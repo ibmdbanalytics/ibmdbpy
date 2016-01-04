@@ -1,0 +1,11 @@
+recursive-include ibmdbpy *.txt
+recursive-include ibmdbpy *.py
+recursive-include docs *
+
+include LICENSE.txt
+include MANIFEST.in
+include README.rst
+include setup.cfg
+
+prune docs/build
+prune ibmdbpy/feature_selection
