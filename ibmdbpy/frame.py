@@ -964,6 +964,7 @@ class IdaDataFrame(object):
             return False
 
     # Should we maybe allow this only in IdaDataBase object ?
+    @timed
     def ida_query(self, query, silent = False, first_row_only = False, autocommit = False):
         """
         Convenience function delegated from IdaDataBase.
@@ -1324,8 +1325,7 @@ class IdaDataFrame(object):
         groupby_columnstr = "\"" + "\",\"".join(columns) + "\""
         if having:
             groupby_columnstr = groupby_columnstr + " HAVING count >= %s"%having
-        data = self.ida_query("SELECT %s AS count FROM %s GROUP BY %s"%(select_columnstr,self.name,groupby_columnstr))
-        #print("lol %s, %s"%(columns,data.columns))     
+        data = self.ida_query("SELECT %s AS count FROM %s GROUP BY %s"%(select_columnstr,self.name,groupby_columnstr))   
         
         data.columns = columns + ["count"]
         return data 
@@ -1346,10 +1346,8 @@ class IdaDataFrame(object):
         select_columnstr = "COUNT(*)"
         groupby_columnstr = "\"" + "\",\"".join(columns) + "\""
         
-        #q20_rows = int(np.floor(len(self)/5))
         subquery = "SELECT %s AS count FROM %s GROUP BY %s"%(select_columnstr,self.name,groupby_columnstr)
         data = self.ida_scalar_query("SELECT AVG(DISTINCT count) FROM (%s)"%subquery)
-        #print("lol %s, %s"%(columns,data.columns))     
         
         return int(data)
     
@@ -1447,19 +1445,35 @@ class IdaDataFrame(object):
 
     @timed
     @idadf_state
-    def corr(self):
+    def corr(self, method="pearson", features=None):
         """
         Compute the correlation matrix, composed of correlation coefficients
         between all pairs of columns in self.
+        
+        Parameters
+        ----------
+        method : str, default: pearson
+            Method to be used to compute the correlation. By default, compute
+            the pearson correlation coefficient. The Spearman rank correlation
+            is also available. Admissible values are: "pearson", "spearman".
 
         Returns
         -------
         correlation matrix: DataFrame
             The axes are the columns of self and the values are the correlation
             coefficients.
+            
+        Notes
+        -----
+        For the Spearman rank correlation, the ordinal rank of columns is 
+        computed. For performance reasons this is easier to compute than the 
+        fractional rank traditionally computed for the Spearman rank 
+        correlation method. This strategy has the property that the sum of the 
+        ranking numbers is the same as under ordinal ranking. We then apply
+        the pearson correlation coefficient method to these ranks. 
         """
         from ibmdbpy.statistics import corr
-        return corr(idadf=self)
+        return corr(idadf=self, features=features)
 
     # TODO: to implement
     @timed
@@ -1644,16 +1658,18 @@ class IdaDataFrame(object):
         query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
         
         classvar = self.ida_query(query)
-        classvar.columns = pd.Index(features)
+        if len(features) == 1:
+            classvar = pd.DataFrame(classvar)
         
+        classvar.columns = pd.Index(features)
         result = pd.Series()
         for attr in classvar:
             result[attr] = classvar[attr].sum()/(N -C)
             
 ###################
             
-        if len(result) == 1:
-            result = result[0]
+        #if len(result) == 1:
+        #    result = result[0]
         
         return result
         
@@ -1661,7 +1677,6 @@ class IdaDataFrame(object):
     @idadf_state
     def within_class_std(self, target, features = None):
         return np.sqrt(self.within_class_var(target, features))
-            
 
     @timed
     @idadf_state
@@ -1705,7 +1720,7 @@ class IdaDataFrame(object):
         
         query = "SELECT \"%s\", %s FROM %s GROUP BY \"%s\""%(groupby, avgstr, self.name, groupby)
         result = self.ida_query(query)
-        result = result.pivot_table(index = groupby)
+        result = result.pivot_table(index = result.columns[0])
         result.columns = pd.Index(features)
         return result
         

@@ -676,7 +676,7 @@ def cov(idadf, other = None):
 
     return result
 
-def corr(idadf):
+def corr(idadf, features=None):
     """
     See IdaDataFrame.corr
     """
@@ -687,38 +687,50 @@ def corr(idadf):
     if not columns:
         print(idadf.name + " has no numeric columns")
         return
+    
+    #target, features = ibmdbpy.utils._check_input(target, features)
+    if features is not None:
+        for column in columns:
+            if column not in features:
+                columns.remove(column)
+    #if target not in columns:
+    #    raise ValueError("%s is not a column of numerical type in %s"%(target, idadf.name))
 
-    agg_list = []
-
+    
     combinations = [x for x in itertools.combinations(columns, 2)]
     columns_set = [{x[0], x[1]} for x in combinations]
-
-    for column_pair in combinations:
-        agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
-        agg_list.append(agg)
-
-    agg_string = ', '.join(agg_list)
-
-    name = idadf.internal_state.current_state
-
-    data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
-
-    tuple_list = []
-    for column1 in columns:
-        list_value = []
-        for column2 in columns:
-            if column1 == column2:
-                list_value.append(1.0)
-            else:
-                for index, column_set in enumerate(columns_set):
-                    if {column1, column2} == column_set:
-                        list_value.append(data[index])
-                        break
-        tuple_list.append(tuple(list_value))
-
-    result = pd.DataFrame(tuple_list)
-    result.index = columns
-    result.columns = columns
+    
+    if len(columns) < 64: # the limit of variables for an SQL statement is 4096, i.e 64^2
+        agg_list = []
+        for column_pair in combinations:
+            agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
+            agg_list.append(agg)
+    
+        agg_string = ', '.join(agg_list)
+    
+        name = idadf.internal_state.current_state
+    
+        data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
+    
+        tuple_list = []
+        for column1 in columns:
+            list_value = []
+            for column2 in columns:
+                if column1 == column2:
+                    list_value.append(1.0)
+                else:
+                    for index, column_set in enumerate(columns_set):
+                        if {column1, column2} == column_set:
+                            list_value.append(data[index])
+                            break
+            tuple_list.append(tuple(list_value))
+    
+        result = pd.DataFrame(tuple_list)
+        result.index = columns
+        result.columns = columns
+    else:
+        raise NotImplementedError("TODO")
+    
 
     if len(result) == 1:
         result = result[0]

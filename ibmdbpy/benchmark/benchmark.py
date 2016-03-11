@@ -65,25 +65,21 @@ def to_nK(dataframe, nKrow):
 
     Notes
     -----
-        If the dataset df has less than 1000 rows, it will be imputed randomly
-        with some existing rows, otherwise the first 1000 rows will be selected
-        and then the dataset grows"""
+        If the dataset is smaller than nKrow, it will be imputed randomly 
+        with some existing rows, otherwise ve return a random sample"""
     if nKrow < 1:
         raise ValueError("n should be an integer with minimum value 1")
     if not isinstance(nKrow, int):
         raise ValueError("n should be an integer with minimum value 1")
     def some(df, nrow):
         """Return n random rows from the given dataframe"""
-        import numpy.random as random
+        from numpy import random
         return df.ix[random.choice(range(len(df)), nrow)]
-    if dataframe.shape[0] < 1000:
-        df1K = pd.concat([dataframe, some(dataframe, 1000 - dataframe.shape[0])])
+
+    if nKrow*1000 > dataframe.shape[0]:
+        df = pd.concat([dataframe, some(dataframe, nKrow*1000 - dataframe.shape[0])], ignore_index=True)
     else:
-        df1K = dataframe.head(1000)
-    df = deepcopy(df1K)
-    if nKrow > 1:
-        for x in range(1, nKrow):
-            df = pd.concat([df, df1K])
+        df = pd.concat([some(dataframe, nKrow*1000)], ignore_index=True)
     return df
 
 def extend_dataset(df, n):

@@ -196,3 +196,32 @@ def _reset_attributes(idaobject, attributes):
             delattr(idaobject, attribute)
         except AttributeError:
             pass
+        
+def _check_input(idadf, target, features):
+    """
+    Check if the input is valid. 
+    Target should be a string that exists as a column in the IdaDataFrame, or None.
+    Features should a string or a list of columns in the IdaDataFrame, or None.
+    If features is None, a list with all features different from target is returned
+    """
+    if target is not None:
+        if not isinstance(target, six.string_types):
+            raise ValueError("target should be a string")
+        if target not in idadf.columns:
+            raise ValueError("Unknown column %s"%target)
+    
+    if features is not None:
+        if isinstance(features, six.string_types):
+            if features not in idadf.columns:
+                raise ValueError("Unknown column %s"%features)
+            features = [features]
+        for x in features:
+            if x not in idadf.columns:
+                raise ValueError("Unknown column %s"%x)
+    else:
+        if target is not None:
+            features = [x for x in idadf.columns if x not in target]
+        else:
+            features = list(idadf.columns)
+            
+    return target, features
