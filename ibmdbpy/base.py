@@ -203,35 +203,47 @@ class IdaDataBase(object):
                             "to work with JDBC.")
             
             here = path.abspath(path.dirname(__file__))
-            
             if not jpype.isJVMStarted():
+                try:
+                    classpath = os.environ['CLASSPATH']
+                except:
+                    classpath = ''
                 
-
-                driver_type = '4'
-                if sys.platform == 'win32':
-                    # Windows specific code
-                    if not os.path.isfile(here + "\\db2jcc4.jar"):
-                        driver_type = '0'
-                        #raise IdaDataBaseError(driver_not_found)
-                    # formatting
-                    jar = here.split(':')[1].replace('\\', '/')
+                if ("db2jcc4.jar" in classpath) or ("db2jcc.jar" in classpath):
+                    # Try to get the path to the driver from the classpath variable
+                    if sys.platform == 'win32':
+                        db2jcclist = [path for path in classpath.split(';') if (("db2jcc4.jar" in path) or ("db2jcc.jar" in path))]
+                        jarpath = db2jcclist[0].split(':')[1].replace('\\', '/') # just take the first, get rid of windows style formatting
+                    else:
+                        db2jcclist = [path for path in classpath.split(':') if (("db2jcc4.jar" in path) or ("db2jcc.jar" in path))]
+                        jarpath = db2jcclist[0] # just take the first
                 else:
-                    jar = here
-                    if not os.path.isfile(here + "/db2jcc4.jar"):
-                        driver_type = '0'
-                        #raise IdaDataBaseError(driver_not_found)
-
-                if driver_type == '4':
-                    jarpath = jar + "/db2jcc4.jar"
-                else:
-                    jarpath = jar + "/db2jcc.jar"
+                    # Try to get the path to the driver from the ibmdbpy folder
+                    driver_type = '4'
+                    if sys.platform == 'win32':
+                        # Windows specific code
+                        if not os.path.isfile(here + "\\db2jcc4.jar"):
+                            driver_type = '0'
+                            #raise IdaDataBaseError(driver_not_found)
+                        # formatting
+                        jar = here.split(':')[1].replace('\\', '/')
+                    else:
+                        jar = here
+                        if not os.path.isfile(here + "/db2jcc4.jar"):
+                            driver_type = '0'
+                            #raise IdaDataBaseError(driver_not_found)
+    
+                    if driver_type == '4':
+                        jarpath = jar + "/db2jcc4.jar"
+                    else:
+                        jarpath = jar + "/db2jcc.jar"
                     
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
 
 
             self._connection_string = [jdbc_url, uid, pwd]
             
-            driver_not_found = (": The JDBC driver for dashDB/DB2 could "+
+            driver_not_found = ("HELP: The JDBC driver for dashDB/DB2 could "+
             "not be found. Please download the latest JDBC Driver at the "+
             "following address: 'http://www-01.ibm.com/support/docview.wss?uid=swg21363866'"+
             "and place the file 'db2jcc.jar' or 'db2jcc4.jar' in the folder %s"%here +
@@ -240,6 +252,7 @@ class IdaDataBase(object):
             try:
                 self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
             except:
+                print(driver_not_found)
                 raise
                 #raise IdaDataBaseError(driver_not_found)
 
@@ -1661,7 +1674,7 @@ class IdaDataBase(object):
                     column_string += "\"%s\" SMALLINT," % str(column).strip()
                 else:
                     if column == primary_key:
-                        column_string += "\"%s\" VARCHAR(255) NOT NULL, PRIMARY KEY (%s)," % (str(column).strip(), str(column).strip())
+                        column_string += "\"%s\" VARCHAR(255) NOT NULL, PRIMARY KEY (\"%s\")," % (str(column).strip(), str(column).strip())
                     else:
                         column_string += "\"%s\" VARCHAR(255)," % str(column).strip()
             elif dataframe.dtypes[column] == np.dtype('datetime64[ns]'):
@@ -1677,7 +1690,7 @@ class IdaDataBase(object):
                 else:
                     datatype = "DOUBLE"
                 if column == primary_key:
-                    column_string += "\"%s\" %s NOT NULL, PRIMARY KEY (%s)," % (str(column).strip(), datatype, str(column).strip())
+                    column_string += "\"%s\" %s NOT NULL, PRIMARY KEY (\"%s\")," % (str(column).strip(), datatype, str(column).strip())
                 else:
                     column_string += "\"%s\" %s," %(str(column.strip()), datatype)
         if column_string[-1] == ',':

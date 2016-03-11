@@ -1,0 +1,9 @@
+Update to Pypi:
+1. Download from Github
+2. in ibmdbpy-master:
+python setup.py sdist bdist_wheel
+twine upload dist/ibmdbpy-VERSION*
+
+To make the doc:
+cd docs
+make html
