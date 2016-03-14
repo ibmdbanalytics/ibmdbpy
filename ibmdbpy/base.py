@@ -28,7 +28,7 @@ from future import standard_library
 standard_library.install_aliases()
 
 import os
-from os import path
+#from os import path
 import sys
 import math
 import random
@@ -160,7 +160,7 @@ class IdaDataBase(object):
         self.data_source_name = dsn
 
         # Detect if user attempt to connection with ODBC or JDBC
-        if "jdbc:db2://" in dsn:
+        if "jdbc:" in dsn:
             self._con_type = "jdbc"
         else:
             self._con_type = "odbc"
@@ -202,7 +202,7 @@ class IdaDataBase(object):
                 ImportError("Please install optional dependency jaydebeapi "+
                             "to work with JDBC.")
             
-            here = path.abspath(path.dirname(__file__))
+            here = os.path.abspath(os.path.dirname(__file__))
             if not jpype.isJVMStarted():
                 try:
                     classpath = os.environ['CLASSPATH']
@@ -212,10 +212,10 @@ class IdaDataBase(object):
                 if ("db2jcc4.jar" in classpath) or ("db2jcc.jar" in classpath):
                     # Try to get the path to the driver from the classpath variable
                     if sys.platform == 'win32':
-                        db2jcclist = [path for path in classpath.split(';') if (("db2jcc4.jar" in path) or ("db2jcc.jar" in path))]
+                        db2jcclist = [x for x in classpath.split(';') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]
                         jarpath = db2jcclist[0].split(':')[1].replace('\\', '/') # just take the first, get rid of windows style formatting
                     else:
-                        db2jcclist = [path for path in classpath.split(':') if (("db2jcc4.jar" in path) or ("db2jcc.jar" in path))]
+                        db2jcclist = [x for x in classpath.split(':') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]
                         jarpath = db2jcclist[0] # just take the first
                 else:
                     # Try to get the path to the driver from the ibmdbpy folder
