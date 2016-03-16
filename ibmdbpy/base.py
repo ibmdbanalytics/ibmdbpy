@@ -66,9 +66,11 @@ class IdaDataBase(object):
     pypyodbc documentation.
 
     To connect with JDBC, install the optional external package jaydebeapi, 
-    download the ibm jdbc driver, and save it in the drivers folder in the 
-    package repository. A C++ compiler adapted to the current python version, 
-    operating system, and architecture may also be required.
+    download the ibm jdbc driver, and save it in your local ibmdbpy folder. 
+    If you put the jdbc driver in the CLASSPATH variable or the folder that
+    contains it, it will work too. A C++ compiler adapted to the current python 
+    version, operating system, and architecture may also be required to install
+    jaydebeapi.
 
     The instantiation of an IdaDataBase object is a mandatory step before 
     creating IdaDataFrame objects because IdaDataFrames require an IdaDataBase 
@@ -204,50 +206,80 @@ class IdaDataBase(object):
             
             here = os.path.abspath(os.path.dirname(__file__))
             if not jpype.isJVMStarted():
-                try:
-                    classpath = os.environ['CLASSPATH']
-                except:
-                    classpath = ''
+                classpath = os.getenv('CLASSPATH','')
+                jarpath = ''
+                platform = sys.platform
                 
+                if verbose: print("Trying to find a path to the db2 jcc driver in CLASSPATH...")
                 if ("db2jcc4.jar" in classpath) or ("db2jcc.jar" in classpath):
-                    # Try to get the path to the driver from the classpath variable
-                    if sys.platform == 'win32':
-                        db2jcclist = [x for x in classpath.split(';') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]
-                        jarpath = db2jcclist[0].split(':')[1].replace('\\', '/') # just take the first, get rid of windows style formatting
+                    # A path to the driver exists in the classpath variable
+                    if platform == 'win32':
+                        db2jcclist = [x for x in classpath.split(';') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]                        
                     else:
                         db2jcclist = [x for x in classpath.split(':') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]
-                        jarpath = db2jcclist[0] # just take the first
-                else:
-                    # Try to get the path to the driver from the ibmdbpy folder
-                    driver_type = '4'
-                    if sys.platform == 'win32':
-                        # Windows specific code
-                        if not os.path.isfile(here + "\\db2jcc4.jar"):
-                            driver_type = '0'
-                            #raise IdaDataBaseError(driver_not_found)
-                        # formatting
-                        jar = here.split(':')[1].replace('\\', '/')
-                    else:
-                        jar = here
-                        if not os.path.isfile(here + "/db2jcc4.jar"):
-                            driver_type = '0'
-                            #raise IdaDataBaseError(driver_not_found)
-    
-                    if driver_type == '4':
-                        jarpath = jar + "/db2jcc4.jar"
-                    else:
-                        jarpath = jar + "/db2jcc.jar"
                     
+                    jarpath = db2jcclist.pop(0) # just take the first
+                    
+                    if not os.path.isfile(jarpath): # Is the path correct?
+                        if verbose: 
+                            print("The path %s does not seem to be correct. Trying to recover..."%jarpath)
+                        jarpath = ''
+                        while db2jcclist: # Try others
+                            jarpath = db2jcclist.pop(0)
+                            if not os.path.isfile(jarpath): 
+                                if verbose: 
+                                    print("The path %s does not seem to be correct. Trying to recover..."%jarpath)
+                                jarpath = ''
+                                
+                    if jarpath and (platform == 'win32'):
+                        jarpath = jarpath.split(':')[1].replace('\\', '/') # get rid of windows style formatting
+                            
+                if not jarpath: # Means the search for a direct path in the CLASSPATH was not successful
+                    def _get_db2driver_from_folder(folder):
+                        jarpath = ''
+                        if platform == 'win32':
+                            # Windows specific code
+                            if os.path.isfile(folder + "\\db2jcc4.jar"):
+                                jarpath = folder.split(':')[1].replace('\\', '/') + "/db2jcc4.jar"
+                            elif os.path.isfile(folder + "\\db2jcc.jar"):
+                                jarpath = folder.split(':')[1].replace('\\', '/') + "/db2jcc.jar"
+                        else:
+                            if os.path.isfile(folder + "/db2jcc4.jar"):
+                                jarpath = folder + "/db2jcc4.jar"
+                            elif os.path.isfile(folder + "/db2jcc.jar"):
+                                jarpath = folder + "/db2jcc.jar"
+                        return jarpath
+                        
+                    if classpath: # There is at least something in the classpath variable
+                        # Let us see if the jar in a folder of the classpath
+                        if verbose: print("Trying to find the db2 jcc driver in the folders of CLASSPATH...")
+                        if sys.platform == 'win32':
+                            db2jcclist = [x for x in classpath.split(';')]
+                        else:
+                            db2jcclist = [x for x in classpath.split(':')]
+                        for folder in db2jcclist:
+                            if not jarpath:
+                                jarpath = _get_db2driver_from_folder(folder)
+                    
+                    if not jarpath: # jarpath is still ''
+                        if verbose: print("Trying to find the db2 jcc driver in the local folder of ibmdbpy (%s)"%here)
+                        # Try to get the path to the driver from the ibmdbpy folder, the last chance
+                        jarpath = _get_db2driver_from_folder(here)
+                    
+                if jarpath:
+                    if verbose: print("Found it at %s! Trying to connect..."%jarpath)
+                       
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
 
 
             self._connection_string = [jdbc_url, uid, pwd]
             
-            driver_not_found = ("HELP: The JDBC driver for dashDB/DB2 could "+
+            driver_not_found = ("HELP: The JDBC driver for IBM dashDB/DB2 could "+
             "not be found. Please download the latest JDBC Driver at the "+
-            "following address: 'http://www-01.ibm.com/support/docview.wss?uid=swg21363866'"+
-            "and place the file 'db2jcc.jar' or 'db2jcc4.jar' in the folder %s"%here +
-            ", or put it in the CLASSPATH variable.")
+            "following address: 'http://www-01.ibm.com/support/docview.wss?uid=swg21363866' "+
+            "and put the file 'db2jcc.jar' or 'db2jcc4.jar' in the CLASSPATH variable "+
+            "or in a folder that is in the CLASSPATH variable. Alternatively place "+
+            "it in the folder %s"%here)
             
             try:
                 self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
@@ -255,7 +287,10 @@ class IdaDataBase(object):
                 print(driver_not_found)
                 raise
                 #raise IdaDataBaseError(driver_not_found)
-
+             
+            if verbose: 
+                print("Connection successful!")
+                
         # Setting Autocommit and verbose environment variables
         set_autocommit(autocommit)
         set_verbose(verbose)
