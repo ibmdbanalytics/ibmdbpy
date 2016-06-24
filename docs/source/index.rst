@@ -61,11 +61,12 @@ Here is the SQL request that was executed for this example::
 
 The result fetched by ibmdbpy is a tuple containing all values of the matrix. This tuple is formatted back into a Pandas.DataFrame and then returned::
 
-                 sepal_length  sepal_width  petal_length  petal_width
-   sepal_length      1.000000    -0.117570      0.871754     0.817941
-   sepal_width      -0.117570     1.000000     -0.428440    -0.366126
-   petal_length      0.871754    -0.428440      1.000000     0.962865
-   petal_width       0.817941    -0.366126      0.962865     1.000000
+    	OBJECTID 	NAME 	     SHAPE 	                                            area
+        	1 	  Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
+ 	        2 	  Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
+ 	        3 	  Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
+ 	        4 	  La Plata 	    MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
+ 	        5 	  Randolph 	    MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
 
 That's as simple as that!
 
