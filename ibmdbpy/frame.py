@@ -518,9 +518,17 @@ class IdaDataFrame(object):
         if len(key) != len(item.columns):
                 raise ValueError("Wrong number of items passed %s, placement implies %s"%(len(item.columns),len(key)))
 
+        #form the new columndict
         for newname, oldname in zip(key, item.columns):
             self.internal_state.columndict[newname] = item.internal_state.columndict[oldname]
+        newColumndict = self.internal_state.columndict
 
+        #erase attributes
+        self._reset_attributes(["columns", "shape", "dtypes"])
+        #set columns and columndict attributes
+        self.internal_state.columndict = newColumndict
+        self.internal_state.columns = ["\"%s\""%col for col in newColumndict.keys()]
+        #update, i.e. appends an entry to internal_state._cumulative
         self.internal_state.update()
         
         # Flush the "unique" cache 
@@ -528,8 +536,6 @@ class IdaDataFrame(object):
             if column in self._unique:
                 del self._unique[column]
                 
-        self._reset_attributes(["columns", "shape", "dtypes"])
-
     def __delitem__(self, item):
         """
         Enable non-destructive deletion of columns using a Pandas style syntax. 
@@ -997,20 +1003,16 @@ class IdaDataFrame(object):
     def head(self, nrow=5):
         """
         Print the n first rows of the instance, n is set to 5 by default.
-
         Parameters
         ----------
         nrow : int > 0
             Number of rows to be included in the result.
-
         Returns
         -------
         DataFrame or Series
             The index of the corresponding row number and the columns are all 
             columns of self. If the IdaDataFrame has only one column, it 
             returns a Series.
-
-
         Examples
         --------
         >>> ida_iris.head()
@@ -1993,7 +1995,7 @@ class IdaDataFrame(object):
         elif self._idadb._con_type == 'jdbc':
             cursor = self._idadb._con.cursor()
             cursor.execute("SELECT * FROM %s"%tablename)
-            columnlist = [column[0] for column in cursor.description]
+            columnlist = [column[0] for column in cursor.description]           
             return Index(columnlist)
 
     def _get_all_columns_in_table(self):
@@ -2042,8 +2044,18 @@ class IdaDataFrame(object):
         # We need to separate it to keep only the TABLENAME for this query.
         if '.' in name :
             name = name.split('.')[-1]
-
-        data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
+        
+        if name.find("TEMP_VIEW_") == 0:
+            #When the column names are going to be retrieved from a temporary
+            #view that was created with the definition of the current state of
+            #the IdaDataFrame, the schema name cannot be assumed as the same of
+            #the IdaDataFrame. Also mind that the name of the temporary view
+            #is thought to be random enough to avoid collisions
+            data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
+                               "WHERE TABNAME=\'%s\' "+
+                               "ORDER BY COLNO")%(name))
+        else:
+           data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
                                "WHERE TABNAME=\'%s\' AND TABSCHEMA=\'%s\' "+
                                "ORDER BY COLNO")%(name, self.schema))
 
@@ -2229,4 +2241,3 @@ class IdaDataFrame(object):
         check_numeric_columns(self)
         if isinstance(other, ibmdbpy.IdaSeries)|isinstance(other, IdaDataFrame):
             check_numeric_columns(other)
-
