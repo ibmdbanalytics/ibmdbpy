@@ -90,7 +90,7 @@ Project Roadmap
 Contributors
 ============
 
-The ibmdbpy- spatial project was initiated in March 2016, and contributed by Rafael Rodriguez Morale and Avipsa Roy at IBM Deutschland Reasearch & Development.
+The ibmdbpy- spatial project was initiated in March 2016, and contributed by Rafael Rodriguez Morales and Avipsa Roy at IBM Deutschland Reasearch & Development.
 
 Indexes and tables
 ==================
