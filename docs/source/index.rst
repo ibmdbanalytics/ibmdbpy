@@ -84,6 +84,7 @@ Table of Contents
    ml.rst
    utils.rst
    legal.rst
+   geospatial.rst
 
 Project Roadmap
 ===============
@@ -97,8 +98,8 @@ Project Roadmap
 Contributors
 ============
 
-The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché, at IBM Deutschland Reasearch & Development. 
-More contributors might participate in the future. 
+The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché
+and the geospatial functions were contributed by Avipsa Roy and Rafael Rodriguez Morale  at IBM Deutschland Reasearch & Development.
 
 Indexes and tables
 ==================
