@@ -74,3 +74,8 @@ class IdaNaiveBayesError(Error):
     This exception is raised when an error related to ibmdbpy Naive Bayes occurs.
     """
     pass
+
+class IdaGeoDataFrameError(Error):
+    """
+    This exception is raised when an error occurs while you manipulate the IdaDataFrame
+    """
