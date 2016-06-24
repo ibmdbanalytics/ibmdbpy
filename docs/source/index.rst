@@ -77,13 +77,6 @@ Table of Contents
 .. toctree::
    :maxdepth: 2
 
-   install.rst
-   start.rst
-   base.rst
-   frame.rst
-   ml.rst
-   utils.rst
-   legal.rst
    geospatial.rst
 
 Project Roadmap
@@ -91,15 +84,12 @@ Project Roadmap
 
 * Full test coverage (a basic coverage is already provided)
 * Add more functions and improve what already exists. 
-* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...) 
-* Feature selection extension
-* Add Spark as computational engine 
+
 
 Contributors
 ============
 
-The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché
-and the geospatial functions were contributed by Avipsa Roy and Rafael Rodriguez Morale  at IBM Deutschland Reasearch & Development.
+The ibmdbpy- spatial project was initiated in March 2016, and contributed by Rafael Rodriguez Morale and Avipsa Roy at IBM Deutschland Reasearch & Development.
 
 Indexes and tables
 ==================
