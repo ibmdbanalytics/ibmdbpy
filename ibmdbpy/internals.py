@@ -32,6 +32,8 @@ import six
 
 import ibmdbpy
 
+from copy import deepcopy
+
 def idadf_state(function=None, force=False):
     """
     View management for IdaDataFrame.
@@ -134,7 +136,30 @@ class InternalState(object):
         and their "real" expression as values, exactly in the way they should
         appear in modified SQL queries for creating views.
         """
-        return OrderedDict((cols,"\""+cols+"\"") for cols in self._idadf.columns)
+        #return OrderedDict((cols,"\""+cols+"\"") for cols in self._idadf.columns)
+        columns = deepcopy(OrderedDict((cols,"\""+cols+"\"") for cols in self._idadf.columns))
+        
+        #Remove the quotation marks enclosing DB2GSE functions
+        #ibmdbpy stores and keeps track of columns internally enclosing them
+        #with double quotation marks, but they must be removed for functions, 
+        #so that the SQL query is interpreted correctly
+        
+        #TODO: Surround the geometries with ST_AsText()
+        #so that the database retrieves geometries as CLOB with WKT instead 
+        #of a geometry (which internally is a STRUCT type).
+        #Although this STRUCT type has the method getSubString() of CLOB types, 
+        #it makes jaydebeapi raise a warning of no mapping of STRUCT type
+        #Pending to do this because knowing the type of a column by its name 
+        #requires accessing the dtypes attribute, which is usually erased after
+        #manipulating the Ida(Geo)DataFrame. In order to do this, refreshing
+        #instead of erasing dtypes attribute would be a better approach
+
+        for column in columns.keys():
+            #if the column is an ST_ function
+            if columns[column].find('ST_') == 0:
+                columns[column] = columns[column][1:-1]
+                
+        return columns
 
     @property
     def views(self):
