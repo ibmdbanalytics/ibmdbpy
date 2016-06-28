@@ -100,15 +100,19 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
             return None #non-SELECT query, didn't return anything
         else:
             #query with SELECT statement, mind that resultset might be empty
-            if first_row_only is True and firstRow is not None:
-                #this following processing was proposed by Edoard
-                tuple_as_list = list(tuple(firstRow))
-                for index, element in enumerate(tuple_as_list):
-                    if element is None:
-                        tuple_as_list[index] = np.nan
-                    if isinstance(element, decimal.Decimal):
-                        tuple_as_list[index] = int(element)
-                result = tuple(tuple_as_list)
+            if first_row_only is True:
+                if firstRow is not None:
+                    #this following processing was proposed by Edoard
+                    tuple_as_list = list(tuple(firstRow))
+                    for index, element in enumerate(tuple_as_list):
+                        if element is None:
+                            tuple_as_list[index] = np.nan
+                        if isinstance(element, decimal.Decimal):
+                            tuple_as_list[index] = int(element)
+                    result = tuple(tuple_as_list)
+                else:
+                    #first_row_only is True but the query retuned nothing
+                    return tuple()
             else:
                 result = read_sql(query, idadb._con)                
                 #convert to Series if only one column       
@@ -163,15 +167,18 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
                    for colNum in colNumbersWithCLOBs:
                        firstRow[colNum] = firstRow[colNum].getSubString(1, firstRow[colNum].length())
                
-               if first_row_only is True:
-                   #this following processing was proposed by Edoard            
-                   for index, element in enumerate(firstRow):
-                       if element is None:
-                           firstRow[index] = np.nan
-                       if isinstance(element, decimal.Decimal):
-                           firstRow[index] = int(element)
-                   result = tuple(firstRow)
-                   return result
+            if first_row_only is True:
+                if firstRow is None:
+                    return tuple()
+                else:
+                    #this following processing was proposed by Edoard            
+                    for index, element in enumerate(firstRow):
+                        if element is None:
+                            firstRow[index] = np.nan
+                        if isinstance(element, decimal.Decimal):
+                            firstRow[index] = int(element)
+                    result = tuple(firstRow)
+                    return result
 
             #first_row_only is False
             if((not colNumbersWithCLOBs) or (firstRow is None)) :
