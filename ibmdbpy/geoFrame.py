@@ -46,12 +46,12 @@ import pandas as pd
 class IdaGeoDataFrame(IdaDataFrame):
     """    
     A IdaGeoDataFrame container inherits from IdaDataFrame and adds wrapper
-    methods for calling functions of DB2/DashDB Geospatial Extender (DB2GSE)
-    (See IdaDataFrame).
+    methods for calling functions of DB2/DashDB Geospatial Extender (DB2GSE).
+    See IdaDataFrame.
 
     Examples
     --------
-    >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID'
+    >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
     >>> idadf['tornado buffer'] = idadf.buffer(distance=5.2, unit='kilometer')
     >>> result = idadf[['OBJECTID','tornado buffer']]
     >>> result.head()
@@ -68,8 +68,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         Constructor for IdaGeoDataFrame objects (see IdaDataFrame class)
         
         Parameters
-        ----------
-        
+        ----------        
         geometry : Optional[str]
             Name of the default column for geospatial operations.
             Geospatial methods will use this column as default if no column
@@ -79,23 +78,27 @@ class IdaGeoDataFrame(IdaDataFrame):
             attribute. If there are no geometry columns in the IdaGeoDataFrame,
             _geometry attribute will be set to None.
             This attribute can be changed afterwards with the method setGeometry
+        
+        Notes
+        -----
+        setGeometry() can raise Exceptions
         """
         super(IdaGeoDataFrame, self).__init__(idadb, tablename, indexer)
         if geometry is not None:
             geometry = geometry.upper()
+            #set the _geometry attribute
             self.setGeometry(geometry) #will raise an exception as appropriate
         else:
-            self._setGeometryAutomatically(verbose = verboseGeometryColumn)
+            self._setGeometryAutomatically(verbose = verboseGeometryColumn)           
     
     @classmethod
     def fromIdaDataFrame(self, idadf = None, geometry = None):
         """
         "Alternate" constructor. 
-        Create an IdaGeoDataFrame from an IdaDataFrame
+        Create an IdaGeoDataFrame from an IdaDataFrame (or an IdaGeoDataFrame)
         
         Parameters
         ----------
-        
         geometry : Optional[str]
             Name of the default column for geospatial operations.
             Geospatial methods will use this column as default if no column
@@ -105,6 +108,15 @@ class IdaGeoDataFrame(IdaDataFrame):
             attribute. If there are no geometry columns in the IdaGeoDataFrame,
             _geometry attribute will be set to None.
             This attribute can be changed afterwards with the method setGeometry
+            
+        Raises
+        ------
+        TypeError
+            If idadf is not an IdaDataFrame
+            
+        Notes
+        -----
+        setGeometry() can raise Exceptions            
         """
         
         if not isinstance(idadf, IdaDataFrame):
@@ -145,8 +157,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def __getitem__(self, item):
         """
-        Overriden method
-        Differences with method of parent class:
+        Overriden method from IdaDataFrame. Differences:
         * when cloning, clones as IdaGeoDataFrame instead of as idaSeries
         * for column projection, sets the _geometry attribute of the resulting
           IdaGeoDataFrame
@@ -159,8 +170,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             newidadf._reset_attributes(["shape"])
         else:
             if isinstance(item, slice):
-                result = self.loc[item]
-                result._setGeometryAutomatically(verbose=True)
+                return self.loc[item]
             if not (isinstance(item,six.string_types)|isinstance(item, list)):
                 raise KeyError(item)
             if isinstance(item, six.string_types):
@@ -224,8 +234,8 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def _clone(self):
             """
-            Overriden method from IdaDataFrame. The only difference is that
-            this one returns an IdaGeoDataFrame instead of an IdaDataFrame
+            Overriden method from IdaDataFrame. Difference: 
+            Returns an IdaGeoDataFrame instead of an IdaDataFrame
             
             This is important for column projection because doing it using
             the _clone() method of IdaDataFrame would end up in having an
@@ -256,35 +266,27 @@ class IdaGeoDataFrame(IdaDataFrame):
             
 #==============================================================================
 ### Geospatial methods
-#==============================================================================
-
+#==============================================================================   
+    
     def buffer(self, colx=None, distance=None, unit=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
+        DB2GSE category: Construction of new geometries from existing geometries 
         DB2GSE function: ST_Buffer
         """
         if distance is None:
-            print("buffer"+" cannot be carried on: missing distance")
-            return False
+            raise TypeError("Missing distance")
         elif not isinstance(distance, Number):
             #mind that distance can be positive or negative
-            print("buffer"+" cannot be carried on: distance is not numerical")
-            return False
+            raise TypeError("Distance is not numerical")
             
         additionalArguments = []
         additionalArguments.append(distance)
         if unit is not None:
-            try:
-                unit = self._checkLinearUnit(unit, callingMethod="buffer")
-            except Exception as e:
-                print(e)
-                return False
-            else:
-                additionalArguments.append(unit)
+            unit = self._checkLinearUnit(unit)
+            additionalArguments.append(unit)
         return self._singleInputFunctionHandler(functionName='ST_Buffer()', 
                                                  columnByUser=colx,
-                                                 additionalArguments=additionalArguments, 
-                                                 onlyTheseTypes=None)
+                                                 additionalArguments=additionalArguments)
     
     def centroid(self, colx=None):
         """
@@ -335,6 +337,40 @@ class IdaGeoDataFrame(IdaDataFrame):
         	"""
         	return self._singleInputFunctionHandler(functionName='ST_GeometryType()', columnByUser=colx)
 
+    def area(self, colx=None, unit=None):
+        """
+        DB2GSE category: Information about spatial indexes and geometries 
+        DB2GSE function: ST_Area
+        """
+        additionalArguments = []
+        if unit is not None:
+            unit = self._checkLinearUnit(unit)
+            additionalArguments.append(unit)
+        return self._singleInputFunctionHandler(functionName='ST_Area()', 
+                                                columnByUser=colx,
+                                                additionalArguments=additionalArguments)
+        
+    def dimension(self, colx=None):
+        """
+        DB2GSE category: Information about spatial indexes and geometries 
+        DB2GSE function: ST_Dimension
+        """
+        return self._singleInputFunctionHandler(functionName='ST_Dimension()', columnByUser=colx)
+        
+    def length(self, colx=None, unit=None):
+        """
+        DB2GSE category: Information about spatial indexes and geometries 
+        DB2GSE function: ST_Length
+        """
+        additionalArguments = []
+        if unit is not None:
+            unit = self._checkLinearUnit(unit)
+            additionalArguments.append(unit)
+        return self._singleInputFunctionHandler(functionName='ST_Length()', 
+                                                columnByUser=colx,
+                                                additionalArguments=additionalArguments,
+                                                validInputTypes=['ST_LINESTRING', 'ST_MULTILINESTRING'])
+        
     def perimeter(self, colx=None, unit=None):
         """
         DB2GSE category: Information about spatial indexes and geometries 
@@ -342,17 +378,12 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         additionalArguments = []
         if unit is not None:
-            try:
-                unit = self._checkLinearUnit(unit, callingMethod="perimeter")
-            except Exception as e:
-                print(e)
-                return False
-            else:
-                additionalArguments.append(unit)
+            unit = self._checkLinearUnit(unit)
+            additionalArguments.append(unit)
         return self._singleInputFunctionHandler(functionName='ST_Perimeter()', 
                                          columnByUser=colx,
                                          additionalArguments=additionalArguments, 
-                                         onlyTheseTypes=['ST_POLYGON', 'ST_MULTIPOLYGON'])
+                                         validInputTypes=['ST_POLYGON', 'ST_MULTIPOLYGON'])
                                          
     def numGeometries(self, colx=None):
         """
@@ -361,7 +392,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_NumGeometries()', 
                                                 columnByUser=colx,
-                                                onlyTheseTypes=['ST_MULTIPOINT', 'ST_MULTIPOLYGON', 'ST_MULTILINESTRING'])
+                                                validInputTypes=['ST_MULTIPOINT', 'ST_MULTIPOLYGON', 'ST_MULTILINESTRING'])
     def numInteriorRing(self, colx=None):
         """
         DB2GSE category: Information about spatial indexes and geometries 
@@ -369,7 +400,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_NumInteriorRing()', 
                                                 columnByUser=colx,
-                                                onlyTheseTypes=['ST_POLYGON'])
+                                                validInputTypes=['ST_POLYGON'])
                                                  
     def numLineStrings(self, colx=None):
         """
@@ -378,7 +409,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_NumLineStrings()', 
                                                 columnByUser=colx,
-                                                onlyTheseTypes=['ST_MULTILINESTRING'])
+                                                validInputTypes=['ST_MULTILINESTRING'])
 
     def numPoints(self, colx=None):
         """
@@ -394,7 +425,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_NumPolygons()', 
                                              columnByUser=colx,
-                                             onlyTheseTypes=['ST_MULTIPOLYGON'])
+                                             validInputTypes=['ST_MULTIPOLYGON'])
 
     def coordDim(self, colx=None):
         """
@@ -487,7 +518,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_M()', 
                                          columnByUser=colx, 
-                                         onlyTheseTypes=['ST_POINT'])
+                                         validInputTypes=['ST_POINT'])
                                          
     def X(self, colx=None):
         """
@@ -496,7 +527,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_X()', 
                                          columnByUser=colx, 
-                                         onlyTheseTypes=['ST_POINT'])
+                                         validInputTypes=['ST_POINT'])
                                          
     def Y(self, colx=None):
         """
@@ -505,7 +536,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_Y()', 
                                          columnByUser=colx, 
-                                         onlyTheseTypes=['ST_POINT'])
+                                         validInputTypes=['ST_POINT'])
                                          
     def Z(self, colx=None):
         """
@@ -514,7 +545,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_Z()', 
                                          columnByUser=colx, 
-                                         onlyTheseTypes=['ST_POINT'])
+                                         validInputTypes=['ST_POINT'])
     def isClosed(self, colx=None):
         """
         DB2GSE category: Information about spatial indexes and geometries 
@@ -522,7 +553,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_IsClosed()', 
                                                 columnByUser=colx, 
-                                                onlyTheseTypes=['ST_LINESTRING', 'ST_MULTILINESTRING'])                                   
+                                                validInputTypes=['ST_LINESTRING', 'ST_MULTILINESTRING'])                                   
     
     def isEmpty(self, colx=None):
         """
@@ -538,51 +569,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         return self._singleInputFunctionHandler(functionName='ST_IsSimple()', columnByUser=colx)  
 
-    def area(self, colx=None, unit=None):
-        """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Area
-        """
-        additionalArguments = []
-        if unit is not None:
-            try:
-                unit = self._checkLinearUnit(unit, callingMethod="area")
-            except Exception as e:
-                print(e)
-                return False
-            else:
-                additionalArguments.append(unit)
-        return self._singleInputFunctionHandler(functionName='ST_Area()', 
-                                                columnByUser=colx,
-                                                additionalArguments=additionalArguments)
-
-        
-    def dimension(self, colx=None):
-        """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Dimension
-        """
-        return self._singleInputFunctionHandler(functionName='ST_Dimension()', columnByUser=colx)
-        
-    def length(self, colx=None, unit=None):
-        """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Length
-        """
-        additionalArguments = []
-        if unit is not None:
-            try:
-                unit = self._checkLinearUnit(unit, callingMethod="length")
-            except Exception as e:
-                print(e)
-                return False
-            else:
-                additionalArguments.append(unit)
-        return self._singleInputFunctionHandler(functionName='ST_Length()', 
-                                                columnByUser=colx,
-                                                additionalArguments=additionalArguments,
-                                                onlyTheseTypes=['ST_LINESTRING', 'ST_MULTILINESTRING'])
-        
+    
     
 
 
@@ -606,16 +593,11 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         columnName : str
             The column name to be set as the IdaGeoDataFrame's default 
-            geometry column
-            
-        Returns
-        -------
-        bool
-            True if successful
+            geometry column      
             
         Raises
         ------
-        IdaGeoDataFrameError
+        KeyError
             If the column is not present in the IdaGeoDataFrame
         IdaGeoDataFrameError
             If the given column doesn't have geometry type           
@@ -623,22 +605,20 @@ class IdaGeoDataFrame(IdaDataFrame):
         
         if columnName is None:
             self._geometry = None
-            return True
-        if columnName not in self.columns:
-            raise IdaGeoDataFrameError("'"+columnName+"' cannot be used as "+
+        elif columnName not in self.columns:
+            raise KeyError("'"+columnName+"' cannot be set as "+
             "default geometry column because this is not a column in "+
             self._name)
             print("Hint:\n"+
                 "dtypes attribute shows the column names and their types\n")
         elif columnName not in self._dtypesGeometrical().index:
-            raise IdaGeoDataFrameError("'"+columnName+"' cannot be used as "+
+            raise IdaGeoDataFrameError("'"+columnName+"' cannot be set as "+
             "default geometry column because it doesn't have geometry type")
             print("Hint:\n"+
             "dtypes attribute shows the column names and their types\n")
         else:
             #columnName is in the IdaGeoDataFrame and has geometry type
             self._geometry = columnName
-            return True
         
 #==============================================================================
 ### Private utilities for geospatial methods
@@ -646,7 +626,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def _dtypesGeometrical(idadf):
         """
-        Returns a dataframe with the following info of the geometry columns in 
+        Returns a DataFrame with the following info of the geometry columns in 
         the IdaDataFrame:
         COLNAME(Index), TYPENAME, COLNUMBER(0-based)    
         """
@@ -663,14 +643,12 @@ class IdaGeoDataFrame(IdaDataFrame):
         result.set_index(keys='COLNAME', inplace=True)
         return result
     
-    def _checkLinearUnit(self, unit, callingMethod):
+    def _checkLinearUnit(self, unit):
         """
         Parameters:
         -----------
         unit : str
-            name of a user-entered unit
-        callingMethod : str
-            The name of the calling method
+            Name of a case-insensitive user-entered unit
         
         Returns
         -------
@@ -680,18 +658,22 @@ class IdaGeoDataFrame(IdaDataFrame):
             
         Raises
         ------
+        TypeError
+            * If the unit is not a string
+            * If the unit is a string larger than VARCHAR(128)
         IdaGeoDataFrameError
-            If the given unit is not a valid linear unit
+            If the given unit is not a valid linear unit of DB2GSE
         """
 
         if not isinstance(unit, six.string_types):
-            raise TypeError(callingMethod+" cannot be carried on: the unit must be a string")
+            raise TypeError("Unit must be a string")
+        elif len(unit) > 128:
+            raise TypeError("Unit length exceeded" )
         else:
             unit = unit.upper()
             if unit not in self.linearUnits.tolist():
-                raise IdaGeoDataFrameError(callingMethod+" cannot be carried "+
-                "on: invalid unit\n Hint: use linearUnits attribute to get a "+
-                "list of valid units")
+                raise IdaGeoDataFrameError("Invalid unit\n"
+                " Hint: use linearUnits attribute to see the valid units")
             else:
                 #replace single quotation marks with two of them
                 if "\'" in unit:
@@ -701,14 +683,11 @@ class IdaGeoDataFrame(IdaDataFrame):
                 unit = '\''+unit+'\''
                 return unit
         
-    def _getColumnForSingleInputFunction(self, columnByUser, functionName,
-                                                  onlyTheseTypes):
+    def _checkColumnForSingleInputFunction(self, columnByUser, functionName,
+                                                  validInputTypes):
         """
-        Gets a valid column and returns its definition. Raises the proper 
-        exceptions as needed.
-        
-        The columnByUser column has precedence over the default geometry 
-        column of the IdaGeoDataFrame (_geometry attribute)
+        This method returns a column definition to be used as argument for a 
+        DB2GSE's function. See _singleInputFunctionHandler()
         
         Returns
         -------
@@ -718,51 +697,66 @@ class IdaGeoDataFrame(IdaDataFrame):
         Raises
         ------
         IdaGeoDataFrameError
-            * If columnByUser is None and default geometry is not set
-            * If columnByUser is None and default geometry has incompatible
-              type for function
-            * If columnByUser is not in the IdaGeoDataFrame
-            * If columnByUser has incompatible type for the function
+            If the IdaGeoDataFrame doesn't have at least one geometry column
+        KeyError
+            If columnByUser column is not in the IdaGeoDataFrame
+        TypeError
+            * If columnByUser column has incompatible type for the DB2GSE
+              function
+            * If the default geometry column has incompatible type for the
+              DB2GSE function
+            
         """
         columnName = ''
-        if columnByUser is None:
-            #user didn't specify a column name when calling the geospatial method
-            if self._geometry is None:
-                #the IdaGeoDataFrame doesn't have a (default) geometry column
-                #return False
-                raise IdaGeoDataFrameError(functionName+" cannot be carried "+
-                "on: no column was specified and default geometry column is "+
-                "not set")
-            else:
-                #the IdaGeoDataFrame has a default geometry column
-                if( (onlyTheseTypes is None) or 
-                (self.dtypes.TYPENAME[self._geometry] in onlyTheseTypes)):
-                    #no type restriction or column has compatible types
-                    columnName = self._geometry
-                else:
-                    #the default geometry column has incompatible types for the
-                    #DB2GSE function
-                    #return False
-                    raise IdaGeoDataFrameError(functionName+" cannot be "+
-                    "carried on: no column was specified and the default "
-                    "geometry column '"+self._geometry+"' has incompatible type")
-        else:
-            #user specified a column name
+        if self._geometry is None:
+            #When _geometry is none, means that the IdaGeoDataFrame doesn't
+            #have even one geometry column
+            raise IdaGeoDataFrameError("The IdaDataFrame doesn't have a "+
+            "geometry column")
+        elif columnByUser is not None:
+            #User specified column name when calling the method
             if columnByUser not in self.columns:
-                #column not in the IdaGeoDataFrame
-                raise IdaGeoDataFrameError(functionName+" cannot be carried "+
-                "on '"+columnByUser+"': column not in "+self._name)
+                #User-specified column is not present
+                raise KeyError("Column '"+columnByUser+"' not in "+
+                self._name)
+            elif self.dtypes.TYPENAME[columnByUser] in validInputTypes:
+                #User-specified column has compatible type
+                columnName = columnByUser
+            elif (validInputTypes[0] == 'ST_GEOMETRY' and 
+            columnByUser in self._dtypesGeometrical().index):
+                #if the DB2GSE function accepts ST_GEOMETRY type, it's enough
+                #if the specified column has any geometry type
+                columnName = columnByUser
             else:
-                #column in the IdaGeoDataFrame
-                if( (onlyTheseTypes is None) or 
-                (self.dtypes.TYPENAME[columnByUser] in onlyTheseTypes)):
-                    #no type restriction or column has compatible types
-                    columnName = columnByUser
-                else:
-                    #incompatible type
-                    raise IdaGeoDataFrameError(functionName+" cannot be "
-                    "carried on '"+columnByUser+"': column has incompatible "+
-                    "type")
+                #User-specified column has incompatible geometry type
+                raise TypeError("Column '"+columnByUser+"' has "+
+                "incompatible type.\nCompatible types are: "+
+                ",".join(elem for elem in validInputTypes))
+                print("Hint:\n"+
+                "dtypes attribute shows the column names and their types\n")
+        else:
+            #User didn't specify a column, try to use default geometry column
+            if self.dtypes.TYPENAME[self._geometry] in validInputTypes:
+                #Default geometry column has compatible geometry type
+                columnName = self._geometry
+            elif (validInputTypes[0] == 'ST_GEOMETRY' and 
+            self._geometry in self._dtypesGeometrical().index):
+                #if the DB2GSE function accepts ST_GEOMETRY type
+                #checking if the default geometry column is in
+                #_dtypesGeometrical() is a mere sanity check
+                columnName = self._geometry
+            else:
+                ##Default geometry column has incompatible geometry type
+                raise TypeError("Default geometry column '"+
+                self._geometry+"' has incompatible type.\nCompatible types "+
+                "are: "+",".join(elem for elem in validInputTypes))
+                print("Hint:\n"+
+                "dtypes attribute shows the column names and their types\n")
+                print("Hint:\n"+
+                "specify a column name when calling the method or "+
+                "change the default geometry column with setGeometry() method")
+                
+        
         
         columnDefinition = self.internal_state.columndict[columnName]
         if columnDefinition[0] == '\"' and columnDefinition[-1] == '\"':
@@ -797,7 +791,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     def _singleInputFunctionHandler(self, functionName=None, 
                                     columnByUser=None,
                                     additionalArguments=None, 
-                                    onlyTheseTypes=None):
+                                    validInputTypes=['ST_GEOMETRY']):
         """
         Returns a one-column IdaGeoDataFrame with the specified DB2GSE function 
         as column, carried on the given column.
@@ -825,48 +819,50 @@ class IdaGeoDataFrame(IdaDataFrame):
             column name specified by the user
         additionalArguments : list
             List of already validated arguments for the DB2GSE function.
-        onlyTheseTypes : list
-            List of the only valid datatypes for the given DB2GSE function
-                    
+        validInputTypes : list
+            List of the valid datatypes for the given DB2GSE function. 
+            
+        Raises
+        ------
+        IdaGeoDataFrameError
+            See _checkColumnForSingleInputFunction() method
+        
         """
                 
         newGeoidadf = self._clone()
-        try:
-            workingColumn = self._getColumnForSingleInputFunction(columnByUser,
-                                                                functionName,
-                                                                onlyTheseTypes)                                                         
-        except Exception as e:
-            print(e)
-        else:
-            #define the column that is going to be added to the definition of 
-            #the IdaDataFrame
-            argumentsForSTFunction = []
-            argumentsForSTFunction.append(workingColumn)
+        workingColumn = self._checkColumnForSingleInputFunction(columnByUser,
+                                                            functionName,
+                                                            validInputTypes)                                                         
 
-            if additionalArguments is not None:
-                for argument in additionalArguments:
-                    argumentsForSTFunction.append(argument)
-                    
-            newColumn = functionName.replace('()', '('+
-            ','.join(map(str,argumentsForSTFunction))+')')           
-            
-            #form the new columndict
-            newGeoidadf.internal_state.columndict[newColumn] = newColumn
-            newColumndict = newGeoidadf.internal_state.columndict
-            #erase attributes
-            newGeoidadf._reset_attributes(["columns", "shape", "dtypes"])
-            #set columns and columndict attributes
-            newGeoidadf.internal_state.columns = ["\"%s\""%col for col in newColumndict.keys()]
-            newGeoidadf.internal_state.columndict = newColumndict
-            #update, i.e. appends an entry to internal_state._cumulative
-            newGeoidadf.internal_state.update()
-            
-            #get only the new column
-            columnIda = newGeoidadf[newColumn]
-            #set the _geometry attribute
-            columnIda._geometry = newColumn
-            return columnIda
-            
+        #define the column that is going to be added to the definition of 
+        #the IdaDataFrame
+        argumentsForSTFunction = []
+        argumentsForSTFunction.append(workingColumn)
+
+        if additionalArguments is not None:
+            for argument in additionalArguments:
+                argumentsForSTFunction.append(argument)
+                
+        newColumn = functionName.replace('()', '('+
+        ','.join(map(str,argumentsForSTFunction))+')')           
+        
+        #form the new columndict
+        newGeoidadf.internal_state.columndict[newColumn] = newColumn
+        newColumndict = newGeoidadf.internal_state.columndict
+        #erase attributes
+        newGeoidadf._reset_attributes(["columns", "shape", "dtypes"])
+        #set columns and columndict attributes
+        newGeoidadf.internal_state.columns = ["\"%s\""%col for col in newColumndict.keys()]
+        newGeoidadf.internal_state.columndict = newColumndict
+        #update, i.e. appends an entry to internal_state._cumulative
+        newGeoidadf.internal_state.update()
+        
+        #get only the new column
+        columnIda = newGeoidadf[newColumn]
+        #set the _geometry attribute
+        columnIda._geometry = newColumn
+        return columnIda
+        
     def _doubleInputFunctionHandler(self):
         pass
     

@@ -211,6 +211,39 @@ def idadf_tmp(request, idadb):
     idadf = idadb.as_idadataframe(data, 'TEST_IBMDBPY_TMP', clear_existing = True)
     idadb.commit()
     return idadf
+    
+@pytest.fixture(scope="session")
+def idageodf_county(idadb):
+    """
+    IdaGeoDataFrame to test geospatial methods
+    This refers to the table 'GEO_COUNTY' of the 'SAMPLES' schema
+    The table has one geometry column named 'SHAPE' of type 'ST_MULTIPOLYGON'
+    Don't use it for destructive nor non-destructive methods (modify columns)
+    """
+    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
+    return idageodf
+
+@pytest.fixture(scope="session")
+def idageodf_customer(idadb):
+    """
+    IdaGeoDataFrame to test geospatial methods
+    This refers to the table 'GEO_CUSTOMER' of the 'SAMPLES' schema
+    The table has one geometry column named 'SHAPE' of type 'ST_POINT'
+    Don't use it for destructive nor non-destructive methods (modify columns)
+    """
+    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
+    return idageodf    
+    
+@pytest.fixture(scope="session")
+def idageodf_tornado(idadb):
+    """
+    IdaGeoDataFrame to test geospatial methods
+    This refers to the table 'GEO_TORNADO' of the 'SAMPLES' schema
+    The table has one geometry column named 'SHAPE' of type 'ST_MULTILINESTRING'
+    Don't use it for destructive nor non-destructive methods (modify columns)
+    """
+    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO')
+    return idageodf
 
 @pytest.fixture(scope="session")
 def idaview(request, idadb, idadf):
