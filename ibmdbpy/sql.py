@@ -97,10 +97,10 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
         try:
             firstRow = cursor.fetchone()
         except:
-            return None #the query didn't return anything
+            return None #non-SELECT query, didn't return anything
         else:
-            #the query returns at least one row
-            if first_row_only is True:
+            #query with SELECT statement, mind that resultset might be empty
+            if first_row_only is True and firstRow is not None:
                 #this following processing was proposed by Edoard
                 tuple_as_list = list(tuple(firstRow))
                 for index, element in enumerate(tuple_as_list):
@@ -147,57 +147,60 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
         try:
             firstRow = cursor.fetchone()
         except:
-            return None #the query didn't return anything
+            return None #non-SELECT query, didn't return anything
         else:        
-            #the query returns at least one row
-
-            #identify CLOB columns
+            #query with SELECT statement, mind that resultset might be empty
             colNumbersWithCLOBs = []
-            for index, col in enumerate(firstRow):
-                if hasattr(col, "getSubString") and hasattr(col, "length"):
-                    colNumbersWithCLOBs.append(index)
-            
-            firstRow = list(firstRow)
-            #replace CLOB's (if any) in the first row
-            if colNumbersWithCLOBs:
-                for colNum in colNumbersWithCLOBs:
-                    firstRow[colNum] = firstRow[colNum].getSubString(1, firstRow[colNum].length())
-            
-            if first_row_only is True:
-                #this following processing was proposed by Edoard            
-                for index, element in enumerate(firstRow):
-                    if element is None:
-                        firstRow[index] = np.nan
-                    if isinstance(element, decimal.Decimal):
-                        firstRow[index] = int(element)
-                result = tuple(firstRow)
+            if firstRow is not None:
+               #identify CLOB columns               
+               for index, col in enumerate(firstRow):
+                   if hasattr(col, "getSubString") and hasattr(col, "length"):
+                       colNumbersWithCLOBs.append(index)
+               
+               firstRow = list(firstRow)
+               #replace CLOB's (if any) in the first row
+               if colNumbersWithCLOBs:
+                   for colNum in colNumbersWithCLOBs:
+                       firstRow[colNum] = firstRow[colNum].getSubString(1, firstRow[colNum].length())
+               
+               if first_row_only is True:
+                   #this following processing was proposed by Edoard            
+                   for index, element in enumerate(firstRow):
+                       if element is None:
+                           firstRow[index] = np.nan
+                       if isinstance(element, decimal.Decimal):
+                           firstRow[index] = int(element)
+                   result = tuple(firstRow)
+                   return result
+
+            #first_row_only is False
+            if((not colNumbersWithCLOBs) or (firstRow is None)) :
+                #use Pandas' read_sql
+                #if firstRow is None, resultset was empty, so create an empty 
+                #DataFrame with the column names
+                result = read_sql(query, idadb._con)
             else:
-                #first_row_only is False
-                if not colNumbersWithCLOBs:
-                    #use Pandas' read_sql
-                    result = read_sql(query, idadb._con)
-                else:
-                    #get the column names for the DataFrame
-                    colNames = [column[0] for column in cursor.description]
-                    
-                    #use the already retrieved row and retrieve the remaining
-                    data = []
-                    row = firstRow
-                    while row is not None:
-                        data.append(row)
-                        row = cursor.fetchone() #this returns a tuple
-                        if row is not None:
-                            row = list(row)            
-                            for colNum in colNumbersWithCLOBs:
-                                row[colNum] = row[colNum].getSubString(1, row[colNum].length())                
-                    result = pd.DataFrame(data)
-                    result.columns = colNames
-                    
-                #convert to Series if only one column       
-                if len(result.columns) == 1:
-                    result = result[result.columns[0]] 
-                                   
-            return result
+                #get the column names for the DataFrame
+                colNames = [column[0] for column in cursor.description]
+                
+                #use the already retrieved row and retrieve the remaining
+                data = []
+                row = firstRow
+                while row is not None:
+                    data.append(row)
+                    row = cursor.fetchone() #this returns a tuple
+                    if row is not None:
+                        row = list(row)            
+                        for colNum in colNumbersWithCLOBs:
+                            row[colNum] = row[colNum].getSubString(1, row[colNum].length())                
+                result = pd.DataFrame(data)
+                result.columns = colNames
+                
+            #convert to Series if only one column       
+            if len(result.columns) == 1:
+                result = result[result.columns[0]] 
+            return result                       
+            
     except:
         raise
     finally:
