@@ -270,8 +270,36 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def buffer(self, colx=None, distance=None, unit=None):
         """
-        DB2GSE category: Construction of new geometries from existing geometries 
-        DB2GSE function: ST_Buffer
+        This function takes a geometry column of the IdaGeoDataFrame, a distance, and, optionally, a unit as
+        input parameters and returns the geometry that surrounds the given geometry by the specified distance,
+        measured in the given unit. Each point on the boundary of the resulting geometry is
+        the specified distance away from the given geometry.
+        The resulting geometry is represented in the spatial reference system of the given geometry. This is a wrapper for DB2GSE.ST_Buffer().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the buffer is to be computed.
+
+        distance : A DOUBLE precision value that specifies the distance to be used for the buffer around geometry.
+
+        unit : A VARCHAR(128) value that identifies the unit in which distance is measured. The supported units of measure
+        are listed in the DB2GSE.ST_UNITS_OF_MEASURE catalog view.
+
+        Returns
+        -------
+        It returns a new column in the IdaGeoDataFrame with the geometry of type ST_Polygon or ST_MultiPolygon.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
+        >>> idadf['Buffer_200_miles'] = idadf.buffer(colx = 'SHAPE', distance= 200, unit= 'STATUTE MILE')
+            OBJECTID      DATE             TIME         LEN    WID        SHAPE                                              Buffer_200_miles
+              115     1950-05-24         13:30:00       3.6    77         MULTILINESTRING ((-99.4800085321 37.2700063950...  POLYGON ((-100.2516146636 40.1057433898, -100....
+              116     1950-05-24         17:30:00       10.7   40         MULTILINESTRING ((-96.9700080939 39.3800068879...  POLYGON ((-98.6396004401 41.9851176508, -98.86...
+              117     1950-05-24         21:30:00       1.0    33         MULTILINESTRING ((-99.0300083486 36.4500062846...  POLYGON ((-101.7207742393 38.4011710646, -101....
+              118     1950-05-25         16:30:00       3.0    880        MULTILINESTRING ((-101.8800087620 32.670005493...  POLYGON ((-99.7001980184 34.9305575445, -99.88...
+              119     1950-05-29         14:48:00       1.0    33         MULTILINESTRING ((-95.2700073814 36.3800064721...  POLYGON ((-97.8549229549 38.4194433892, -98.01...
+
         """
         if distance is None:
             raise TypeError("Missing distance")
@@ -290,57 +318,232 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def centroid(self, colx=None):
         """
-        DB2GSE category: Construction of new geometries from existing geometries 
-        DB2GSE function: ST_Centroid
+        This function takes the geometry column of an IdaGeoDataFrame and computes the geometric center,
+        which is the center of the minimum bounding rectangle of the given geometry, as a point (ST_Point).
+        The resulting point is represented in the spatial reference system of the given geometry. This is a wrapper for DB2GSE.ST_Centroid().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the centroid is to be computed.
+
+        Returns
+        -------
+        It returns a new column in the IdaGeoDataFrame of type ST_Point which represents the centroid of the geometry
+        column of the IdaGeoDataFrame.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['centroid_of_counties'] = idadf.centroid(colx = 'SHAPE')
+       OBJECTID   SHAPE                                              NAME        centroid_of_counties
+       538       MULTIPOLYGON (((-84.7169295502 37.8153962541, ...   Garrard     POINT (-84.5466579862 37.6514537302)
+       539       MULTIPOLYGON (((-95.4980049329 41.5060813190, ...   Harrison    POINT (-95.8184105459 41.6861673203)
+       617       MULTIPOLYGON (((-74.6195926239 40.3744051681, ...   Middlesex   POINT (-74.4165740651 40.4300696882)
+       618       MULTIPOLYGON (((-85.5575396424 35.5329837613, ...   Van Buren   POINT (-85.4328451208 35.6775997933)
+       619       MULTIPOLYGON (((-93.4905266829 33.0184479233, ...   Columbia    POINT (-93.2345011258 33.2361624817)
         """
         return self._singleInputFunctionHandler(functionName='ST_Centroid()', columnByUser=colx)
         
     def boundary(self, colx=None):
         """
-        DB2GSE category: Construction of new geometries from existing geometries 
-        DB2GSE function: ST_Boundary
+        This function takes the geometry column of an IdaGeoDataFrame and finds its geographic boundary .
+        The resulting geometry is represented in the spatial reference system of the given geometry.This is a wrapper for DB2GSE.ST_Boundary().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the boundary is to be computed.
+
+        Returns
+        -------
+        If the given geometry is a point, multipoint, closed curve, or closed multicurve, or if it is empty,
+        then the result is an empty geometry of type ST_Point. For curves or multicurves that are not closed,
+        the start points and end points of the curves are returned as an ST_MultiPoint value, unless such a
+        point is the start or end point of an even number of curves. For surfaces and multisurfaces,
+        the curve defining the boundary of the given geometry is returned, either as an ST_Curve or an ST_MultiCurve value.
+        If the given geometry is null, then null is returned.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['boundary_of_counties'] = idadf.boundary(colx = 'SHAPE')
+           OBJECTID  NAME               SHAPE                                          boundary_of_counties
+           344       Wood        MULTIPOLYGON (((-83.8811535639 41.1678319254, ...     LINESTRING (-83.8811535639 41.1678319254, -83....
+           345       Cass        MULTIPOLYGON (((-94.6522670025 33.2688669233, ...     LINESTRING (-94.6522670025 33.2688669233, -94....
+           346       Washington  MULTIPOLYGON (((-89.1443938789 38.4738851677, ...     LINESTRING (-89.1443938789 38.4738851677, -89....
+           347       Fulton      MULTIPOLYGON (((-74.0974686254 42.9829426852, ...     LINESTRING (-74.0974686254 42.9829426852, -74....
+           348       Clay        MULTIPOLYGON (((-96.7646321063 46.9291404309, ...     MULTILINESTRING ((-96.7646321063 46.9291404309.
         """
         return self._singleInputFunctionHandler(functionName='ST_Boundary()', columnByUser=colx)
         
     def envelope(self, colx=None):
         """
-        DB2GSE category: Construction of new geometries from existing geometries 
-        DB2GSE function: ST_Envelope
+        This function takes the geometry column of an IdaGeoDataFrame and finds an envelope
+        around the geometry . The envelope is a rectangle that is represented as a polygon.
+        The resulting geometry is represented in the spatial reference system of the given geometry
+        in a new column of the IdaGeoDataFrame . This is a wrapper for DB2GSE.ST_Envelope().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the boundary is to be computed.
+
+        Returns
+        -------
+        If the given geometry is a point, a horizontal linestring, or a vertical linestring,
+        then a rectangle, which is slightly larger than the given geometry, is returned.
+        Otherwise, the minimum bounding rectangle of the geometry is returned as the envelope.
+        If the given geometry is null or is empty, then null is returned.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['envelope_of_counties'] = idadf.envelope(colx = 'SHAPE')
+            OBJECTID  NAME       SHAPE                                              envelope_of_counties
+0           538       Garrard    MULTIPOLYGON (((-84.7169295502 37.8153962541, ...  POLYGON ((-84.7455065514 37.4726702018, -84.34...
+1           539       Harrison   MULTIPOLYGON (((-95.4980049329 41.5060813190, ...  POLYGON ((-96.1390201477 41.5060193080, -95.49...
+2           617       Middlesex  MULTIPOLYGON (((-74.6195926239 40.3744051681, ...  POLYGON ((-74.6294586256 40.2521281500, -74.20...
+3           618       Van Buren  MULTIPOLYGON (((-85.5575396424 35.5329837613, ...  POLYGON ((-85.6121676723 35.5329837613, -85.25...
+4           619       Columbia   MULTIPOLYGON (((-93.4905266829 33.0184479233, ...  POLYGON ((-93.4905266829 33.0172739429, -92.97...
+
         """
         return self._singleInputFunctionHandler(functionName='ST_Envelope()', columnByUser=colx)
     
     def MBR(self, colx=None):
         """
-        DB2GSE category: Construction of new geometries from existing geometries 
-        DB2GSE function: ST_MBR
+        This function takes the geometry column of an IdaGeoDataFrame and finds the minimum bounding rectangle
+       around the geometry . This is a wrapper for DB2GSE.ST_MBR().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the boundary is to be computed.
+
+        Returns
+        -------
+        If the given geometry is a point, then the point itself is returned. If the geometry is a horizontal linestring
+        or a vertical linestring, then the horizontal or vertical linestring itself is returned. Otherwise,
+        the minimum bounding rectangle of the geometry is returned as a polygon. If the given geometry is
+        null or is empty, then null is returned.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['envelope_of_counties'] = idadf.MBR(colx = 'SHAPE')
+            OBJECTID   DATE             TIME     LEN    WID    SHAPE                                              MBR_of_tornadoes
+            115        1950-05-24     13:30:00   3.6    77     MULTILINESTRING ((-99.4800085321 37.2700063950...  POLYGON ((-99.4800085321 37.2700063950, -99.42...
+            116        1950-05-24     17:30:00   10.7   40     MULTILINESTRING ((-96.9700080939 39.3800068879...  POLYGON ((-96.9700080939 39.3800068879, -96.78...
+            117        1950-05-24     21:30:00   1.0    33     MULTILINESTRING ((-99.0300083486 36.4500062846...  POLYGON ((-99.0300083486 36.4500062846, -99.02...
+            118        1950-05-25     16:30:00   3.0    880    MULTILINESTRING ((-101.8800087620 32.670005493...  POLYGON ((-101.8800087620 32.6500054909, -101....
+            119        1950-05-29     14:48:00   1.0    33     MULTILINESTRING ((-95.2700073814 36.3800064721...  POLYGON ((-95.2700073814 36.3800064721, -95.26...
         """
         return self._singleInputFunctionHandler(functionName='ST_MBR()', columnByUser=colx)
         
     def SRID(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_SRID
+        This function takes the geometry column of an IdaGeoDataFrame and finds the ID corresponding to the spatial
+        reference system of the geometry . THis is a wrapper for DB2GSE.ST_SRID().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the SRID is to be found.
+
+        Returns
+        -------
+        The current spatial reference system identifier of the given geometry is returned as an integer.
+        If srs_id does not identify a spatial reference system listed in the catalog view
+        DB2GSE.ST_SPATIAL_REFERENCE_SYSTEMS, then an exception condition is raised (SQLSTATE 38SU1).
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
+        >>> idadf['SRID_of geometry'] = idadf.SRID(colx = 'SHAPE')
+            OBJECTID    SHAPE                              NAME             INSURANCE_VALUE  SRID_of geometry
+            330     POINT (-83.7068206238 32.3855192199)   Wilda Stinger      297057            1005
+            331     POINT (-83.5094902518 32.5293427765)   Cassie Mcsweeney   134430            1005
+            332     POINT (-83.6036673419 32.3703439716)   Jazmin Castellon   228751            1005
+            333     POINT (-83.5113783092 32.4928397102)   Nicky Sprow        555804            1005
+            334     POINT (-83.8034685769 32.6024797193)   Louisa Timms       137577            1005
+
         """
         return self._singleInputFunctionHandler(functionName='ST_SRID()', columnByUser=colx)
         
     def srsName(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_SrsName
+        This function takes the geometry column of an IdaGeoDataFrame and finds the name corresponding to the spatial
+        reference system of the geometry from the B2GSE.COORD_REF_SYS catalog view . This is a wrapper for DB2GSE.ST_SrsName().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the SRSName is to be found.
+
+        Returns
+        -------
+        The function returns the name of the spatial reference system in which the given geometry is represented
+        as a series of VARCHAR objects.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
+        >>> idadf['srsName'] = idadf.srsName(colx = 'SHAPE')
+            OBJECTID 	SHAPE 	                            NAME 	         INSURANCE_VALUE 	 SRS_Name
+            1 	      POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	     155263 	     SAMPLE_GCS_WGS_1984
+            2         POINT (-80.6569863704 40.0406902830)  Aurelia Hussein      201204          SAMPLE_GCS_WGS_1984
+            3         POINT (-80.6247752421 40.1320339439)  Hildegard Kittrell   260550          SAMPLE_GCS_WGS_1984
+            4         POINT (-80.7158029630 40.1151442910)  Arletta Henne        278992          SAMPLE_GCS_WGS_1984
+            5         POINT (-80.6682444120 40.1808573446)  Elvia Shadrick       190152          SAMPLE_GCS_WGS_1984
         """
         return self._singleInputFunctionHandler(functionName='ST_SrsName()', columnByUser=colx)
     
     def geometryType(self, colx=None):
         	"""
-        	DB2GSE category: Information about spatial indexes and geometries 
-        	DB2GSE function: ST_GeometryType
+        	This function takes the geometry column of an IdaGeoDataFrame and finds the type of the geometry from the predefined geometry types in the DB2 Spatial Extender.
+        	This is a wrapper for DB2GSE.ST_GeometryType().
+
+            Parameters
+            ----------
+            colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
+
+            Returns
+            -------
+            The function returns the name of the geometry type like ST_Point, ST_Polygon, ST_Multipolygon, ST_LineString or ST_MultiLineString.
+
+            Examples
+            --------
+            >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+            >>> idadf['srsName'] = idadf.geometryType(colx = 'SHAPE')
+                OBJECTID 	NAME 	    SHAPE 	                                            geomType
+                 	1 	   Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	                2 	   Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	                3 	   Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	                4 	   La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	                5 	   Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+
         	"""
         	return self._singleInputFunctionHandler(functionName='ST_GeometryType()', columnByUser=colx)
 
     def area(self, colx=None, unit=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Area
+        This function takes the geometry column of an IdaGeoDataFrame and optionally, a unit as input parameters and
+        returns the area covered by the given geometry in the given unit of measure . This is a wrapper for DB2GSE.ST_Area().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the area is to be found.
+
+        Returns
+        -------
+        The function returns the the area covered by the geometry if the geometry is a polygon or multipolygon.
+        The area of points, linestrings, multipoints, and multilinestrings is 0 (zero).
+        If the geometry is null or is an empty geometry, then null is returned.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['area'] = idadf.area(colx = 'SHAPE', unit = 'STATUTE MILE')
+         	OBJECTID 	NAME 	        SHAPE 	                                                 area
+        0 	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
+        1 	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
+        2 	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
+        3 	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
+        4 	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
         """
         additionalArguments = []
         if unit is not None:
@@ -352,15 +555,77 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def dimension(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Dimension
+        This function takes the geometry column of an IdaGeoDataFrame and returns the dimension of the geometry .
+        It is a wrapper for the function DB2GSE.ST_Dimension().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the dimension is to be found.
+
+        Returns
+        -------
+        If the given geometry is empty, then -1 is returned. For points and
+        multipoints, the dimension is 0 (zero); for curves and multicurves, the
+        dimension is 1; and for polygons and multipolygons, the dimension is 2. If the
+        given geometry is null, then null is returned0 (zero).
+        If the geometry is null or is an empty geometry, then null is returned.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['dim'] = idadf.dimension(colx = 'SHAPE')
+         	OBJECTID 	NAME 	        SHAPE 	                                               dim
+        0 	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	2
+        1 	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	2
+        2 	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	2
+        3 	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	2
+        4 	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	2
+
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
+        >>> idadf['dim'] = idadf.dimension(colx = 'SHAPE')
+         	OBJECTID 	SHAPE 	                                NAME 	            INSURANCE_VALUE 	dim
+        0 	1 	        POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	        155263 	        0
+        1 	2 	        POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	201204 	        0
+        2 	3 	        POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550 	        0
+        3 	4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	        278992 	        0
+        4 	5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	        190152 	        0
+
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
+        >>> idadf['dim'] = idadf.dimension(colx = 'SHAPE')
+         	OBJECTID 	SHAPE 	                                            dim
+        0 	1 	        MULTILINESTRING ((-90.2200062071 38.7700071663... 	1
+        1 	2 	        MULTILINESTRING ((-89.3000059755 39.1000072739... 	1
+        2 	3 	        MULTILINESTRING ((-84.5800047496 40.8800078382... 	1
+        3 	4 	        MULTILINESTRING ((-94.3700070010 34.4000061520... 	1
+        4 	5 	        MULTILINESTRING ((-90.6800062393 37.6000069289... 	1
         """
         return self._singleInputFunctionHandler(functionName='ST_Dimension()', columnByUser=colx)
         
     def length(self, colx=None, unit=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Length
+        This function takes the geometry column of an IdaGeoDataFrame of type ST_Linestring or ST_MultiLineString
+        and optionally, a unit as input parameters and returns the length of the given geometry in the
+        given unit of measure . This is a wrapper for DB2GSE.ST_Length().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the length is to be found.
+
+        Returns
+        -------
+        The function returns the length of the given curve or multicurve in the given unit of measure.
+        If the given curve or multicurve is null or is empty, then null is returned..
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
+        >>> idadf['length'] = idadf.area(colx = 'SHAPE', unit = 'KILOMETRES')
+         	OBJECTID 	SHAPE 	                                         length
+        0 	115 	    MULTILINESTRING ((-99.4800085321 37.2700063950... 	5.435906
+        1 	116 	    MULTILINESTRING ((-96.9700080939 39.3800068879... 	18.114294
+        2 	117 	    MULTILINESTRING ((-99.0300083486 36.4500062846... 	0.014205
+        3 	118 	    MULTILINESTRING ((-101.8800087620 32.670005493... 	3.583249
+        4 	119 	    MULTILINESTRING ((-95.2700073814 36.3800064721... 	0.014204
         """
         additionalArguments = []
         if unit is not None:
@@ -373,8 +638,28 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def perimeter(self, colx=None, unit=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Perimeter
+        This function takes the geometry column of an IdaGeoDataFrame and optionally a unit as input parameters and returns the perimeter of the surface or multisurface,
+        that is the length of its boundary, measured in the given units. This is a wrapper for DB2GSE.ST_Perimeter().
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
+        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
+        Returns
+        -------
+        The function returns the perimeter of the surface as DOUBLE  or NULL if the given surface or multisurface is null or is empty.
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['perimeter'] = idadf.perimeter(colx = 'SHAPE',unit = ‘KILOMETERS’)
+             	OBJECTID 	NAME 	    SHAPE 	                                            perimeter
+ 	            1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	247.112571
+ 	            2 	        Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	222.841115
+ 	            3 	        Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	212.003946
+ 	            4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	281.656337
+ 	            5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	195.554056
         """
         additionalArguments = []
         if unit is not None:
@@ -387,16 +672,24 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def numGeometries(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_NumGeometries
+        This function is a wrapper for ST_NumGeometries() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4074.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_NumGeometries()', 
                                                 columnByUser=colx,
                                                 validInputTypes=['ST_MULTIPOINT', 'ST_MULTIPOLYGON', 'ST_MULTILINESTRING'])
     def numInteriorRing(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_NumInteriorRing
+        This function is a wrapper for ST_NumInteriorRing() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4098.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_NumInteriorRing()', 
                                                 columnByUser=colx,
@@ -404,8 +697,12 @@ class IdaGeoDataFrame(IdaDataFrame):
                                                  
     def numLineStrings(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_NumLineStrings
+        This function is a wrapper for ST_NumLineStrings() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4099.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_NumLineStrings()', 
                                                 columnByUser=colx,
@@ -413,15 +710,23 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def numPoints(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_NumPoints
+        This function is a wrapper for ST_NumPoints() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4128.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_NumPoints()', columnByUser=colx)
         
     def numPolygons(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_NumPolygons
+        This function is a wrapper for ST_NumPolygons() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4129.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_NumPolygons()', 
                                              columnByUser=colx,
@@ -429,92 +734,144 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def coordDim(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_CoordDim
+        This function is a wrapper for ST_CoordDim() . For more information about what the function does, please refer this link :
+       http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4033.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_CoordDim()', columnByUser=colx)
 
     def is3d(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Is3d
+       This function is a wrapper for ST_Is3d() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4061.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_Is3d()', columnByUser=colx)
         
     def isMeasured(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_IsMeasured
+        This function is a wrapper for ST_IsMeasured() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4064.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_IsMeasured()', columnByUser=colx)
         
     def isValid(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_IsValid
+        This function is a wrapper for ST_IsValid() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4087.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_IsValid()', columnByUser=colx)
 
     def maxM(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MaxM
+         This function is a wrapper for ST_MaxM() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4075.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MaxM()', columnByUser=colx)
         
     def maxX(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MaX
+        This function is a wrapper for ST_MaxX() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/csbp4076.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MaxX()', columnByUser=colx)
         
     def maxY(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MaxY
+        This function is a wrapper for ST_MaxY() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4077.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MaxY()', columnByUser=colx)
         
     def maxZ(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MaxZ
+        This function is a wrapper for ST_MaxY() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4078.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MaxZ()', columnByUser=colx)
     
     def minM(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MinM
+         This function is a wrapper for ST_MinM() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4083.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MinM()', columnByUser=colx)
         
     def minX(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MinX
+        This function is a wrapper for ST_MinX() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4084.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MinX()', columnByUser=colx)
     
     def minY(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MinY
+        This function is a wrapper for ST_MinY() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4085.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MinY()', columnByUser=colx)
         
     def minZ(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_MinM
+        This function is a wrapper for ST_MinZ() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4086.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_MinM()', columnByUser=colx)
         
     def M(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_M
+         This function is a wrapper for ST_MinZ() . For more information about what the function does, please refer this link :
+       http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4093.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_M()', 
                                          columnByUser=colx, 
@@ -522,8 +879,29 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def X(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_X
+        This function takes the geometry column of an IdaGeoDataFrame of type ST_POINT and  returns the X coordinate of the point,
+        that is the length of its boundary, measured in the given units.
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
+        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
+        Returns
+        -------
+        The function returns the perimeter of the surface as DOUBLE  or NULL if the given surface or multisurface is null or is empty.
+
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
+        >>> idadf['perimeter'] = idadf.X(colx = 'SHAPE')
+         	OBJECTID 	SHAPE 	                                NAME 	            INSURANCE_VALUE 	X
+ 	        1 	        POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	    155263 	           -80.556100
+ 	        2 	        POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	201204 	           -80.656986
+ 	        3 	        POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550 	           -80.624775
+ 	        4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	    278992 	           -80.715803
+ 	        5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152 	           -80.668244
         """
         return self._singleInputFunctionHandler(functionName='ST_X()', 
                                          columnByUser=colx, 
@@ -531,8 +909,28 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def Y(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Y
+        This function takes the geometry column of an IdaGeoDataFrame of type ST_POINT and returns the Y coordinate of the point.
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
+        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
+        Returns
+        -------
+        The function returns the perimeter of the surface as DOUBLE  or NULL if the given surface or multisurface is null or is empty.
+
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
+        >>> idadf['perimeter'] = idadf.X(colx = 'SHAPE')
+         	OBJECTID 	SHAPE 	                                NAME 	            INSURANCE_VALUE 	Y
+ 	        1 	        POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	    155263 	           40.152810
+ 	        2 	        POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	201204 	           40.040690
+ 	        3 	        POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550 	           40.132034
+ 	        4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	    278992 	           40.115144
+ 	        5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152 	           40.180857
         """
         return self._singleInputFunctionHandler(functionName='ST_Y()', 
                                          columnByUser=colx, 
@@ -540,16 +938,40 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def Z(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_Z
+       This function takes the geometry column of an IdaGeoDataFrame of type ST_POINT and returns the Z coordinate of the point.
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
+        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
+        Returns
+        -------
+        The function returns the perimeter of the surface as DOUBLE  or NULL/None if the given surface or multisurface is null or is empty.
+
+
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
+        >>> idadf['perimeter'] = idadf.X(colx = 'SHAPE')
+         	OBJECTID 	SHAPE 	                                NAME 	            INSURANCE_VALUE 	Z
+ 	        1 	        POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	    155263 	           None
+ 	        2 	        POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	201204 	           None
+ 	        3 	        POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550 	           None
+ 	        4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	    278992 	           None
+ 	        5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152 	           None
         """
         return self._singleInputFunctionHandler(functionName='ST_Z()', 
                                          columnByUser=colx, 
                                          validInputTypes=['ST_POINT'])
     def isClosed(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_IsClosed
+        This function is a wrapper for ST_isClosed() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4062.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_IsClosed()', 
                                                 columnByUser=colx, 
@@ -557,15 +979,23 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def isEmpty(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_IsEmpty
+        This function is a wrapper for ST_isEmpty() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4063.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_IsEmpty()', columnByUser=colx)
     
     def isSimple(self, colx=None):
         """
-        DB2GSE category: Information about spatial indexes and geometries 
-        DB2GSE function: ST_IsSimple
+       This function is a wrapper for ST_isSimple() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4067.html
+
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame.
         """
         return self._singleInputFunctionHandler(functionName='ST_IsSimple()', columnByUser=colx)  
 
