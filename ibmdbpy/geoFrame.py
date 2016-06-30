@@ -318,7 +318,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def centroid(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and computes the geometric center,
+        This method takes the geometry column of an IdaGeoDataFrame and computes the geometric center,
         which is the center of the minimum bounding rectangle of the given geometry, as a point (ST_Point).
         The resulting point is represented in the spatial reference system of the given geometry. This is a wrapper for DB2GSE.ST_Centroid().
 
@@ -335,18 +335,19 @@ class IdaGeoDataFrame(IdaDataFrame):
         --------
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
         >>> idadf['centroid_of_counties'] = idadf.centroid(colx = 'SHAPE')
-       OBJECTID   SHAPE                                              NAME        centroid_of_counties
-       538       MULTIPOLYGON (((-84.7169295502 37.8153962541, ...   Garrard     POINT (-84.5466579862 37.6514537302)
-       539       MULTIPOLYGON (((-95.4980049329 41.5060813190, ...   Harrison    POINT (-95.8184105459 41.6861673203)
-       617       MULTIPOLYGON (((-74.6195926239 40.3744051681, ...   Middlesex   POINT (-74.4165740651 40.4300696882)
-       618       MULTIPOLYGON (((-85.5575396424 35.5329837613, ...   Van Buren   POINT (-85.4328451208 35.6775997933)
-       619       MULTIPOLYGON (((-93.4905266829 33.0184479233, ...   Columbia    POINT (-93.2345011258 33.2361624817)
+            OBJECTID   SHAPE                                              NAME        centroid_of_counties
+            538       MULTIPOLYGON (((-84.7169295502 37.8153962541, ...   Garrard     POINT (-84.5466579862 37.6514537302)
+            539       MULTIPOLYGON (((-95.4980049329 41.5060813190, ...   Harrison    POINT (-95.8184105459 41.6861673203)
+            617       MULTIPOLYGON (((-74.6195926239 40.3744051681, ...   Middlesex   POINT (-74.4165740651 40.4300696882)
+            618       MULTIPOLYGON (((-85.5575396424 35.5329837613, ...   Van Buren   POINT (-85.4328451208 35.6775997933)
+            619       MULTIPOLYGON (((-93.4905266829 33.0184479233, ...   Columbia    POINT (-93.2345011258 33.2361624817)
+
         """
         return self._singleInputFunctionHandler(functionName='ST_Centroid()', columnByUser=colx)
         
     def boundary(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and finds its geographic boundary .
+        This method takes the geometry column of an IdaGeoDataFrame and finds its geographic boundary .
         The resulting geometry is represented in the spatial reference system of the given geometry.This is a wrapper for DB2GSE.ST_Boundary().
 
         Parameters
@@ -366,18 +367,19 @@ class IdaGeoDataFrame(IdaDataFrame):
         --------
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
         >>> idadf['boundary_of_counties'] = idadf.boundary(colx = 'SHAPE')
-           OBJECTID  NAME               SHAPE                                          boundary_of_counties
-           344       Wood        MULTIPOLYGON (((-83.8811535639 41.1678319254, ...     LINESTRING (-83.8811535639 41.1678319254, -83....
-           345       Cass        MULTIPOLYGON (((-94.6522670025 33.2688669233, ...     LINESTRING (-94.6522670025 33.2688669233, -94....
-           346       Washington  MULTIPOLYGON (((-89.1443938789 38.4738851677, ...     LINESTRING (-89.1443938789 38.4738851677, -89....
-           347       Fulton      MULTIPOLYGON (((-74.0974686254 42.9829426852, ...     LINESTRING (-74.0974686254 42.9829426852, -74....
-           348       Clay        MULTIPOLYGON (((-96.7646321063 46.9291404309, ...     MULTILINESTRING ((-96.7646321063 46.9291404309.
+            OBJECTID  NAME               SHAPE                                          boundary_of_counties
+            344       Wood        MULTIPOLYGON (((-83.8811535639 41.1678319254, ...     LINESTRING (-83.8811535639 41.1678319254, -83....
+            345       Cass        MULTIPOLYGON (((-94.6522670025 33.2688669233, ...     LINESTRING (-94.6522670025 33.2688669233, -94....
+            346       Washington  MULTIPOLYGON (((-89.1443938789 38.4738851677, ...     LINESTRING (-89.1443938789 38.4738851677, -89....
+            347       Fulton      MULTIPOLYGON (((-74.0974686254 42.9829426852, ...     LINESTRING (-74.0974686254 42.9829426852, -74....
+            348       Clay        MULTIPOLYGON (((-96.7646321063 46.9291404309, ...     MULTILINESTRING ((-96.7646321063 46.9291404309.
+
         """
         return self._singleInputFunctionHandler(functionName='ST_Boundary()', columnByUser=colx)
         
     def envelope(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and finds an envelope
+        This method takes the geometry column of an IdaGeoDataFrame and finds an envelope
         around the geometry . The envelope is a rectangle that is represented as a polygon.
         The resulting geometry is represented in the spatial reference system of the given geometry
         in a new column of the IdaGeoDataFrame . This is a wrapper for DB2GSE.ST_Envelope().
@@ -398,19 +400,19 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
         >>> idadf['envelope_of_counties'] = idadf.envelope(colx = 'SHAPE')
             OBJECTID  NAME       SHAPE                                              envelope_of_counties
-0           538       Garrard    MULTIPOLYGON (((-84.7169295502 37.8153962541, ...  POLYGON ((-84.7455065514 37.4726702018, -84.34...
-1           539       Harrison   MULTIPOLYGON (((-95.4980049329 41.5060813190, ...  POLYGON ((-96.1390201477 41.5060193080, -95.49...
-2           617       Middlesex  MULTIPOLYGON (((-74.6195926239 40.3744051681, ...  POLYGON ((-74.6294586256 40.2521281500, -74.20...
-3           618       Van Buren  MULTIPOLYGON (((-85.5575396424 35.5329837613, ...  POLYGON ((-85.6121676723 35.5329837613, -85.25...
-4           619       Columbia   MULTIPOLYGON (((-93.4905266829 33.0184479233, ...  POLYGON ((-93.4905266829 33.0172739429, -92.97...
+            538       Garrard    MULTIPOLYGON (((-84.7169295502 37.8153962541, ...  POLYGON ((-84.7455065514 37.4726702018, -84.34...
+            539       Harrison   MULTIPOLYGON (((-95.4980049329 41.5060813190, ...  POLYGON ((-96.1390201477 41.5060193080, -95.49...
+            617       Middlesex  MULTIPOLYGON (((-74.6195926239 40.3744051681, ...  POLYGON ((-74.6294586256 40.2521281500, -74.20...
+            618       Van Buren  MULTIPOLYGON (((-85.5575396424 35.5329837613, ...  POLYGON ((-85.6121676723 35.5329837613, -85.25...
+            619       Columbia   MULTIPOLYGON (((-93.4905266829 33.0184479233, ...  POLYGON ((-93.4905266829 33.0172739429, -92.97...
 
         """
         return self._singleInputFunctionHandler(functionName='ST_Envelope()', columnByUser=colx)
     
     def MBR(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and finds the minimum bounding rectangle
-       around the geometry . This is a wrapper for DB2GSE.ST_MBR().
+        This method takes the geometry column of an IdaGeoDataFrame and finds the minimum bounding rectangle
+        around the geometry . This is a wrapper for DB2GSE.ST_MBR().
 
         Parameters
         ----------
@@ -438,7 +440,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def SRID(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and finds the ID corresponding to the spatial
+        This method takes the geometry column of an IdaGeoDataFrame and finds the ID corresponding to the spatial
         reference system of the geometry . THis is a wrapper for DB2GSE.ST_SRID().
 
         Parameters
@@ -467,7 +469,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def srsName(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and finds the name corresponding to the spatial
+        This method takes the geometry column of an IdaGeoDataFrame and finds the name corresponding to the spatial
         reference system of the geometry from the B2GSE.COORD_REF_SYS catalog view . This is a wrapper for DB2GSE.ST_SrsName().
 
         Parameters
@@ -494,7 +496,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def geometryType(self, colx=None):
         	"""
-        	This function takes the geometry column of an IdaGeoDataFrame and finds the type of the geometry from the predefined geometry types in the DB2 Spatial Extender.
+        	This method takes the geometry column of an IdaGeoDataFrame and finds the type of the geometry from the predefined geometry types in the DB2 Spatial Extender.
         	This is a wrapper for DB2GSE.ST_GeometryType().
 
             Parameters
@@ -521,7 +523,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def area(self, colx=None, unit=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and optionally, a unit as input parameters and
+        This method takes the geometry column of an IdaGeoDataFrame and optionally, a unit as input parameters and
         returns the area covered by the given geometry in the given unit of measure . This is a wrapper for DB2GSE.ST_Area().
 
         Parameters
@@ -539,11 +541,11 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
         >>> idadf['area'] = idadf.area(colx = 'SHAPE', unit = 'STATUTE MILE')
          	OBJECTID 	NAME 	        SHAPE 	                                                 area
-        0 	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
-        1 	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
-        2 	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
-        3 	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
-        4 	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
+         	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
+         	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
+         	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
+         	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
+         	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
         """
         additionalArguments = []
         if unit is not None:
@@ -555,7 +557,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def dimension(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame and returns the dimension of the geometry .
+        This method takes the geometry column of an IdaGeoDataFrame and returns the dimension of the geometry .
         It is a wrapper for the function DB2GSE.ST_Dimension().
 
         Parameters
@@ -575,35 +577,35 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
         >>> idadf['dim'] = idadf.dimension(colx = 'SHAPE')
          	OBJECTID 	NAME 	        SHAPE 	                                               dim
-        0 	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	2
-        1 	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	2
-        2 	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	2
-        3 	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	2
-        4 	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	2
+         	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	2
+         	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	2
+         	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	2
+         	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	2
+         	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	2
 
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer = 'OBJECTID')
         >>> idadf['dim'] = idadf.dimension(colx = 'SHAPE')
          	OBJECTID 	SHAPE 	                                NAME 	            INSURANCE_VALUE 	dim
-        0 	1 	        POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	        155263 	        0
-        1 	2 	        POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	201204 	        0
-        2 	3 	        POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550 	        0
-        3 	4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	        278992 	        0
-        4 	5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	        190152 	        0
+         	1 	        POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	        155263 	        0
+         	2 	        POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	201204 	        0
+         	3 	        POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550 	        0
+         	4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	        278992 	        0
+         	5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	        190152 	        0
 
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
         >>> idadf['dim'] = idadf.dimension(colx = 'SHAPE')
          	OBJECTID 	SHAPE 	                                            dim
-        0 	1 	        MULTILINESTRING ((-90.2200062071 38.7700071663... 	1
-        1 	2 	        MULTILINESTRING ((-89.3000059755 39.1000072739... 	1
-        2 	3 	        MULTILINESTRING ((-84.5800047496 40.8800078382... 	1
-        3 	4 	        MULTILINESTRING ((-94.3700070010 34.4000061520... 	1
-        4 	5 	        MULTILINESTRING ((-90.6800062393 37.6000069289... 	1
+         	1 	        MULTILINESTRING ((-90.2200062071 38.7700071663... 	1
+         	2 	        MULTILINESTRING ((-89.3000059755 39.1000072739... 	1
+         	3 	        MULTILINESTRING ((-84.5800047496 40.8800078382... 	1
+         	4 	        MULTILINESTRING ((-94.3700070010 34.4000061520... 	1
+         	5 	        MULTILINESTRING ((-90.6800062393 37.6000069289... 	1
         """
         return self._singleInputFunctionHandler(functionName='ST_Dimension()', columnByUser=colx)
         
     def length(self, colx=None, unit=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame of type ST_Linestring or ST_MultiLineString
+        This method takes the geometry column of an IdaGeoDataFrame of type ST_Linestring or ST_MultiLineString
         and optionally, a unit as input parameters and returns the length of the given geometry in the
         given unit of measure . This is a wrapper for DB2GSE.ST_Length().
 
@@ -621,11 +623,11 @@ class IdaGeoDataFrame(IdaDataFrame):
         >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
         >>> idadf['length'] = idadf.area(colx = 'SHAPE', unit = 'KILOMETRES')
          	OBJECTID 	SHAPE 	                                         length
-        0 	115 	    MULTILINESTRING ((-99.4800085321 37.2700063950... 	5.435906
-        1 	116 	    MULTILINESTRING ((-96.9700080939 39.3800068879... 	18.114294
-        2 	117 	    MULTILINESTRING ((-99.0300083486 36.4500062846... 	0.014205
-        3 	118 	    MULTILINESTRING ((-101.8800087620 32.670005493... 	3.583249
-        4 	119 	    MULTILINESTRING ((-95.2700073814 36.3800064721... 	0.014204
+         	115 	    MULTILINESTRING ((-99.4800085321 37.2700063950... 	5.435906
+         	116 	    MULTILINESTRING ((-96.9700080939 39.3800068879... 	18.114294
+         	117 	    MULTILINESTRING ((-99.0300083486 36.4500062846... 	0.014205
+         	118 	    MULTILINESTRING ((-101.8800087620 32.670005493... 	3.583249
+         	119 	    MULTILINESTRING ((-95.2700073814 36.3800064721... 	0.014204
         """
         additionalArguments = []
         if unit is not None:
@@ -672,7 +674,7 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def numGeometries(self, colx=None):
         """
-        This function is a wrapper for ST_NumGeometries() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_NumGeometries() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4074.html
 
         Parameters
@@ -684,7 +686,7 @@ class IdaGeoDataFrame(IdaDataFrame):
                                                 validInputTypes=['ST_MULTIPOINT', 'ST_MULTIPOLYGON', 'ST_MULTILINESTRING'])
     def numInteriorRing(self, colx=None):
         """
-        This function is a wrapper for ST_NumInteriorRing() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_NumInteriorRing() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4098.html
 
         Parameters
@@ -697,7 +699,7 @@ class IdaGeoDataFrame(IdaDataFrame):
                                                  
     def numLineStrings(self, colx=None):
         """
-        This function is a wrapper for ST_NumLineStrings() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_NumLineStrings() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4099.html
 
         Parameters
@@ -710,7 +712,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def numPoints(self, colx=None):
         """
-        This function is a wrapper for ST_NumPoints() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_NumPoints() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4128.html
 
         Parameters
@@ -721,7 +723,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def numPolygons(self, colx=None):
         """
-        This function is a wrapper for ST_NumPolygons() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_NumPolygons() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4129.html
 
         Parameters
@@ -734,8 +736,8 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def coordDim(self, colx=None):
         """
-        This function is a wrapper for ST_CoordDim() . For more information about what the function does, please refer this link :
-       http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4033.html
+        This method is a wrapper for ST_CoordDim() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4033.html
 
         Parameters
         ----------
@@ -745,7 +747,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def is3d(self, colx=None):
         """
-       This function is a wrapper for ST_Is3d() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_Is3d() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4061.html
 
         Parameters
@@ -767,7 +769,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def isValid(self, colx=None):
         """
-        This function is a wrapper for ST_IsValid() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_IsValid() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4087.html
 
         Parameters
@@ -778,7 +780,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     def maxM(self, colx=None):
         """
-         This function is a wrapper for ST_MaxM() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_MaxM() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4075.html
 
         Parameters
@@ -800,7 +802,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def maxY(self, colx=None):
         """
-        This function is a wrapper for ST_MaxY() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_MaxY() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4077.html
 
         Parameters
@@ -811,7 +813,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def maxZ(self, colx=None):
         """
-        This function is a wrapper for ST_MaxY() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_MaxY() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4078.html
 
         Parameters
@@ -822,7 +824,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def minM(self, colx=None):
         """
-         This function is a wrapper for ST_MinM() . For more information about what the function does, please refer this link :
+         This method is a wrapper for ST_MinM() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4083.html
 
         Parameters
@@ -833,7 +835,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def minX(self, colx=None):
         """
-        This function is a wrapper for ST_MinX() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_MinX() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4084.html
 
         Parameters
@@ -844,7 +846,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def minY(self, colx=None):
         """
-        This function is a wrapper for ST_MinY() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_MinY() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4085.html
 
         Parameters
@@ -855,7 +857,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def minZ(self, colx=None):
         """
-        This function is a wrapper for ST_MinZ() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_MinZ() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4086.html
 
         Parameters
@@ -866,8 +868,8 @@ class IdaGeoDataFrame(IdaDataFrame):
         
     def M(self, colx=None):
         """
-         This function is a wrapper for ST_MinZ() . For more information about what the function does, please refer this link :
-       http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4093.html
+        This method is a wrapper for ST_MinZ() . For more information about what the function does, please refer this link :
+        http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4093.html
 
         Parameters
         ----------
@@ -879,13 +881,13 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def X(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame of type ST_POINT and  returns the X coordinate of the point,
+        This method takes the geometry column of an IdaGeoDataFrame of type ST_POINT and  returns the X coordinate of the point,
         that is the length of its boundary, measured in the given units.
 
         Parameters
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
-        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
 
         Returns
         -------
@@ -909,12 +911,12 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def Y(self, colx=None):
         """
-        This function takes the geometry column of an IdaGeoDataFrame of type ST_POINT and returns the Y coordinate of the point.
+        This method takes the geometry column of an IdaGeoDataFrame of type ST_POINT and returns the Y coordinate of the point.
 
         Parameters
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
-        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
 
         Returns
         -------
@@ -938,12 +940,12 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          
     def Z(self, colx=None):
         """
-       This function takes the geometry column of an IdaGeoDataFrame of type ST_POINT and returns the Z coordinate of the point.
+        This method takes the geometry column of an IdaGeoDataFrame of type ST_POINT and returns the Z coordinate of the point.
 
         Parameters
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
-        unit : The unit in which the perimeter is to be calculated, this is an optional argument.
+
 
         Returns
         -------
@@ -966,7 +968,7 @@ class IdaGeoDataFrame(IdaDataFrame):
                                          validInputTypes=['ST_POINT'])
     def isClosed(self, colx=None):
         """
-        This function is a wrapper for ST_isClosed() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_isClosed() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4062.html
 
         Parameters
@@ -979,7 +981,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def isEmpty(self, colx=None):
         """
-        This function is a wrapper for ST_isEmpty() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_isEmpty() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4063.html
 
         Parameters
@@ -990,7 +992,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def isSimple(self, colx=None):
         """
-       This function is a wrapper for ST_isSimple() . For more information about what the function does, please refer this link :
+        This method is a wrapper for ST_isSimple() . For more information about what the function does, please refer this link :
         http://www.ibm.com/support/knowledgecenter/SSEPGG_9.7.0/com.ibm.db2.luw.spatial.topics.doc/doc/rsbp4067.html
 
         Parameters
