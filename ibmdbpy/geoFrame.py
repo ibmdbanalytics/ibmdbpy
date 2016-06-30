@@ -270,7 +270,7 @@ class IdaGeoDataFrame(IdaDataFrame):
     
     def buffer(self, colx=None, distance=None, unit=None):
         """
-        This function takes a geometry column of the IdaGeoDataFrame, a distance, and, optionally, a unit as
+        This method takes a geometry column of the IdaGeoDataFrame, a distance, and, optionally, a unit as
         input parameters and returns the geometry that surrounds the given geometry by the specified distance,
         measured in the given unit. Each point on the boundary of the resulting geometry is
         the specified distance away from the given geometry.
