@@ -299,8 +299,11 @@ class IdaDataBase(object):
             if verbose: 
                 print("Connection successful!")
                 
-            query = "SET CURRENT FUNCTION PATH = CURRENT FUNCTION PATH, db2gse"
-            self.ida_query(query)
+            #add DB2GSE to the database FUNCTION PATH            
+            #query = "SET CURRENT FUNCTION PATH = CURRENT FUNCTION PATH, db2gse"
+            #self.ida_query(query)
+            #not anymore, reported problems with ODBC
+            #better mention DB2GSE explicitly when accessing its functions
                 
         # Setting Autocommit and verbose environment variables
         set_autocommit(autocommit)

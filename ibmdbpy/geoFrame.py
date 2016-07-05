@@ -312,7 +312,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         if unit is not None:
             unit = self._checkLinearUnit(unit)
             additionalArguments.append(unit)
-        return self._singleInputFunctionHandler(functionName='ST_Buffer()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Buffer()', 
                                                  columnByUser=colx,
                                                  additionalArguments=additionalArguments)
     
@@ -343,7 +343,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             619       MULTIPOLYGON (((-93.4905266829 33.0184479233, ...   Columbia    POINT (-93.2345011258 33.2361624817)
 
         """
-        return self._singleInputFunctionHandler(functionName='ST_Centroid()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Centroid()', columnByUser=colx)
         
     def boundary(self, colx=None):
         """
@@ -375,7 +375,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             348       Clay        MULTIPOLYGON (((-96.7646321063 46.9291404309, ...     MULTILINESTRING ((-96.7646321063 46.9291404309.
 
         """
-        return self._singleInputFunctionHandler(functionName='ST_Boundary()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Boundary()', columnByUser=colx)
         
     def envelope(self, colx=None):
         """
@@ -407,7 +407,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             619       Columbia   MULTIPOLYGON (((-93.4905266829 33.0184479233, ...  POLYGON ((-93.4905266829 33.0172739429, -92.97...
 
         """
-        return self._singleInputFunctionHandler(functionName='ST_Envelope()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Envelope()', columnByUser=colx)
     
     def MBR(self, colx=None):
         """
@@ -436,7 +436,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             118        1950-05-25     16:30:00   3.0    880    MULTILINESTRING ((-101.8800087620 32.670005493...  POLYGON ((-101.8800087620 32.6500054909, -101....
             119        1950-05-29     14:48:00   1.0    33     MULTILINESTRING ((-95.2700073814 36.3800064721...  POLYGON ((-95.2700073814 36.3800064721, -95.26...
         """
-        return self._singleInputFunctionHandler(functionName='ST_MBR()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MBR()', columnByUser=colx)
         
     def SRID(self, colx=None):
         """
@@ -465,7 +465,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             334     POINT (-83.8034685769 32.6024797193)   Louisa Timms       137577            1005
 
         """
-        return self._singleInputFunctionHandler(functionName='ST_SRID()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_SRID()', columnByUser=colx)
         
     def srsName(self, colx=None):
         """
@@ -492,34 +492,34 @@ class IdaGeoDataFrame(IdaDataFrame):
             4         POINT (-80.7158029630 40.1151442910)  Arletta Henne        278992          SAMPLE_GCS_WGS_1984
             5         POINT (-80.6682444120 40.1808573446)  Elvia Shadrick       190152          SAMPLE_GCS_WGS_1984
         """
-        return self._singleInputFunctionHandler(functionName='ST_SrsName()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_SrsName()', columnByUser=colx)
     
     def geometryType(self, colx=None):
-        	"""
-        	This method takes the geometry column of an IdaGeoDataFrame and finds the type of the geometry from the predefined geometry types in the DB2 Spatial Extender.
-        	This is a wrapper for DB2GSE.ST_GeometryType().
+        """
+    	   This method takes the geometry column of an IdaGeoDataFrame and finds the type of the geometry from the predefined geometry types in the DB2 Spatial Extender.
+    	   This is a wrapper for DB2GSE.ST_GeometryType().
 
-            Parameters
-            ----------
-            colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
+        Parameters
+        ----------
+        colx : The name of the geometry column in the IdaGeoDataFrame for which the geometry type is to be found.
 
-            Returns
-            -------
-            The function returns the name of the geometry type like ST_Point, ST_Polygon, ST_Multipolygon, ST_LineString or ST_MultiLineString.
+        Returns
+        -------
+        The function returns the name of the geometry type like ST_Point, ST_Polygon, ST_Multipolygon, ST_LineString or ST_MultiLineString.
 
-            Examples
-            --------
-            >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
-            >>> idadf['srsName'] = idadf.geometryType(colx = 'SHAPE')
-                OBJECTID 	NAME 	    SHAPE 	                                            geomType
-                 	1 	   Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	"DB2GSE "."ST_MULTIPOLYGON"
- 	                2 	   Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	"DB2GSE "."ST_MULTIPOLYGON"
- 	                3 	   Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	"DB2GSE "."ST_MULTIPOLYGON"
- 	                4 	   La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	"DB2GSE "."ST_MULTIPOLYGON"
- 	                5 	   Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+        Examples
+        --------
+        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer = 'OBJECTID')
+        >>> idadf['srsName'] = idadf.geometryType(colx = 'SHAPE')
+        OBJECTID 	NAME 	    SHAPE 	                                            geomType
+        1 	   Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	   2 	   Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	   3 	   Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	   4 	   La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	"DB2GSE "."ST_MULTIPOLYGON"
+ 	   5 	   Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	"DB2GSE "."ST_MULTIPOLYGON"
 
-        	"""
-        	return self._singleInputFunctionHandler(functionName='ST_GeometryType()', columnByUser=colx)
+    	   """
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_GeometryType()', columnByUser=colx)
 
     def area(self, colx=None, unit=None):
         """
@@ -551,7 +551,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         if unit is not None:
             unit = self._checkLinearUnit(unit)
             additionalArguments.append(unit)
-        return self._singleInputFunctionHandler(functionName='ST_Area()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Area()', 
                                                 columnByUser=colx,
                                                 additionalArguments=additionalArguments)
         
@@ -601,7 +601,7 @@ class IdaGeoDataFrame(IdaDataFrame):
          	4 	        MULTILINESTRING ((-94.3700070010 34.4000061520... 	1
          	5 	        MULTILINESTRING ((-90.6800062393 37.6000069289... 	1
         """
-        return self._singleInputFunctionHandler(functionName='ST_Dimension()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Dimension()', columnByUser=colx)
         
     def length(self, colx=None, unit=None):
         """
@@ -633,7 +633,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         if unit is not None:
             unit = self._checkLinearUnit(unit)
             additionalArguments.append(unit)
-        return self._singleInputFunctionHandler(functionName='ST_Length()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Length()', 
                                                 columnByUser=colx,
                                                 additionalArguments=additionalArguments,
                                                 validInputTypes=['ST_LINESTRING', 'ST_MULTILINESTRING'])
@@ -667,7 +667,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         if unit is not None:
             unit = self._checkLinearUnit(unit)
             additionalArguments.append(unit)
-        return self._singleInputFunctionHandler(functionName='ST_Perimeter()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Perimeter()', 
                                          columnByUser=colx,
                                          additionalArguments=additionalArguments, 
                                          validInputTypes=['ST_POLYGON', 'ST_MULTIPOLYGON'])
@@ -681,7 +681,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_NumGeometries()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_NumGeometries()', 
                                                 columnByUser=colx,
                                                 validInputTypes=['ST_MULTIPOINT', 'ST_MULTIPOLYGON', 'ST_MULTILINESTRING'])
     def numInteriorRing(self, colx=None):
@@ -693,7 +693,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_NumInteriorRing()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_NumInteriorRing()', 
                                                 columnByUser=colx,
                                                 validInputTypes=['ST_POLYGON'])
                                                  
@@ -706,7 +706,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_NumLineStrings()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_NumLineStrings()', 
                                                 columnByUser=colx,
                                                 validInputTypes=['ST_MULTILINESTRING'])
 
@@ -719,7 +719,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_NumPoints()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_NumPoints()', columnByUser=colx)
         
     def numPolygons(self, colx=None):
         """
@@ -730,7 +730,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_NumPolygons()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_NumPolygons()', 
                                              columnByUser=colx,
                                              validInputTypes=['ST_MULTIPOLYGON'])
 
@@ -743,7 +743,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_CoordDim()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_CoordDim()', columnByUser=colx)
 
     def is3d(self, colx=None):
         """
@@ -754,7 +754,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_Is3d()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Is3d()', columnByUser=colx)
         
     def isMeasured(self, colx=None):
         """
@@ -765,7 +765,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_IsMeasured()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_IsMeasured()', columnByUser=colx)
         
     def isValid(self, colx=None):
         """
@@ -776,7 +776,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_IsValid()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_IsValid()', columnByUser=colx)
 
     def maxM(self, colx=None):
         """
@@ -787,7 +787,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MaxM()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MaxM()', columnByUser=colx)
         
     def maxX(self, colx=None):
         """
@@ -798,7 +798,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MaxX()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MaxX()', columnByUser=colx)
         
     def maxY(self, colx=None):
         """
@@ -809,7 +809,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MaxY()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MaxY()', columnByUser=colx)
         
     def maxZ(self, colx=None):
         """
@@ -820,7 +820,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MaxZ()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MaxZ()', columnByUser=colx)
     
     def minM(self, colx=None):
         """
@@ -831,7 +831,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MinM()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MinM()', columnByUser=colx)
         
     def minX(self, colx=None):
         """
@@ -842,7 +842,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MinX()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MinX()', columnByUser=colx)
     
     def minY(self, colx=None):
         """
@@ -853,7 +853,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MinY()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MinY()', columnByUser=colx)
         
     def minZ(self, colx=None):
         """
@@ -864,7 +864,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_MinM()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_MinM()', columnByUser=colx)
         
     def M(self, colx=None):
         """
@@ -875,7 +875,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_M()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_M()', 
                                          columnByUser=colx, 
                                          validInputTypes=['ST_POINT'])
                                          
@@ -905,7 +905,7 @@ class IdaGeoDataFrame(IdaDataFrame):
  	        4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	    278992 	           -80.715803
  	        5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152 	           -80.668244
         """
-        return self._singleInputFunctionHandler(functionName='ST_X()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_X()', 
                                          columnByUser=colx, 
                                          validInputTypes=['ST_POINT'])
                                          
@@ -934,7 +934,7 @@ class IdaGeoDataFrame(IdaDataFrame):
  	        4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	    278992 	           40.115144
  	        5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152 	           40.180857
         """
-        return self._singleInputFunctionHandler(functionName='ST_Y()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Y()', 
                                          columnByUser=colx, 
                                          validInputTypes=['ST_POINT'])
                                          
@@ -963,7 +963,7 @@ class IdaGeoDataFrame(IdaDataFrame):
  	        4 	        POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	    278992 	           None
  	        5 	        POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152 	           None
         """
-        return self._singleInputFunctionHandler(functionName='ST_Z()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_Z()', 
                                          columnByUser=colx, 
                                          validInputTypes=['ST_POINT'])
     def isClosed(self, colx=None):
@@ -975,7 +975,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_IsClosed()', 
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_IsClosed()', 
                                                 columnByUser=colx, 
                                                 validInputTypes=['ST_LINESTRING', 'ST_MULTILINESTRING'])                                   
     
@@ -988,7 +988,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_IsEmpty()', columnByUser=colx)
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_IsEmpty()', columnByUser=colx)
     
     def isSimple(self, colx=None):
         """
@@ -999,7 +999,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         ----------
         colx : The name of the geometry column in the IdaGeoDataFrame.
         """
-        return self._singleInputFunctionHandler(functionName='ST_IsSimple()', columnByUser=colx)  
+        return self._singleInputFunctionHandler(functionName='DB2GSE.ST_IsSimple()', columnByUser=colx)  
 
     
     
