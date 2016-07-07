@@ -291,8 +291,8 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         Examples
         --------
-        >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
-        >>> idadf['Buffer_200_miles'] = idadf.buffer(colx = 'SHAPE', distance= 200, unit= 'STATUTE MILE')
+    >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_TORNADO', indexer = 'OBJECTID')
+    >>> idadf['Buffer_200_miles'] = idadf.buffer(colx = 'SHAPE', distance= 200, unit= 'STATUTE MILE')
             OBJECTID      DATE             TIME         LEN    WID        SHAPE                                              Buffer_200_miles
               115     1950-05-24         13:30:00       3.6    77         MULTILINESTRING ((-99.4800085321 37.2700063950...  POLYGON ((-100.2516146636 40.1057433898, -100....
               116     1950-05-24         17:30:00       10.7   40         MULTILINESTRING ((-96.9700080939 39.3800068879...  POLYGON ((-98.6396004401 41.9851176508, -98.86...
@@ -320,7 +320,8 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         This method takes the geometry column of an IdaGeoDataFrame and computes the geometric center,
         which is the center of the minimum bounding rectangle of the given geometry, as a point (ST_Point).
-        The resulting point is represented in the spatial reference system of the given geometry. This is a wrapper for DB2GSE.ST_Centroid().
+        The resulting point is represented in the spatial reference system of the given geometry.
+        This is a wrapper for DB2GSE.ST_Centroid().
 
         Parameters
         ----------

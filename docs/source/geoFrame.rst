@@ -1,7 +1,12 @@
 .. highlight:: python
 
-Single Input Methods
+Geospatial Functions
 ********************
+The spatial functions of ibmdbpy can operate in two different ways. It can either operate on a single spatial column of
+one table and calculate features like area, length, dimension , perimeter etc for a single geometry. In another case, it
+can work on two different spatial columns in a single IdaGeoDataFrame or one spatial column each from two different
+IdaGeoDataFrames. Here we elaborate on the structure of the wrapper methods in ibmdbpy for these functions.
+
 .. currentmodule:: ibmdbpy.geoFrame
 
 .. autoclass:: ibmdbpy.geoFrame
