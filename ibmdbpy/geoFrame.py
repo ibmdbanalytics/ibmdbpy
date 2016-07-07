@@ -1069,7 +1069,7 @@ class IdaGeoDataFrame(IdaDataFrame):
                                       dtypes['TYPENAME'])):
             colName = colNameAndType[0]
             colType = colNameAndType[1]
-            if(colType.find('ST_') == 0): #ST_ at the begining of the string
+            if(colType.find('ST_') == 0):
                 table.append([colName, colType, colNumber])
         columns = ['COLNAME', 'TYPENAME', 'COLNUMBER']
         result = pd.DataFrame(table, columns=columns)    
@@ -1116,7 +1116,7 @@ class IdaGeoDataFrame(IdaDataFrame):
                 unit = '\''+unit+'\''
                 return unit
         
-    def _checkColumnForSingleInputFunction(self, columnByUser, functionName,
+    def _checkColumnForSingleInputFunction(self, columnByUser,
                                                   validInputTypes):
         """
         This method returns a column definition to be used as argument for a 
@@ -1144,8 +1144,8 @@ class IdaGeoDataFrame(IdaDataFrame):
         if self._geometry is None:
             #When _geometry is none, means that the IdaGeoDataFrame doesn't
             #have even one geometry column
-            raise IdaGeoDataFrameError("The IdaDataFrame doesn't have a "+
-            "geometry column")
+            raise IdaGeoDataFrameError(
+                "The IdaGeoDataFrame doesn't have a geometry column")
         elif columnByUser is not None:
             #User specified column name when calling the method
             if columnByUser not in self.columns:
@@ -1221,9 +1221,9 @@ class IdaGeoDataFrame(IdaDataFrame):
                 print("Column '"+self._geometry+"' default "+
                 "geometry column for geospatial operations.\n")
     
-    def _singleInputFunctionHandler(self, functionName=None, 
-                                    columnByUser=None,
-                                    additionalArguments=None, 
+    def _singleInputFunctionHandler(self, functionName, 
+                                    columnByUser,
+                                    additionalArguments=None,
                                     validInputTypes=['ST_GEOMETRY']):
         """
         Returns a one-column IdaGeoDataFrame with the specified DB2GSE function 
@@ -1259,12 +1259,10 @@ class IdaGeoDataFrame(IdaDataFrame):
         ------
         IdaGeoDataFrameError
             See _checkColumnForSingleInputFunction() method
-        
         """
                 
         newGeoidadf = self._clone()
         workingColumn = self._checkColumnForSingleInputFunction(columnByUser,
-                                                            functionName,
                                                             validInputTypes)                                                         
 
         #define the column that is going to be added to the definition of 
