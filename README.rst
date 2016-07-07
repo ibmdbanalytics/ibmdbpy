@@ -116,5 +116,6 @@ Project Roadmap
 Contributors
 ============
 
-The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché, at IBM Deutschland Reasearch & Development.
-More contributors might participate in the future.
+The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché and the geospatial extension was
+contributed by Avipsa Roy and Rafael Rodriguez Morales in March,2016 under the supervision of Dr. Gregor Moehler,
+at IBM Deutschland Reasearch & Development, Böblingen.
