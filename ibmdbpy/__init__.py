@@ -19,7 +19,9 @@ from .base import IdaDataBase
 from .frame import IdaDataFrame
 from .series import IdaSeries
 from .geoFrame import IdaGeoDataFrame
+from .geoSeries import IdaGeoSeries
 
 __all__ = ['benchmark', 'learn', 'sampledata', 'tests', 'aggregation', 
 		   'base', 'exceptions', 'filtering', 'frame', 'indexing', 
-		   'internals', 'series', 'sql', 'statistics', 'utils', 'geoFrame']
+		   'internals', 'series', 'sql', 'statistics', 'utils', 'geoFrame',
+             'geoSeries']
