@@ -45,23 +45,23 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     An IdaGeoSeries doesn't have an indexer attribute because geometries are
     unorderable in DB2 Spatial Extender.
     """
-    def __init__(self, idadb, tablename, column):
+    def __init__(self, idadb, tablename, indexer, column):
         """
         Ensures that the specified column has geometry type.
+        See __init__ of IdaSeries.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         column : str
             Column name. It must have geometry type.
 
-        Notes:
-        ------
-        An IdaGeoSeries doesn't have an indexer attribute because geometries
-        are unorderable in DB2GSE.
+        Notes
+        -----
+        Even though geometry types are unorderable in DB2GSE, the IdaGeoSeries
+        might have as indexer another column of the table whose column the
+        IdaGeoSeries refers to.
         """
-        super(IdaGeoSeries, self).__init__(
-                idadb = idadb, tablename = tablename, indexer = None,
-                column = column)
+        super(IdaGeoSeries, self).__init__(idadb, tablename, indexer, column)
         if self.dtypes.TYPENAME[self.column].find('ST_') != 0:
             raise TypeError("Specified column doesn't have geometry type. "
                             "Cannot create IdaGeoSeries object")
@@ -85,9 +85,6 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
             else:
                 idageoseries = idaseries
                 idageoseries.__class__ = IdaGeoSeries
-                # Geometries are unorderable
-                idageoseries.indexer = None
-                idageoseries.order = None
                 return idageoseries
 
 #==============================================================================
@@ -150,8 +147,10 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         --------
 
         """
-        if not isinstance(threshold, float):
-            raise TypeError("threshold must be float")
+        try:
+            threshold = float(threshold)
+        except:
+            raise TypeError("threshold must be float")        
         if threshold < 0:
             raise ValueError("threshold must be greater than or equal to 0")
         additional_args = [threshold]
@@ -1620,12 +1619,13 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         # Set the column attribute of the new idaseries
         idaseries.column = result_column
-        # Refresh the lazy method columns
+        
         try:
             del(idaseries.columns)
         except:
             pass
-
+        
+        # Refresh the lazy method columns
         if idaseries.dtypes.TYPENAME[result_column].find('ST_') == 0:
             return IdaGeoSeries.from_IdaSeries(idaseries)
         else:
