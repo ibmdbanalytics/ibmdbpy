@@ -463,34 +463,50 @@ class IdaDataFrame(object):
             if not (isinstance(item,six.string_types)|isinstance(item, list)):
                 raise KeyError(item)
             if isinstance(item, six.string_types):
+                # Case when only one column was selected
                 if item not in self.columns:
                     raise KeyError(item)
                 newidaseries = self._clone_as_serie(item)
 
+                # Form the new columndict
                 for column in list(newidaseries.internal_state.columndict):
                     if column != item:
                         del newidaseries.internal_state.columndict[column]
-                newidaseries.internal_state.update()
+                newColumndict = newidaseries.internal_state.columndict
+                
+                # Erase attributes
                 newidaseries._reset_attributes(["columns", "shape", "dtypes"])
+                # Set columns and columndict attributes
+                newidaseries.internal_state.columns = ["\"%s\""%col for col in item]
+                newidaseries.internal_state.columndict = newColumndict
+                # Update, i.e. appends an entry to internal_state._cumulative
+                newidaseries.internal_state.update()
                 
                 # Performance improvement 
                 newidaseries.dtypes = self.dtypes.loc[[item]]
                 
                 return newidaseries
 
+            # Case of multiple columns
             not_a_column = [x for x in item if x not in self.columns]
             if not_a_column:
                 raise KeyError("%s"%not_a_column)
 
             newidadf = self._clone()
-            newidadf.internal_state.columns = ["\"%s\""%col for col in item]
-
-            for column in list(newidadf.internal_state.columndict):
-                if column not in item:
-                    del newidadf.internal_state.columndict[column]
-
-            newidadf.internal_state.update()
+            
+            # Form the new columndict
+            newColumndict = OrderedDict()            
+            for col in item:
+                # Column name as key, its definition as value
+                newColumndict[col] = self.internal_state.columndict[col]
+                
+            # Erase attributes
             newidadf._reset_attributes(["columns", "shape", "dtypes"])
+            # Set columns and columndict attributes
+            newidadf.internal_state.columns = ["\"%s\""%col for col in item]
+            newidadf.internal_state.columndict = newColumndict
+            # Update, i.e. appends an entry to internal_state._cumulative
+            newidadf.internal_state.update()
             
             # Performance improvement 
             newidadf.dtypes = self.dtypes.loc[item]
