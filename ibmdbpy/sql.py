@@ -198,8 +198,15 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
                     row = cursor.fetchone() #this returns a tuple
                     if row is not None:
                         row = list(row)            
-                        for colNum in colNumbersWithCLOBs:
-                            row[colNum] = row[colNum].getSubString(1, row[colNum].length())                
+                        for colNum in colNumbersWithCLOBs:                            
+                            try:
+                                # Check needed because some DB2GSE functions 
+                                # return Null, which is then interpreted as
+                                # None, which doesn't have getSubString method
+                                row[colNum] = row[colNum].getSubString(
+                                        1, row[colNum].length())
+                            except:
+                                pass
                 result = pd.DataFrame(data)
                 result.columns = colNames
                 
