@@ -212,7 +212,7 @@ def idadf_tmp(request, idadb):
     idadb.commit()
     return idadf
     
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def idageodf_county(idadb):
     """
     IdaGeoDataFrame to test geospatial methods
@@ -223,7 +223,7 @@ def idageodf_county(idadb):
     idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
     return idageodf
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def idageodf_customer(idadb):
     """
     IdaGeoDataFrame to test geospatial methods
@@ -234,7 +234,7 @@ def idageodf_customer(idadb):
     idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
     return idageodf    
     
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def idageodf_tornado(idadb):
     """
     IdaGeoDataFrame to test geospatial methods
