@@ -258,13 +258,13 @@ class IdaGeoDataFrame(IdaDataFrame):
     @classmethod
     def from_IdaDataFrame(cls, idadf, geometry = None):
         """ 
-        Creates an IdaGeoDataFrame from an IdaDataFrame (or an IdaGeoDataFrame)
+        Creates an IdaGeoDataFrame from an IdaDataFrame.
         
         Parameters
         ----------
         geometry : str, optional
-            Name of the column to be set as "geometry" column of the
-            IdaGeoDataFrame. It must have geometry type.
+            Column name to set the "geometry" property of the IdaGeoDataFrame.
+            The column must have geometry type.
 
         Raises
         ------
