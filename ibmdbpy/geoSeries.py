@@ -76,7 +76,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
             raise TypeError("Expected IdaSeries")
         else:
             # Mind that the given IdaSeries might have non-destructive
-            # columns that were added by the use. That's why __init__ is not
+            # columns that were added by the user. That's why __init__ is not
             # used for this purpose.
             if idaseries.dtypes.TYPENAME[idaseries.column].find('ST_') != 0:
                 raise TypeError(
@@ -145,7 +145,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-
+        # TODO add examples
         """
         try:
             threshold = float(threshold)
@@ -207,7 +207,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-
+        # TODO add examples
         """
         if not isinstance(distance, Number):
             # distance can be positive or negative
@@ -1578,7 +1578,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         IdaSeries
             If the resulting column doesn't have geometry type.
         """
-        if not (self.column in valid_types or valid_types[0] == 'ST_GEOMETRY'):
+        if not (self.dtypes.TYPENAME[0] in valid_types or 
+                valid_types[0] == 'ST_GEOMETRY'):
             raise TypeError("Column " + self.column +
                             " has incompatible type.")
 
@@ -1625,7 +1626,6 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         except:
             pass
         
-        # Refresh the lazy method columns
         if idaseries.dtypes.TYPENAME[result_column].find('ST_') == 0:
             return IdaGeoSeries.from_IdaSeries(idaseries)
         else:
