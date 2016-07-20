@@ -482,8 +482,9 @@ class IdaDataFrame(object):
                 # Update, i.e. appends an entry to internal_state._cumulative
                 newidaseries.internal_state.update()
                 
-                # Performance improvement 
-                newidaseries.dtypes = self.dtypes.loc[[item]]
+                # Performance improvement
+                # avoid, caused wrong dtypes for the result
+                # newidaseries.dtypes = self.dtypes.loc[[item]]
                 
                 return newidaseries
 
@@ -509,7 +510,8 @@ class IdaDataFrame(object):
             newidadf.internal_state.update()
             
             # Performance improvement 
-            newidadf.dtypes = self.dtypes.loc[item]
+            # avoid, caused wrong dtypes for the result
+            # newidadf.dtypes = self.dtypes.loc[item]
             
         return newidadf
 
