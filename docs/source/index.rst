@@ -100,10 +100,6 @@ Table of Contents
    frame.rst
    ml.rst
    geospatial.rst
-   utils.rst
-   legal.rst
-
-
 
 Project Roadmap
 ===============

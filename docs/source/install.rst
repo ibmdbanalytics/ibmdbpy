@@ -89,6 +89,7 @@ Package structure
 	    ├── filtering.py
 	    ├── frame.py
 	    ├── geoFrame.py
+        ├── geoSeries.py
 	    ├── indexing.py
 	    ├── internals.py
 	    ├── series.py
