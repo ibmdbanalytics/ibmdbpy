@@ -109,11 +109,7 @@ Project Roadmap
 
 * Full test coverage (a basic coverage is already provided)
 * Add more functions and improve what already exists
-<<<<<<< HEAD
-* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...)
-=======
-* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...) 
->>>>>>> refs/remotes/origin/master
+* Add wrappers for several ML-Algorithms
 * Feature selection extension
 * Add Spark as computational engine
 
