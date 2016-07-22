@@ -87,12 +87,12 @@ Note that to create an IDA geo data frame using the IdaDataFrame object, we need
 Now let us compute the area of the counties in the GEO_COUNTY table. The result of the area will be stored as a new column 'area' in the IdaGeoDataFrame:
 
 >>> idadf['area'] = idadf.area(colx = 'SHAPE')
-      OBJECTID 	NAME 	     SHAPE 	                                            area
-      1    	   Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
- 	  2 	   Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
- 	  3 	   Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
- 	  4 	   La Plata 	    MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
- 	  5 	   Randolph 	    MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
+    OBJECTID    NAME         SHAPE                                              area
+    1           Wilbarger    MULTIPOLYGON (((-99.4756582604 33.8340108094, ...  0.247254
+    2           Austin       MULTIPOLYGON (((-96.6219873342 30.0442882117, ...  0.162639
+    3           Logan        MULTIPOLYGON (((-99.4497297204 46.6316377481, ...  0.306589
+    4           La Plata     MULTIPOLYGON (((-107.4817473750 37.0000108736,...  0.447591
+    5           Randolph     MULTIPOLYGON (((-91.2589262966 36.2578866492, ...  0.170844
 
 
 In the background, ibmdbpy looks for geometry columns in the table and builds an SQL request that returns the area of each geometry.
