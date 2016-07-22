@@ -94,7 +94,7 @@ Filtering
 .. automethod:: IdaDataFrame.__gt__
 
 
-Feature Engineering 
+Feature Engineering
 -------------------
 
 .. automethod:: IdaDataFrame.__setitem__
@@ -170,7 +170,7 @@ ida_scalar_query
 .. automethod:: IdaDataFrame.ida_scalar_query
 
 
-Data Exploration 
+Data Exploration
 ================
 
 head

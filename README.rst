@@ -38,7 +38,7 @@ Next, we can create an IDA data frame that points to the table we just uploaded.
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 
-Note that to create an IDA data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection. 
+Note that to create an IDA data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
 
 Now let us compute the correlation matrix:
 
@@ -46,12 +46,12 @@ Now let us compute the correlation matrix:
 
 In the background, ibmdbpy looks for numerical columns in the table and builds an SQL request that returns the correlation between each pair of columns. Here is the SQL request that was executed for this example::
 
-   SELECT CORRELATION("sepal_length","sepal_width"), 
-   CORRELATION("sepal_length","petal_length"), 
-   CORRELATION("sepal_length","petal_width"), 
-   CORRELATION("sepal_width","petal_length"), 
-   CORRELATION("sepal_width","petal_width"), 
-   CORRELATION("petal_length","petal_width") 
+   SELECT CORRELATION("sepal_length","sepal_width"),
+   CORRELATION("sepal_length","petal_length"),
+   CORRELATION("sepal_length","petal_width"),
+   CORRELATION("sepal_width","petal_length"),
+   CORRELATION("sepal_width","petal_width"),
+   CORRELATION("petal_length","petal_width")
    FROM IRIS
 
 The result fetched by ibmdbpy is a tuple containing all values of the matrix. This tuple is formatted back into a Pandas.DataFrame and then returned::
@@ -64,18 +64,62 @@ The result fetched by ibmdbpy is a tuple containing all values of the matrix. Th
 
 Et voilà !
 
+How the spatial functions work
+------------------------------
+
+The geospatial extension translates geopandas-like syntax into SQL and uses a middleware API (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution.
+It identifies the geometry column for spatial tables and enables the user to perform spatial queries based upon this column.
+The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
+
+The following scenario illustrates how spatial functions work.
+
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a dashDB instance named DASHDB) via ODBC:
+
+>>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
+>>> idadb = IdaDataBase('DASHDB')
+
+We can create an IDA geo data frame that points to a sample table in dashDB:
+
+>>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
+
+Note that to create an IDA geo data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
+
+Now let us compute the area of the counties in the GEO_COUNTY table. The result of the area will be stored as a new column 'area' in the IdaGeoDataFrame:
+
+>>> idadf['area'] = idadf.area(colx = 'SHAPE')
+      OBJECTID 	NAME 	     SHAPE 	                                            area
+      1    	   Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
+ 	  2 	   Austin 	    MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
+ 	  3 	   Logan 	    MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
+ 	  4 	   La Plata 	    MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
+ 	  5 	   Randolph 	    MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
+
+
+In the background, ibmdbpy looks for geometry columns in the table and builds an SQL request that returns the area of each geometry.
+Here is the SQL request that was executed for this example::
+
+   SELECT t.*,db2gse.ST_Area(t.SHAPE) as area
+   FROM SAMPLES.GEO_COUNTY t;
+
+
+That's as simple as that!
+
 Project Roadmap
 ===============
 
 * Full test coverage (a basic coverage is already provided)
 * Add more functions and improve what already exists
+<<<<<<< HEAD
+* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...)
+=======
 * Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...) 
+>>>>>>> refs/remotes/origin/master
 * Feature selection extension
-* Add Spark as computational engine 
+* Add Spark as computational engine
 
 Contributors
 ============
 
-The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché, at IBM Deutschland Reasearch & Development. 
-More contributors might participate in the future. 
-
+The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché and the geospatial extension was
+contributed by Avipsa Roy and Rafael Rodriguez Morales in March,2016 under the supervision of Dr. Gregor Moehler,
+at IBM Deutschland Reasearch & Development, Böblingen.

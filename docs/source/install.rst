@@ -19,7 +19,7 @@ Introduction
 ------------
 
 This statement builds the project from source::
-  
+
  	> python setup.py install
 
 These statements build the documentation::
@@ -31,18 +31,18 @@ These statements build the documentation::
 These statements run the test::
 
 	> cd tests
-	> py.test 
+	> py.test
 
 By default, pytest assumes that a database named "DASHDB" is reachable via an ODBC connection and that its credentials are stored in the user's ODBC settings. This may be not the case for most users, so several options are avaiable:
 
 	* ``--dsn`` : Data Source Name
 	* ``--uid``, ``--pwd`` : Database login and password
-	* ``--jdbc`` : jdbc url string 
+	* ``--jdbc`` : jdbc url string
 	* ``--table`` : Table to use to test (default: iris)
 
 For testing, all tables from ibmdbpy.sampledata can be used: iris, swiss, titanic.
 
-More tables may be added in the future. 
+More tables may be added in the future.
 
 Strict dependencies
 -------------------
@@ -54,7 +54,7 @@ Ibmdbpy uses data structures and methods from two common Python libraries - Pand
 	* future
 	* six
 	* lazy
-	* pypyodbc 
+	* pypyodbc
 
 Optional dependencies
 ---------------------
@@ -66,7 +66,7 @@ Some optional libraries can be installed to benefit from extra features, for exa
 	* sphinx (for building the documentation)
 	* bokeh (visualization of benchmarks)
 
-JayDeBeApi requires a C++ compiler, which may make it difficult to install for some users.  
+JayDeBeApi requires a C++ compiler, which may make it difficult to install for some users.
 
 Package structure
 -----------------
@@ -88,6 +88,8 @@ Package structure
 	    ├── exceptions.py
 	    ├── filtering.py
 	    ├── frame.py
+	    ├── geoFrame.py
+        ├── geoSeries.py
 	    ├── indexing.py
 	    ├── internals.py
 	    ├── series.py
@@ -98,13 +100,13 @@ Package structure
 	    ├── benchmark
 	    │   ├── __init__.py
 	    │   ├── benchmark.py
-	    ├── learn 
+	    ├── learn
 	    │   ├── __init__.py
 	    │   ├── association_rules.py
 	    │   ├── kmeans.py
 	    │   ├── naive_bayes.py
-	    ├── sampledata 
+	    ├── sampledata
 	    │   ├── ...
-	    └── tests 
+	    └── tests
 	    	├── conftest.py
 	        └── ...
