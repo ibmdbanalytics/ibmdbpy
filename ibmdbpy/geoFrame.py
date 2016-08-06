@@ -325,3 +325,228 @@ class IdaGeoDataFrame(IdaDataFrame):
         else:
             self._geometry_colname = column_name
 
+    # ==============================================================================
+    ### Binary geospatial methods
+    # ==============================================================================
+    def equals(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_EQUALS',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def distance(self, ida2, unit=None):
+        additional_args = []
+        if unit is not None:
+            unit = self._check_linear_unit(unit)  # Can raise exceptions
+            additional_args.append(unit)
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_DISTANCE',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def crosses(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_CROSSES',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def intersects(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_INTERSECTS',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def overlaps(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_OVERLAPS',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def touches(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_TOUCHES',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def disjoint(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_DISJOINT',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def contains(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_CONTAINS',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def within(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of hte two input IdaGeoDataFrames and a result column
+        with 1 or 0 depending upon the output of the DB2GSE function ST_WITHIN() , which represent
+        whether the first geometry is inside the second.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        IdaGeoDataFrame.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_WITHIN() function.
+
+        Examples
+        --------
+        >>> idageodf_customer = IdaGeoDataFrame(idadb,'SAMPLES.GEO_CUSTOMER',indexer='OBJECTID')
+        >>> idageodf_customer.set_geometry('SHAPE')
+        >>> idageodf_county = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> idageodf_county.set_geometry('SHAPE')
+        >>> ida1 = idageodf_customer[idageodf_customer['INSURANCE_VALUE']>250000]
+        >>> ida2 = idageodf_county[idageodf_county['NAME']=='Madison']
+        >>> result = ida1.within(ida2)
+        >>> result[result['RESULT']==1].head()
+        INDEXERIDA1    INDEXERIDA2    RESULT
+        134            21473          1
+        134            21413          1
+        134            21414          1
+        134            21417          1
+        134            21419          1
+        """
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_WITHIN',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def mbr_intersects(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_MBRINTERSECTS',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def difference(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_DIFFERENCE',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def intersection(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_INTERSECTION',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def union(self, ida2):
+        return self._binary_operation_handler(
+            ida2,
+            db2gse_function='DB2GSE.ST_UNION',
+            valid_types_ida1=['ST_GEOMETRY'],
+            valid_types_ida2=['ST_GEOMETRY'])
+
+    def _binary_operation_handler(self, ida2, db2gse_function,
+                                          valid_types_ida1, valid_types_ida2,
+                                          additional_args=None):
+
+
+        """
+        Returns an IdaDataFrame with three columns:
+        [
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+        ]
+
+
+        Parameters
+        ----------
+        db2gse_function : str
+                Name of the corresponding DB2GSE function.
+        valid_types_ida1 : list of str
+                Valid input typenames for the first IdaGeoSeries.
+        valid_types_ida2 : list of str
+                Valid input typenames for the second IdaGeoSeries.
+        additional_args : list of str, optional
+                Additional arguments for the DB2GSE function.
+
+        Returns
+        -------
+        IdaDataFrame
+        """
+        ida1 = self  # For code clearness
+        if not (ida1.dtypes.TYPENAME[0] in valid_types_ida1 or
+                        valid_types_ida1[0] == 'ST_GEOMETRY'):
+            raise TypeError("Column " + ida1.column +
+                            " has incompatible type.")
+        if not (ida2.dtypes.TYPENAME[0] in valid_types_ida2 or
+                        valid_types_ida2[0] == 'ST_GEOMETRY'):
+            raise TypeError("Column " + ida1.column +
+                            " has incompatible type.")
+
+        # Get the definitions of the columns, which will be the arguments for
+        # the DB2GSE function
+        column1_for_db2gse = ida1.internal_state.columndict[self.geometry.column]
+        if column1_for_db2gse[0] == '\"' and column1_for_db2gse[-1] == '\"':
+            column1_for_db2gse = column1_for_db2gse[1:-1]
+        column2_for_db2gse = ida2.internal_state.columndict[self.geometry.column]
+        if column2_for_db2gse[0] == '\"' and column2_for_db2gse[-1] == '\"':
+            column2_for_db2gse = column2_for_db2gse[1:-1]
+
+        arguments_for_db2gse_function = []
+        arguments_for_db2gse_function.append('IDA1.' + column1_for_db2gse)
+        arguments_for_db2gse_function.append('IDA2.' + column1_for_db2gse)
+        if additional_args is not None:
+            for arg in additional_args:
+                arguments_for_db2gse_function.append(arg)
+
+        # SELECT statement
+        select_columns = []
+        if hasattr(ida1, '_indexer') and ida1._indexer is not None:
+            select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' % (ida1.indexer))
+        else:
+            raise IdaGeoDataFrameError(ida1 + "has no indexer defined." +
+                                       "Please assign index column with set_indexer and retry.")
+            # select_columns.append('NULL AS \"INDEXERIDA1\"')
+        if hasattr(ida2, '_indexer') and ida2._indexer is not None:
+            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' % (ida1.indexer))
+        else:
+            raise IdaGeoDataFrameError(ida2 + "has no indexer defined." +
+                                       "Please assign index column with set_indexer and retry.")
+            # select_columns.append('NULL AS \"INDEXERIDA2\"')
+        result_column = (
+            db2gse_function +
+            '(' +
+            ','.join(map(str, arguments_for_db2gse_function)) +
+            ')'
+        )
+        select_columns.append('%s AS \"RESULT\"' % (result_column))
+        select_statement = 'SELECT ' + ','.join(select_columns) + ' '
+
+        # FROM clause
+        from_clause = (
+            'FROM ' +
+            ida1.name + ' AS IDA1, ' +
+            ida2.name + ' AS IDA2 '
+        )
+
+        # Create a view
+        view_creation_query = '(' + select_statement + from_clause + ')'
+        viewname = self._idadb._create_view_from_expression(
+            view_creation_query)
+
+        idageodf = ibmdbpy.IdaGeoDataFrame(self._idadb, viewname,indexer= 'INDEXERIDA1')
+        return idageodf
