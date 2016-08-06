@@ -31,3 +31,15 @@ Create from an IdaDataFrame
 Get the geometry attribute
 --------------------------
 .. automethod:: IdaGeoDataFrame.geometry
+
+Geospatial Methods that return an IdaGeoDataFrame
+=================================================
+Some geospatial methods operate on two IdaGeoDataFrames to return a result as a boolean or a new geometry.
+Such methods can be accessed with the IdaGeoDataFrame object to return a new IdaGeoDataFrame with three columns
+respectively, indexer of the first IdaGeoDataFrame with which the method is called, the indexer of the second
+IdaGeoDataFrame which is passed as an argument to the method and a third column which contains the result of the
+geometric operation between the geometry columns of the first and second IdaGeoDataFrames.
+
+Within
+------
+.. automethod:: IdaGeoDataFrame.within
