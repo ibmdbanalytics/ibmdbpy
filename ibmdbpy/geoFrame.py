@@ -28,7 +28,7 @@ import ibmdbpy
 from ibmdbpy.frame import IdaDataFrame
 from ibmdbpy.geoSeries import IdaGeoSeries
 
-from copy import  deepcopy
+from copy import deepcopy
 
 import six
 
