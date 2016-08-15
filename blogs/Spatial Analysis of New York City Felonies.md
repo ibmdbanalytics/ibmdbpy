@@ -351,7 +351,7 @@ map1
 ```
 
 
-![png](chropleth_map.png)
+![png](choropleth_map.png)
 
 
 
