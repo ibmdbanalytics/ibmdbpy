@@ -116,6 +116,9 @@ def entropy_stats(idadf, target=None, mode="normal", execute = True, ignore_inde
     Input column should be categorical, otherwise this measure does not make 
     much sense. 
     
+    Cannot handle columns that are not physically existing in the database, 
+    since no statistics are available for them. 
+    
     Examples
     --------
     >>> idadf = IdaDataFrame(idadb, "IRIS")

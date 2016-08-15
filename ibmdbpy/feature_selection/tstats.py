@@ -54,8 +54,6 @@ def ttest(idadf, target=None, features=None, ignore_indexer=True):
     The target columns should be categorical, while the feature columns should
     be numerical.
     
-    - idadf_state is not supported yet 
-    
     The scalability of this approach is not very good. Should not be used on 
     high dimensional data. 
     

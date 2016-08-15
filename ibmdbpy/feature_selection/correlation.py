@@ -69,8 +69,6 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
             raise TypeError("Correlation-based measure not available for non-numerical column %s"%feature)
                     
     if target is None:
-        if len(features) == 1:
-                raise ValueError("Cannot compute the pearson correlation coefficient of only one column, need at least 2")
         return idadf.corr(features = features, ignore_indexer=ignore_indexer)
     else:
         for t in target:

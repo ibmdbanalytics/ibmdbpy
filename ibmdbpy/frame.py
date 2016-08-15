@@ -1660,21 +1660,6 @@ class IdaDataFrame(object):
         #C = self.levels(target)
         N = len(self)
 
-
-######### VERSION 1
-        
-#        for feature in features:
-#            subquery = "(SELECT \"%s\",AVG(\"%s\") as \"average\" FROM %s GROUP BY \"%s\") AS B"%(target, feature, self.name, target)
-#            condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
-#            groupby = "GROUP BY A.\"%s\""%target
-#            query = "SELECT SUM(POWER(\"%s\" - \"average\", 2)) AS \"SUM\" FROM %s AS A INNER JOIN %s %s %s"%(feature, self.name, subquery, condition, groupby)
-#            classvar = self.ida_query(query)
-#            #print(classvar)
-#            result[feature] = classvar.sum() /(N -C)
-
-####################
-
-########## VERSION 2
         if len(features) < 5:
           
             avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(features)]
@@ -1705,7 +1690,6 @@ class IdaDataFrame(object):
         else:
             chunkgen = chunklist(features, 5)
             result = pd.Series()
-            #data = ()
             for chunk in chunkgen:
                 avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(chunk)]
                 sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(chunk)]
@@ -1719,7 +1703,8 @@ class IdaDataFrame(object):
                 query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
                 
                 classvar = self.ida_query(query)
-                if len(features) == 1:
+                
+                if len(chunk) == 1:
                     classvar = pd.DataFrame(classvar)
                     
                 C = len(classvar)
@@ -1730,11 +1715,6 @@ class IdaDataFrame(object):
                 
                 for attr in classvar:
                     result[attr] = classvar[attr].sum()/(N -C)
-            
-###################
-            
-        #if len(result) == 1:
-        #    result = result[0]
         
         return result
         

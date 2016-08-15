@@ -43,6 +43,10 @@ def _check_input(idadf, target, features, ignore_indexer=True):
             for x in features:
                 if x not in idadf.columns:
                     raise ValueError("Unknown feature column %s"%x)
+        if target is None:
+            if len(features) == 1:
+                raise ValueError("Cannot compute correlation coefficients of only one"+
+                                 " column (%s), need at least 2"%features[0])
     else:
         if target is not None:
             if len(target) == 1:
@@ -58,5 +62,10 @@ def _check_input(idadf, target, features, ignore_indexer=True):
             if idadf.indexer:
                 if idadf.indexer in features:
                     features.remove(idadf.indexer)
+    
+    # Catch the case where users ask for the correlation between the two same columns
+    if target == features:
+        if len(target) == 1:
+            raise ValueError("The correlation value of two same columns is always maximal")
             
     return target, features
