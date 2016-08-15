@@ -123,6 +123,7 @@ Using our previously opened IdaDataBase instance named 'idadb', we can open one 
 
 Let us open the iris data set, assuming it is stored in the database under the name 'IRIS'
 
+>>> from ibmdbpy import IdaDataFrame
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 
 Explore data

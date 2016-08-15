@@ -225,3 +225,8 @@ def _check_input(idadf, target, features):
             features = list(idadf.columns)
             
     return target, features
+    
+def chunklist(l, n):
+    """ Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i+n]

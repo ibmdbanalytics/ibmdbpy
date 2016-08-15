@@ -347,7 +347,9 @@ class KMeans(object):
         if outtable is None:
             outtable = idadf._idadb._get_valid_modelname('PREDICT_KMEANS_')
         else:
-            outtable = ibmdbpy.utils.check_tablename(self.outtable)
+            if self.outtable:
+                outtable = self.outtable
+            outtable = ibmdbpy.utils.check_tablename(outtable)
             if idadf._idadb.exists_table(outtable):
                 idadf._idadb.drop_table(outtable)
 

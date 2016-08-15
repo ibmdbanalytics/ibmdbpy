@@ -205,6 +205,7 @@ class IdaDataBase(object):
                             "to work with JDBC.")
             
             here = os.path.abspath(os.path.dirname(__file__))
+            
             if not jpype.isJVMStarted():
                 classpath = os.getenv('CLASSPATH','')
                 jarpath = ''
@@ -729,7 +730,7 @@ class IdaDataBase(object):
     def ida_scalar_query(self, query, silent=False, autocommit = False):
         """
         Prepare and execute a query and return only the first element as a 
-        string. If nothing is returned from thje SQL query, an error occur.
+        string. If nothing is returned from the SQL query, an error occur.
 
         Parameters
         ----------
@@ -765,7 +766,11 @@ class IdaDataBase(object):
     @timed
     def as_idadataframe(self, dataframe, tablename=None, clear_existing=False, primary_key=None, indexer=None):
         """
-        Upload a dataframe and return its corresponding IdaDataFrame.
+        Upload a dataframe and return its corresponding IdaDataFrame. The target
+        table (tablename) will be created or replaced if the option clear_existing
+        is set to True.
+        
+        To add data to an existing tables, see IdaDataBase.append
 
         Parameters
         ----------
@@ -809,6 +814,12 @@ class IdaDataBase(object):
         <ibmdbpy.frame.IdaDataFrame at 0xb375940>
         >>> idadb.as_idadataframe(iris, "IRIS", clear_existing = True)
         <ibmdbpy.frame.IdaDataFrame at 0xb371cf8>
+        
+        Notes
+        -----
+        This function is not intended to be used to add data to an existing table,
+        rather to create a new table from a dataframe. To add data to an existing
+        table, please consider using IdaDataBase.append 
         """
         if not isinstance(dataframe, pd.DataFrame):
             raise TypeError("Argument dataframe is not of type Pandas.DataFrame")
