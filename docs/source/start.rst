@@ -11,7 +11,7 @@ IBM dashDB instances are available on Bluemix, the cloud development platform po
 
 	https://console.ng.bluemix.net/
 
-You will need a Bluemix account. It is possible to get a 30-day trial account, if you don't have a Bluemix account and would like to try Bluemix. 
+You will need a Bluemix account. It is possible to get a 30-day trial account, if you don't have a Bluemix account and would like to try Bluemix.
 
 ODBC Connection
 ---------------
@@ -27,7 +27,7 @@ Otherwise, it is possible to connect with your dashDB credentials:
 
 >>> idadb = IdaDataBase(dsn="DASHDB", uid="<UID>", pwd="<PWD>")
 
-Using ODBC platforms other than Windows may require additional configuration. 
+Using ODBC platforms other than Windows may require additional configuration.
 
 JDBC Connection
 ---------------
@@ -48,11 +48,11 @@ Alternatively, an installer can be downloaded from the Java_ website.
 
 Furthermore, you need to download the latest version of the JDBC driver for DB2. It is available through `IBM Support & Downloads`__.
 
-__ http://www-01.ibm.com/support/docview.wss?uid=swg21363866 
+__ http://www-01.ibm.com/support/docview.wss?uid=swg21363866
 
 You need to put the ‘db2jcc.jar’ or ‘db2jcc4.jar’ file in the ibmdbpy site-package folder. When ibmdbpy runs, it checks whether one of those files exists in its installation folder and uses it to establish the connection.
 
-The connection is done using the JDBC URL string. For a dashDB instance on Bluemix, the JDBC URL string can be found on the dashDB Connection Information page. 
+The connection is done using the JDBC URL string. For a dashDB instance on Bluemix, the JDBC URL string can be found on the dashDB Connection Information page.
 
 >>> jdbc = 'jdbc:db2://<HOST>:<PORT>/<DBNAME>:user=<UID>;password=<PWD>'
 >>> IdaDataBase(jdbc)
@@ -86,7 +86,7 @@ The verbose mode automatically prints all SQL-communication between ibmdbpy and 
 
 >>> idadb = IdaDataBase("DASHDB", verbose=False)
 
-Alternatively 
+Alternatively
 
 >>> from ibmdbpy.utils import set_verbose
 >>> set_verbose(False)
@@ -197,7 +197,7 @@ Alternatively
 
 >>> idadf_new = idadf.loc[0:9]
 
-Which is equivalent to selecting the first 10 IDs in a list: 
+Which is equivalent to selecting the first 10 IDs in a list:
 
 >>> idadf_new = idadf.loc[[0,1,2,3,4,5,6,7,8,9]]
 
@@ -206,30 +206,30 @@ Of course, this only makes sense if an ID column is provided. Otherwise, the sel
 Projection
 ----------
 
-* It is possible to select a subset of columns in an IdaDataFrame. 
+* It is possible to select a subset of columns in an IdaDataFrame.
 
 >>> idadf_new = idadf[['sepal_length', 'sepal_width']]
 
 As in the Pandas interface, this operation creates a new IdaDataFrame instance that is similar to the current one and contains only the selected column(s). This is done to allow users to manipulate the original IdaDataFrame and the new one independently.
 
 >>> idadf_new.head()
-   sepal_length  sepal_width 
-0           5.1          3.5 
-1           4.9          3.0 
-2           4.7          3.2 
-3           4.6          3.1 
-4           5.0          3.6 
+   sepal_length  sepal_width
+0           5.1          3.5
+1           4.9          3.0
+2           4.7          3.2
+3           4.6          3.1
+4           5.0          3.6
 
 Note that ``idadf['sepal_length']`` is not equivalent to ``idadf[['sepa_length']]``. The first one returns an IdaSeries object that behaves like a Pandas.Series object. The second one returns an IdaDataFrame which contains only one column. For example:
 
 >>> idadf_new = idadf[['sepal_length']]
 >>> idadf_new.head()
-   sepal_length 
-0           5.1  
-1           4.9  
-2           4.7  
-3           4.6 
-4           5.0  
+   sepal_length
+0           5.1
+1           4.9
+2           4.7
+3           4.6
+4           5.0
 
 >>> idaseries = idadf['sepal_length']
 >>> idaseries.head()
@@ -345,7 +345,7 @@ Select all rows for which the 'sepal_length' value is smaller than 5:
 3   66           4.7          3.2           1.3          0.2  setosa
 4   49           4.8          3.4           1.9          0.2  setosa
 
->>> idadf_new.shape 
+>>> idadf_new.shape
 (22, 5) # Here we can see that only 22 records meet the criterion
 
 Select all samples belonging to the 'versicolor' species:
@@ -395,7 +395,7 @@ Modify an existing column:
 1   1           5.0          3.4           1.5          0.2  setosa  2.828427
 2   2           5.1          3.5           1.4          0.3  setosa  2.639016
 3   3           5.1          3.7           1.5          0.4  setosa  2.828427
-4   4           4.6          3.6           1.0          0.2  setosa  2.000000 
+4   4           4.6          3.6           1.0          0.2  setosa  2.000000
 
 Modify an existing columns based on itself:
 
@@ -406,7 +406,7 @@ Modify an existing columns based on itself:
 1           5.6          2.9           3.6          1.3  versicolor -12.380828
 2           5.4          3.9           1.3          0.4      setosa -22.044271
 3           5.0          3.4           1.5          0.2      setosa -21.678133
-4           5.8          2.6           4.0          1.2  versicolor  -8.506560  
+4           5.8          2.6           4.0          1.2  versicolor  -8.506560
 
 Delete colummns:
 
@@ -415,7 +415,7 @@ Delete colummns:
 
 Modify existing columns:
 
->>> idadf['sepal_length'] = idadf['sepal_length'] / 2 
+>>> idadf['sepal_length'] = idadf['sepal_length'] / 2
    ID  sepal_length  sepal_width  petal_length  petal_width
 0   0          2.55          3.5           1.4          0.2
 1   1          2.50          3.4           1.5          0.2
@@ -435,7 +435,7 @@ Modify several or all columns at the same time:
 3   3          4.55          5.7           1.5          0.4
 4   4          4.30          5.6           1.0          0.2
 
->>> idadf = idadf + idadf['sepal_length'].var() 
+>>> idadf = idadf + idadf['sepal_length'].var()
 >>> idadf.head() # Possible because all columns are numeric
          ID  sepal_length  sepal_width  petal_length  petal_width
 0  0.171423      4.721423     5.671423      1.571423     0.371423
@@ -458,7 +458,7 @@ Ibmdbpy provides a wrapper for several machine learning algorithms that are deve
 The following example uses K-means:
 
 >>> idadf = IdaDataBase(idadb, 'IRIS', indexer="ID")
-# In-DataBase Kmeans needs an indexer to identify each row 
+# In-DataBase Kmeans needs an indexer to identify each row
 
 >>> from ibmdbpy.learn import KMeans
 >>> kmeans = KMeans(3) # configure clustering with 3 cluters
@@ -468,7 +468,7 @@ The following example uses K-means:
 
 >>> kmeans.describe()
 KMeans clustering with 3 clusters of sizes 49, 50, 51
-Cluster means: 
+Cluster means:
    CLUSTERID  sepal_length  sepal_width  petal_length  petal_width     species
 0          1      5.879592     2.753061      4.236735     1.322449  versicolor
 1          2      6.629412     2.986275      5.549020     2.015686   virginica
@@ -489,10 +489,40 @@ Within cluster sum of squares by cluster:
 
 To learn how to use other machine learning algorithms, refer to the detailed documentation.
 
+Geospatial Analysis
+-------------------
+Ibmdbpy provides a wrapper for spatial functions which translate geopandas-like syntax into SQL and uses a middleware API (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution.
+The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
+
+The following scenario illustrates how ibmdbpy works.
+
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a dashDB instance named DASHDB) via ODBC:
+
+    >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
+    >>> idadb = IdaDataBase('DASHDB')
+
+We can create an IDA geo data frame that points to a sample table in dashDB:
+
+    >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
+
+Note that to create an IDA geo data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
+
+Now let us compute the area of the counties in the GEO_COUNTY table:
+
+    >>> idadf['area'] = idadf.area(colx = 'SHAPE')
+         	OBJECTID 	NAME 	        SHAPE 	                                                 area
+         	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
+         	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639
+         	3 	        Logan 	        MULTIPOLYGON (((-99.4497297204 46.6316377481, ... 	0.306589
+         	4 	        La Plata 	MULTIPOLYGON (((-107.4817473750 37.0000108736,... 	0.447591
+         	5 	        Randolph 	MULTIPOLYGON (((-91.2589262966 36.2578866492, ... 	0.170844
+
+To learn how to use other geospatial functions, refer to the detailed documentation.
+
 Benchmarking
 ------------
 
-A performance testing framework is available for ibmdbpy, which simultaneously tests the execution time of the same line of code for the in-database and in-memory version on a same growing data set. This framework is useful for profiling and for showing the advantage of ibmdbpy over traditional in-memory implementation. 
+A performance testing framework is available for ibmdbpy, which simultaneously tests the execution time of the same line of code for the in-database and in-memory version on a same growing data set. This framework is useful for profiling and for showing the advantage of ibmdbpy over traditional in-memory implementation.
 
 The following example shows how to use it and what type of result it can produce:
 

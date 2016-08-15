@@ -142,7 +142,7 @@ class IdaDataBase(object):
 
         >>> IdaDataBase(dsn="DASHDB", uid="<UID>", pwd="<PWD>")
         <ibmdbpy.base.IdaDataBase at 0x9bec860>
-
+        
         JDBC connection, full JDBC string:
 
         >>> jdbc='jdbc:db2://<HOST>:<PORT>/<DBNAME>:user=<UID>;password=<PWD>'
@@ -170,7 +170,16 @@ class IdaDataBase(object):
         self._idadfs = []
 
         if self._con_type == 'odbc':
-            self._connection_string = "DSN=%s; UID=%s; PWD=%s"%(dsn,uid,pwd)
+            self._connection_string = "DSN=%s; UID=%s; PWD=%s;LONGDATACOMPAT=1;"%(dsn,uid,pwd)
+            """
+            Workaround for CLOB retrieval: 
+            Set the CLI/ODBC LongDataCompat keyword to 1. 
+            Doing so will force the CLI driver to make the 
+            following data type mappings
+            SQL_CLOB to SQL_LONGVARCHAR
+            SQL_BLOB to SQL_LONGVARBINARY
+            SQL_DBCLOB to SQL_WLONGVARCHAR
+            """
             import pypyodbc
             try :
                 self._con = pypyodbc.connect(self._connection_string)
@@ -271,8 +280,7 @@ class IdaDataBase(object):
                     if verbose: print("Found it at %s! Trying to connect..."%jarpath)
                        
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
-
-
+           
             self._connection_string = [jdbc_url, uid, pwd]
             
             driver_not_found = ("HELP: The JDBC driver for IBM dashDB/DB2 could "+
@@ -291,6 +299,12 @@ class IdaDataBase(object):
              
             if verbose: 
                 print("Connection successful!")
+                
+            #add DB2GSE to the database FUNCTION PATH            
+            #query = "SET CURRENT FUNCTION PATH = CURRENT FUNCTION PATH, db2gse"
+            #self.ida_query(query)
+            #not anymore, reported problems with ODBC
+            #better mention DB2GSE explicitly when accessing its functions
                 
         # Setting Autocommit and verbose environment variables
         set_autocommit(autocommit)
@@ -864,7 +878,7 @@ class IdaDataBase(object):
         if primary_key:
             idadf.indexer = primary_key
         return idadf
-
+        
     ###########################################################################
     #### Delete DataBase objects
     ###########################################################################

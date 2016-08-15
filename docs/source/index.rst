@@ -3,6 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
+.. Ibmdbpy documentation master file, created by
+   sphinx-quickstart on Tue Jul 14 13:18:19 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
 ibmdbpy
 *******
 
@@ -43,7 +49,7 @@ Next, we can create an IDA data frame that points to the table we just uploaded.
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 
-Note that to create an IDA data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection. 
+Note that to create an IDA data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
 
 Now let us compute the correlation matrix:
 
@@ -51,12 +57,12 @@ Now let us compute the correlation matrix:
 
 In the background, ibmdbpy looks for numerical columns in the table and builds an SQL request that returns the correlation between each pair of columns. Here is the SQL request that was executed for this example::
 
-   SELECT CORRELATION("sepal_length","sepal_width"), 
-   CORRELATION("sepal_length","petal_length"), 
-   CORRELATION("sepal_length","petal_width"), 
-   CORRELATION("sepal_width","petal_length"), 
-   CORRELATION("sepal_width","petal_width"), 
-   CORRELATION("petal_length","petal_width") 
+   SELECT CORRELATION("sepal_length","sepal_width"),
+   CORRELATION("sepal_length","petal_length"),
+   CORRELATION("sepal_length","petal_width"),
+   CORRELATION("sepal_width","petal_length"),
+   CORRELATION("sepal_width","petal_width"),
+   CORRELATION("petal_length","petal_width")
    FROM IRIS
 
 The result fetched by ibmdbpy is a tuple containing all values of the matrix. This tuple is formatted back into a Pandas.DataFrame and then returned::
@@ -68,6 +74,17 @@ The result fetched by ibmdbpy is a tuple containing all values of the matrix. Th
    petal_width       0.817941    -0.366126      0.962865     1.000000
 
 Et voilà !
+
+Geospatial Functions
+====================
+
+The ibmdbpy package now supports geospatial functions! It provides a Python interface for data manipulation and access to in-database algorithms in IBM dashDB and IBM DB2 Spatial Extender.
+It accelerates Python analytics by seamlessly pushing spatial operations written in Python into the underlying database for execution,
+thereby benefitting from in-database performance-enhancing features, such as columnar storage and parallel processing.
+
+The ibmdbpy spatial functions can be used by geospatial analysts with very little additional knowledge, because it copies the well-known interface of the geopandas library for data manipulation.
+
+These functions are compatible with Python releases 2.7 up to 3.4 and can be connected to dashDB or DB2 instances via ODBC or JDBC.
 
 Table of Contents
 =================
@@ -82,6 +99,7 @@ Table of Contents
    base.rst
    frame.rst
    ml.rst
+   geospatial.rst
    utils.rst
    legal.rst
 
@@ -89,16 +107,18 @@ Project Roadmap
 ===============
 
 * Full test coverage (a basic coverage is already provided)
-* Add more functions and improve what already exists. 
-* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...) 
+* Add more functions and improve what already exists.
+* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...)
+* Add more wrappers for spatial functions
 * Feature selection extension
-* Add Spark as computational engine 
+* Add Spark as computational engine
+
 
 Contributors
 ============
 
-The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché, at IBM Deutschland Reasearch & Development. 
-More contributors might participate in the future. 
+The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché and the geospatial features were added in March 2016,
+and contributed by Rafael Rodriguez Morales and Avipsa Roy at IBM Deutschland Reasearch & Development.
 
 Indexes and tables
 ==================

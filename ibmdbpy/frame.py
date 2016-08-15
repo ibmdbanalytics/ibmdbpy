@@ -463,37 +463,55 @@ class IdaDataFrame(object):
             if not (isinstance(item,six.string_types)|isinstance(item, list)):
                 raise KeyError(item)
             if isinstance(item, six.string_types):
+                # Case when only one column was selected
                 if item not in self.columns:
                     raise KeyError(item)
                 newidaseries = self._clone_as_serie(item)
 
+                # Form the new columndict
                 for column in list(newidaseries.internal_state.columndict):
                     if column != item:
                         del newidaseries.internal_state.columndict[column]
-                newidaseries.internal_state.update()
-                newidaseries._reset_attributes(["columns", "shape", "dtypes"])
+                newColumndict = newidaseries.internal_state.columndict
                 
-                # Performance improvement 
-                newidaseries.dtypes = self.dtypes.loc[[item]]
+                # Erase attributes
+                newidaseries._reset_attributes(["columns", "shape", "dtypes"])
+                # Set columns and columndict attributes
+                newidaseries.internal_state.columns = ["\"%s\""%col for col in item]
+                newidaseries.internal_state.columndict = newColumndict
+                # Update, i.e. appends an entry to internal_state._cumulative
+                newidaseries.internal_state.update()
+                
+                # Performance improvement
+                # avoid, caused wrong dtypes for the result
+                # newidaseries.dtypes = self.dtypes.loc[[item]]
                 
                 return newidaseries
 
+            # Case of multiple columns
             not_a_column = [x for x in item if x not in self.columns]
             if not_a_column:
                 raise KeyError("%s"%not_a_column)
 
             newidadf = self._clone()
-            newidadf.internal_state.columns = ["\"%s\""%col for col in item]
-
-            for column in list(newidadf.internal_state.columndict):
-                if column not in item:
-                    del newidadf.internal_state.columndict[column]
-
-            newidadf.internal_state.update()
+            
+            # Form the new columndict
+            newColumndict = OrderedDict()            
+            for col in item:
+                # Column name as key, its definition as value
+                newColumndict[col] = self.internal_state.columndict[col]
+                
+            # Erase attributes
             newidadf._reset_attributes(["columns", "shape", "dtypes"])
+            # Set columns and columndict attributes
+            newidadf.internal_state.columns = ["\"%s\""%col for col in item]
+            newidadf.internal_state.columndict = newColumndict
+            # Update, i.e. appends an entry to internal_state._cumulative
+            newidadf.internal_state.update()
             
             # Performance improvement 
-            newidadf.dtypes = self.dtypes.loc[item]
+            # avoid, caused wrong dtypes for the result
+            # newidadf.dtypes = self.dtypes.loc[item]
             
         return newidadf
 
@@ -518,9 +536,17 @@ class IdaDataFrame(object):
         if len(key) != len(item.columns):
                 raise ValueError("Wrong number of items passed %s, placement implies %s"%(len(item.columns),len(key)))
 
+        #form the new columndict
         for newname, oldname in zip(key, item.columns):
             self.internal_state.columndict[newname] = item.internal_state.columndict[oldname]
+        newColumndict = self.internal_state.columndict
 
+        #erase attributes
+        self._reset_attributes(["columns", "shape", "dtypes"])
+        #set columns and columndict attributes
+        self.internal_state.columndict = newColumndict
+        self.internal_state.columns = ["\"%s\""%col for col in newColumndict.keys()]
+        #update, i.e. appends an entry to internal_state._cumulative
         self.internal_state.update()
         
         # Flush the "unique" cache 
@@ -528,8 +554,6 @@ class IdaDataFrame(object):
             if column in self._unique:
                 del self._unique[column]
                 
-        self._reset_attributes(["columns", "shape", "dtypes"])
-
     def __delitem__(self, item):
         """
         Enable non-destructive deletion of columns using a Pandas style syntax. 
@@ -997,20 +1021,16 @@ class IdaDataFrame(object):
     def head(self, nrow=5):
         """
         Print the n first rows of the instance, n is set to 5 by default.
-
         Parameters
         ----------
         nrow : int > 0
             Number of rows to be included in the result.
-
         Returns
         -------
         DataFrame or Series
             The index of the corresponding row number and the columns are all 
             columns of self. If the IdaDataFrame has only one column, it 
             returns a Series.
-
-
         Examples
         --------
         >>> ida_iris.head()
@@ -2038,7 +2058,7 @@ class IdaDataFrame(object):
         elif self._idadb._con_type == 'jdbc':
             cursor = self._idadb._con.cursor()
             cursor.execute("SELECT * FROM %s"%tablename)
-            columnlist = [column[0] for column in cursor.description]
+            columnlist = [column[0] for column in cursor.description]           
             return Index(columnlist)
 
     def _get_all_columns_in_table(self):
@@ -2087,8 +2107,18 @@ class IdaDataFrame(object):
         # We need to separate it to keep only the TABLENAME for this query.
         if '.' in name :
             name = name.split('.')[-1]
-
-        data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
+        
+        if name.find("TEMP_VIEW_") == 0:
+            #When the column names are going to be retrieved from a temporary
+            #view that was created with the definition of the current state of
+            #the IdaDataFrame, the schema name cannot be assumed as the same of
+            #the IdaDataFrame. Also mind that the name of the temporary view
+            #is thought to be random enough to avoid collisions
+            data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
+                               "WHERE TABNAME=\'%s\' "+
+                               "ORDER BY COLNO")%(name))
+        else:
+           data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
                                "WHERE TABNAME=\'%s\' AND TABSCHEMA=\'%s\' "+
                                "ORDER BY COLNO")%(name, self.schema))
 
@@ -2274,4 +2304,3 @@ class IdaDataFrame(object):
         check_numeric_columns(self)
         if isinstance(other, ibmdbpy.IdaSeries)|isinstance(other, IdaDataFrame):
             check_numeric_columns(other)
-

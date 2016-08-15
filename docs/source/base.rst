@@ -8,7 +8,7 @@ Connect to dashDB/DB2
 
 .. currentmodule:: ibmdbpy.base
 
-.. autoclass:: IdaDataBase 
+.. autoclass:: IdaDataBase
 
    .. automethod:: __init__
 
