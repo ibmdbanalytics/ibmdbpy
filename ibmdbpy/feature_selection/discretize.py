@@ -17,6 +17,41 @@ def discretize(idadf, columns = None, disc= "em", target = None, bins = None, ou
     """
     Discretize a set of numerical columns from an IdaDataFrame and returns an 
     IdaDataFrame open on the discretized version of the dataset. 
+    
+    Parameters
+    ----------
+    idadf : IdaDataFrame
+    
+    columns : str or list of str, optional
+        A column or list of columns to be discretized
+    
+    disc : "ef", "em", "ew", "ewn" default: "em"
+        Discretization method to be used
+        
+        - ef: Discretization bins of equal frequency 
+        
+        - em: Discretization bins of minimal entropy 
+        
+        - ew: Discretization bins of equal width
+        
+        - ewn: Discretization bins of equal width with human-friendly limits 
+    
+    target : str
+        Target column again which the discretization will be done. Relevant
+        only for "em" discretization. 
+        
+    bins: int, optional
+        Number of bins. Not relevant for "em" discretization. 
+        
+    outtable: str, optional
+        The name of the output table where the assigned clusters are stored.
+        If this parameter is not specified, it is generated automatically.
+        If the parameter corresponds to an existing table in the database,
+        it is replaced.
+    
+    clear_existing: bool, default: False
+        If set to True, a table will be replaced when a table with the same 
+        name already exists  in the database.
     """
     if columns is None:
         columns = idadf._get_numerical_columns()
@@ -68,6 +103,10 @@ def discretize(idadf, columns = None, disc= "em", target = None, bins = None, ou
     
     
 def _check(idadf, columns, disc, target, bins, outtable):
+    """
+    Helper function to handle basic checks for 
+    ibmdbpy.feature_selection.discretize
+    """
     if outtable is not None:
         ibmdbpy.utils.check_tablename(outtable)
     if bins is not None:

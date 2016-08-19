@@ -29,6 +29,6 @@ from .symmetric_uncertainty import su
 from .gini import gini, gini_pairwise
 from .discretize import discretize
 
-from .chisquare import chisquare
+from .chisquared import chisquared
 from .tstats import ttest 
 

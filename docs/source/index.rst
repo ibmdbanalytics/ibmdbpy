@@ -86,6 +86,11 @@ The ibmdbpy spatial functions can be used by geospatial analysts with very littl
 
 These functions are compatible with Python releases 2.7 up to 3.4 and can be connected to dashDB or DB2 instances via ODBC or JDBC.
 
+Feature Selection
+=================
+
+Ibmdbpy provides a range of functions to support efficient in-database feature selection, e.g. to estimate the relevance of attributes with respect to a particular target. Functions and documentation can be found in the submodule ``ibmdbpy.feature_selection``. 
+
 Table of Contents
 =================
 
@@ -100,6 +105,7 @@ Table of Contents
    frame.rst
    ml.rst
    geospatial.rst
+   feature_selection.rst
    utils.rst
    legal.rst
 

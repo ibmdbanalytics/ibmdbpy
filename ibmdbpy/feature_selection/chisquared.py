@@ -18,9 +18,9 @@ from ibmdbpy.feature_selection.private import _check_input
 
 @idadf_state
 @timed
-def chisquare(idadf, target = None, features = None, ignore_indexer=True):
+def chisquared(idadf, target = None, features = None, ignore_indexer=True):
     """
-    Compute the chisquare statistics coefficients between a set of features 
+    Compute the Chi-Squared statistics coefficients between a set of features 
     and a set of target in an IdaDataFrame. 
     
     Parameters
@@ -47,7 +47,7 @@ def chisquare(idadf, target = None, features = None, ignore_indexer=True):
     Input columns as target and features should be categorical, otherwise 
     this measure does not make much sense. 
     
-    Chisquare as defined in 
+    Chi-squared as defined in 
     A Comparative Study on Feature Selection and Classification Methods Using 
     Gene Expression Profiles and Proteomic Patterns. (GIW02F006)
     
@@ -57,7 +57,7 @@ def chisquare(idadf, target = None, features = None, ignore_indexer=True):
     Examples
     --------
     >>> idadf = IdaDataFrame(idadb, "IRIS")
-    >>> chisquare(idadf)
+    >>> chisquared(idadf)
     """
     # Check input
     if target is None:
