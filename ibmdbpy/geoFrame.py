@@ -506,6 +506,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         if column2_for_db2gse[0] == '\"' and column2_for_db2gse[-1] == '\"':
             column2_for_db2gse = column2_for_db2gse[1:-1]
 
+
         arguments_for_db2gse_function = []
         arguments_for_db2gse_function.append('IDA1.' + column1_for_db2gse)
         arguments_for_db2gse_function.append('IDA2.' + column1_for_db2gse)
@@ -518,15 +519,13 @@ class IdaGeoDataFrame(IdaDataFrame):
         if hasattr(ida1, '_indexer') and ida1._indexer is not None:
             select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' % (ida1.indexer))
         else:
-            raise IdaGeoDataFrameError(ida1 + "has no indexer defined." +
-                                       "Please assign index column with set_indexer and retry.")
-            # select_columns.append('NULL AS \"INDEXERIDA1\"')
+            message = (ida1 + "has no indexer defined. Please assign index column with set_indexer and retry.")
+            raise IdaGeoDataFrameError(message)
         if hasattr(ida2, '_indexer') and ida2._indexer is not None:
             select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' % (ida1.indexer))
         else:
-            raise IdaGeoDataFrameError(ida2 + "has no indexer defined." +
-                                       "Please assign index column with set_indexer and retry.")
-            # select_columns.append('NULL AS \"INDEXERIDA2\"')
+            message = (ida2 + "has no indexer defined. Please assign index column with set_indexer and retry.")
+            raise IdaGeoDataFrameError(message)
         result_column = (
             db2gse_function +
             '(' +
