@@ -15,13 +15,6 @@ in-database analytics package called __‘ibmdbpy’__ and visualizing the resul
 of a few open source python packages – __‘folium’__ and __‘matplotlib’__.
 
 
-
-```python
-import sys
-sys.path.extend(['C:\\Users\\IBM_ADMIN\\Anaconda2\\Lib\\site-packages\\ibmdbpy'])
-```
-
-
 ```python
 # Import packages needed for analysis
 import ibmdbpy
@@ -61,13 +54,7 @@ robberies_2015.shape
     Wall time: 233 ms
     Wall time: 2min 26s
 
-
-
-
-
     (16886, 3)
-
-
 
 Find the number of robberies and area of each borough using shapely operations within and area with Geopandas
 
