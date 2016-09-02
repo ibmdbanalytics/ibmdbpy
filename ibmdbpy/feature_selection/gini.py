@@ -9,6 +9,7 @@ Created on Tue Dec  1 12:29:30 2015
 from collections import OrderedDict
 
 import pandas as pd
+import numpy as np
 import six
 
 from ibmdbpy.internals import idadf_state
@@ -52,11 +53,6 @@ def gini_pairwise(idadf, target=None, features=None, ignore_indexer=True):
     >>> gini_pairwise(idadf)
     """
     # Check input
-    if target is None:
-        if features is None:
-            target = list(idadf.columns) 
-        else:
-            target = features
     target, features = _check_input(idadf, target, features, ignore_indexer)
         
     gini_dict = OrderedDict()
@@ -69,31 +65,36 @@ def gini_pairwise(idadf, target=None, features=None, ignore_indexer=True):
         for feature in features_notarget:
             if t not in gini_dict:
                 gini_dict[t] = OrderedDict()
-            if feature not in gini_dict:
-                gini_dict[feature] = OrderedDict()
             
             query = ("SELECT SUM((POWER(c,2) - gini)/c)/%s FROM "+ 
             "(SELECT SUM(POWER(count,2)) as gini, SUM(count) as c FROM "+
             "(SELECT CAST(COUNT(*) AS FLOAT) AS count, \"%s\" FROM %s GROUP BY \"%s\",\"%s\") "+
             "GROUP BY \"%s\")")
             query0 = query%(length, feature, idadf.name, t, feature, feature)
-            query1 = query%(length, t, idadf.name, feature, t, t)
-            gini_dict[feature][t] = idadf.ida_scalar_query(query1)
             gini_dict[t][feature] = idadf.ida_scalar_query(query0)
-               
-    result = pd.DataFrame(gini_dict).fillna(0)
+            
+    result = pd.DataFrame(gini_dict).fillna(np.nan)
         
+    if len(result.columns) > 1:
+        order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
+        result = result.reindex(order)
+       
+    result = result.dropna(axis=1, how="all")
+    
     if len(result.columns) == 1:
         if len(result) == 1:
             result = result.iloc[0,0]
         else:
             result = result[result.columns[0]].copy()
-            result.sort(ascending = False) 
+            result.sort(ascending = True) 
     else:
-        order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
-        result = result.reindex(order)
-   
+        result = result.fillna(0)
+    
     return result
+               
+    
+        
+    
     
     
 @idadf_state

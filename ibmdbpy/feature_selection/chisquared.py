@@ -15,7 +15,6 @@ import pandas as pd
 
 from ibmdbpy.feature_selection.private import _check_input
 
-
 @idadf_state
 @timed
 def chisquared(idadf, target = None, features = None, ignore_indexer=True):
@@ -60,12 +59,6 @@ def chisquared(idadf, target = None, features = None, ignore_indexer=True):
     >>> chisquared(idadf)
     """
     # Check input
-    if target is None:
-        if features is None:
-            target = list(idadf.columns) 
-        else:
-            target = features
-            
     target, features = _check_input(idadf, target, features, ignore_indexer)
     count_dict = dict()
     length = len(idadf)
@@ -73,62 +66,68 @@ def chisquared(idadf, target = None, features = None, ignore_indexer=True):
     values = OrderedDict()
          
     for t in target:   
-        values[t] = OrderedDict() 
+        if t not in values:
+            values[t] = OrderedDict() 
         features_notarget = [x for x in features if (x != t)]
         
         ### Compute
         for feature in features_notarget:
-            ############
-            target = t
-            feature = feature
-        
-            if target not in count_dict:
-                count = idadf.count_groupby(target)
-                count_serie = count["count"]
-                count_serie.index = count[target]
-                count_dict[target] = count_serie
-        
-            C = dict(count_dict[target])
+            if feature not in values:
+                values[feature] = OrderedDict()
+            if t not in values[feature]:
+                if t not in count_dict:
+                    count = idadf.count_groupby(t)
+                    count_serie = count["count"]
+                    count_serie.index = count[t]
+                    count_dict[t] = count_serie
             
-            if feature not in count_dict:
-                count = idadf.count_groupby(feature)
-                count_serie = count["count"]
-                count_serie.index = count[feature]
-                count_dict[feature] = count_serie
+                C = dict(count_dict[t])
                 
-            R = dict(count_dict[feature])
-            
-            if (feature, target) not in count_dict:
-                count_dict[(feature, target)] = idadf.count_groupby([feature , target])
-            
-            count = count_dict[(feature, target)]
-            
-            chi = 0            
-            for target_class in C.keys():
-                count_target = count[count[target] == target_class][[feature, "count"]]
-                A_target = count_target['count']
-                A_target.index = count_target[feature]
+                if feature not in count_dict:
+                    count = idadf.count_groupby(feature)
+                    count_serie = count["count"]
+                    count_serie.index = count[feature]
+                    count_dict[feature] = count_serie
+                    
+                R = dict(count_dict[feature])
                 
-                for feature_class in A_target.index:
-                    a = A_target[feature_class]
-                    e = R[feature_class] * C[target_class] / length
-                    chi += ((a - e)**2)/e
-            
-            values[t][feature] = chi
+                if (feature, t) not in count_dict:
+                    count_dict[(feature, t)] = idadf.count_groupby([feature , t])
+                
+                count = count_dict[(feature, t)]
+                
+                chi = 0            
+                for target_class in C.keys():
+                    count_target = count[count[t] == target_class][[feature, "count"]]
+                    A_target = count_target['count']
+                    A_target.index = count_target[feature]
+                    
+                    for feature_class in A_target.index:
+                        a = A_target[feature_class]
+                        e = R[feature_class] * C[target_class] / length
+                        chi += ((a - e)**2)/e
+                
+                values[t][feature] = chi   # chisquared is symmetric 
+                if feature in target:
+                    values[feature][t] = chi
         
-
     result = pd.DataFrame(values).fillna(np.nan)
+    result = result.dropna(axis=1, how="all")
         
+    if len(result.columns) > 1:
+        order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
+        result = result.reindex(order)
+    
     if len(result.columns) == 1:
         if len(result) == 1:
             result = result.iloc[0,0]
         else:
             result = result[result.columns[0]].copy()
             result.sort(ascending = False) 
-    else:
-        order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
-        result = result.reindex(order)
+        
 
+    
+    
     return result
     
     

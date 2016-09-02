@@ -68,7 +68,7 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
         if feature not in numerical_columns:
             raise TypeError("Correlation-based measure not available for non-numerical column %s"%feature)
                     
-    if target is None:
+    if target == features:
         return idadf.corr(features = features, ignore_indexer=ignore_indexer)
     else:
         for t in target:
@@ -94,7 +94,7 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
             
                     name = idadf.internal_state.current_state
                     data += idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
-
+    
             for i, feature in enumerate(features_notarget):
                 value_dict[t][feature] = data[i]
         
@@ -152,16 +152,29 @@ def spearman(idadf, target=None, features = None, ignore_indexer=True):
     >>> spearman(idadf)
     """
     numerical_columns = idadf._get_numerical_columns()
+    if features is None:
+        features = numerical_columns
+        
+    target, features = _check_input(idadf, target, features, ignore_indexer)
+    
+    for feature in features:
+        if feature not in numerical_columns:
+            raise TypeError("Correlation-based measure not available for non-numerical column %s"%feature)
     
     if ignore_indexer is True:
         if idadf.indexer:
             if idadf.indexer in numerical_columns:
-                numerical_columns.remove(idadf.indexer)
+                features.remove(idadf.indexer)
     
     if features is None:
         features = list(idadf.columns)
     
     numerical_features = [x for x in features if x in numerical_columns]
+    numerical_targets = [x for x in target if x in numerical_columns]
+    
+    numerical_features = list(set(numerical_features) | set(numerical_targets))
+    
+    
     agg_list = ["CAST(RANK() OVER (ORDER BY \"%s\") AS INTEGER) AS \"%s\""%(x, x) for x in numerical_features]
     agg_string = ', '.join(agg_list)
     

@@ -13,7 +13,6 @@ import pandas as pd
 import six
 
 @idadf_state
-@timed
 def entropy(idadf, target=None, mode="normal", execute=True, ignore_indexer=True):
     """
     Compute the entropy for a set of features in an IdaDataFrame. 

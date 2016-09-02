@@ -54,9 +54,10 @@ class Test_DataBaseExploration(object):
         assert(idadb.exists_table_or_view("NOT_EXISTING_DATA_FRAME_130530496_4860385960") == 0)
         assert(idadb.exists_table_or_view("NOT_EXISTING_130530496_4860385960") == 0)
 
-    def test_idadb_exists_table_or_view_error(self, idadb):
-        with pytest.raises(TypeError):
-            idadb.exists_table_or_view("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE")
+    #def test_idadb_exists_table_or_view_error(self, idadb):
+    #    with pytest.raises(TypeError):
+    #        idadb.exists_table_or_view("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE")
+    # Note: We cannot assume that "ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE" exists and is of type "A"
 
     def test_idadb_exists_table_positive(self, idadb, idadf):
         assert(idadb.exists_table(idadf.name) == 1)
@@ -101,8 +102,8 @@ class Test_DataBaseExploration(object):
         assert(idadb.is_table_or_view(idadf.name) == 1)
         assert(idadb.is_table_or_view(idaview.name) == 1)
 
-    def test_idadb_is_table_or_view_negative(self, idadb):
-        assert(idadb.is_table_or_view("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
+    #def test_idadb_is_table_or_view_negative(self, idadb):
+    #    assert(idadb.is_table_or_view("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
 
     def test_idadb_is_table_or_view_error(self, idadb):
         with pytest.raises(ValueError):
@@ -140,7 +141,7 @@ class Test_DataBaseExploration(object):
     def test_idadb_is_model_negative(self, idadb, idadf, idaview):
         assert(idadb.is_model(idadf.name) == 0)
         assert(idadb.is_model(idaview.name) == 0)
-        assert(idadb.is_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
+    #    assert(idadb.is_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
 
     def test_idadb_is_model_error(self, idadb):
         with pytest.raises(ValueError):

@@ -41,9 +41,9 @@ def ttest(idadf, target=None, features=None, ignore_indexer=True):
     
     Raises
     ------
-    ValueError
+    TypeError
         If the features argument or the data set does not contains any 
-        numerical features. Raise ValueError. 
+        numerical features. Raise TypeError. 
         
     Notes
     -----
@@ -63,11 +63,6 @@ def ttest(idadf, target=None, features=None, ignore_indexer=True):
     >>> ttest(idadf,"CLASS")
     """
     # Check input
-    if target is None:
-        if features is None:
-            target = list(idadf.columns) 
-        else:
-            target = features
     target, features = _check_input(idadf, target, features, ignore_indexer)
     ttest_dict = OrderedDict()
     length = len(idadf)
@@ -81,7 +76,7 @@ def ttest(idadf, target=None, features=None, ignore_indexer=True):
     # Filter out non numerical columns
     features = [feature for feature in features if feature in numerical_columns]
     if not features:
-        raise ValueError("No numerical features.")
+        raise TypeError("No numerical features.")
         
     #mean = idadf[features].mean() # This is broken
     mean = idadf.mean()

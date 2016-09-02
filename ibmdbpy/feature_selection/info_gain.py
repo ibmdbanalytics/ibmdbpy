@@ -55,11 +55,6 @@ def info_gain(idadf, target = None, features = None, ignore_indexer=True):
     >>> info_gain(idadf)
     """
     # Check input
-    if target is None:
-        if features is None:
-            target = list(idadf.columns) 
-        else:
-            target = features
     target, features = _check_input(idadf, target, features, ignore_indexer)
     
     entropy_dict = OrderedDict()
@@ -68,21 +63,32 @@ def info_gain(idadf, target = None, features = None, ignore_indexer=True):
     
     values = OrderedDict()
     
-     
-         
     for t in target:
-        values[t] = OrderedDict() 
+        if t not in values:
+            values[t] = OrderedDict() 
         features_notarget = [x for x in features if (x != t)]
         
         for feature in features_notarget:
-            if t not in entropy_dict:
-                entropy_dict[t] = entropy(idadf, t, mode = "raw")
-            if feature not in entropy_dict:
-                entropy_dict[feature] = entropy(idadf, feature, mode = "raw")
-            join_entropy = entropy(idadf, [t] + [feature], mode = "raw")            
-            values[t][feature] = ((entropy_dict[t] + entropy_dict[feature] - join_entropy)/length + loglength)/log(2)
+            if feature not in values:
+                values[feature] = OrderedDict()
+            if t not in values[feature]:
+                if t not in entropy_dict:
+                    entropy_dict[t] = entropy(idadf, t, mode = "raw")
+                if feature not in entropy_dict:
+                    entropy_dict[feature] = entropy(idadf, feature, mode = "raw")
+                join_entropy = entropy(idadf, [t] + [feature], mode = "raw")            
+                
+                value = ((entropy_dict[t] + entropy_dict[feature] - join_entropy)/length + loglength)/log(2)
+                values[t][feature] = value
+                if feature in target:
+                    values[feature][t] = value
     
     result = pd.DataFrame(values).fillna(np.nan)
+    result = result.dropna(axis=1, how="all")
+    
+    if len(result.columns) > 1:
+        order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
+        result = result.reindex(order)
     
     if len(result.columns) == 1:
         if len(result) == 1:
@@ -90,9 +96,6 @@ def info_gain(idadf, target = None, features = None, ignore_indexer=True):
         else:
             result = result[result.columns[0]].copy()
             result.sort(ascending = False) 
-    else:
-        order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
-        result = result.reindex(order)
 
     return result        
 

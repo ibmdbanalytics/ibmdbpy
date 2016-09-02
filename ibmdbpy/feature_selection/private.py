@@ -24,12 +24,15 @@ def _check_input(idadf, target, features, ignore_indexer=True):
         If True, remove the indexer from the features set, as long as an
         indexer is defined in idadf
     """
+    #import pdb ; pdb.set_trace()
     if target is not None:
         if isinstance(target, six.string_types):
             if target not in idadf.columns:
                 raise ValueError("Unknown target column %s"%target)
             target = [target]
         else:
+            if hasattr(target, '__iter__'):
+                target = list(target)
             for x in target:
                 if x not in idadf.columns:
                     raise ValueError("Unknown target column %s"%x)
@@ -40,6 +43,8 @@ def _check_input(idadf, target, features, ignore_indexer=True):
                 raise ValueError("Unknown feature column %s"%features)
             features = [features]
         else:
+            if hasattr(features, '__iter__'):
+                features = list(features)
             for x in features:
                 if x not in idadf.columns:
                     raise ValueError("Unknown feature column %s"%x)
@@ -64,8 +69,15 @@ def _check_input(idadf, target, features, ignore_indexer=True):
                     features.remove(idadf.indexer)
     
     # Catch the case where users ask for the correlation between the two same columns
+    #import pdb ; pdb.set_trace()
     if target == features:
         if len(target) == 1:
             raise ValueError("The correlation value of two same columns is always maximal")
+            
+    if target is None:
+        if features is None:
+            target = list(idadf.columns) 
+        else:
+            target = features
             
     return target, features
