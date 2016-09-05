@@ -162,20 +162,7 @@ from IPython.display import IFrame
 IFrame("https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/", width=950, height=450)
 ```
 
-
-
-
-
-        <iframe
-            width="950"
-            height="450"
-            src="https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
-
-
-
+![png](dashDB.png)
 
 The NYC crime data which is already available on dashDB is retrieved as an IdaDataFrame which is
 similar to a pandas data frame. The crime data is already geocoded and stored as ST_Point in dashDB.
