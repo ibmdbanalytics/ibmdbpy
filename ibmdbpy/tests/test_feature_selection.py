@@ -22,10 +22,6 @@ standard_library.install_aliases()
 
 import pandas
 import pytest
-#import six
-
-#import ibmdbpy
-#from ibmdbpy import IdaDataBase
 
 from ibmdbpy.feature_selection import pearson 
 from ibmdbpy.feature_selection import spearman
@@ -34,11 +30,8 @@ from ibmdbpy.feature_selection import chisquared
 from ibmdbpy.feature_selection import gini, gini_pairwise
 from ibmdbpy.feature_selection import entropy
 from ibmdbpy.feature_selection import info_gain, gain_ratio, su
-# ...
 
 # Test symmetry
-
-
 
 class Test_PearsonCorrelation(object):
 

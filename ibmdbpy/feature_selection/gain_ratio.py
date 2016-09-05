@@ -92,9 +92,10 @@ def gain_ratio(idadf, target = None, features = None, symmetry=True, ignore_inde
                         values[feature][t] = gain_ratio
                 else:
                     gain_ratio_1 = (info_gain + corrector)/(entropy_dict[t] + corrector)
-                    gain_ratio_2 = (info_gain + corrector)/(entropy_dict[feature] + corrector)
                     values[t][feature] = gain_ratio_1
-                    values[feature][t] = gain_ratio_2
+                    if feature in target:
+                        gain_ratio_2 = (info_gain + corrector)/(entropy_dict[feature] + corrector)
+                        values[feature][t] = gain_ratio_2
              
     ### Fill the matrix
     result = pd.DataFrame(values).fillna(np.nan)
