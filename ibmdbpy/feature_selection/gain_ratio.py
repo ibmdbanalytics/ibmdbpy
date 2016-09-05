@@ -63,7 +63,8 @@ def gain_ratio(idadf, target = None, features = None, symmetry=True, ignore_inde
     
     entropy_dict = dict()
     length = len(idadf)
-    values = OrderedDict() 
+    values = OrderedDict()
+    corrector = length*np.log(length)
         
     for t in target:
         if t not in values:
@@ -72,28 +73,9 @@ def gain_ratio(idadf, target = None, features = None, symmetry=True, ignore_inde
         
         for feature in features_notarget:
             if feature not in values:
-                values[feature] = OrderedDict()         
+                values[feature] = OrderedDict()      
                 
-            if symmetry:
-                if t not in values[feature]:    # i.e. it was not already computed 
-                    ########################  can be refactored 
-                    if t not in entropy_dict:
-                        entropy_dict[t] = entropy(idadf, t, mode = "raw")
-                    if feature not in entropy_dict:
-                        entropy_dict[feature] = entropy(idadf, feature, mode = "raw")
-                        
-                    join_entropy = entropy(idadf,  [t] + [feature], mode = "raw")     
-                    disjoin_entropy = entropy_dict[t] + entropy_dict[feature]
-                    info_gain = (disjoin_entropy - join_entropy)
-                    corrector = length*np.log(length)
-                    ########################
-                
-                    gain_ratio = (info_gain + corrector)/(disjoin_entropy + 2*corrector) # 2* because symmetric
-                    values[t][feature] = gain_ratio
-                    if feature in target:
-                        values[feature][t] = gain_ratio
-            else:
-                ########################
+            if t not in values[feature]:    # i.e. it was not already computed 
                 if t not in entropy_dict:
                     entropy_dict[t] = entropy(idadf, t, mode = "raw")
                 if feature not in entropy_dict:
@@ -102,11 +84,17 @@ def gain_ratio(idadf, target = None, features = None, symmetry=True, ignore_inde
                 join_entropy = entropy(idadf,  [t] + [feature], mode = "raw")     
                 disjoin_entropy = entropy_dict[t] + entropy_dict[feature]
                 info_gain = (disjoin_entropy - join_entropy)
-                corrector = length*np.log(length)
-                ########################
-
-                gain_ratio = (info_gain + corrector)/(entropy_dict[t] + corrector)
-                values[t][feature] = gain_ratio
+            
+                if symmetry:
+                    gain_ratio = (info_gain + corrector)/(disjoin_entropy + 2*corrector) # 2* because symmetric
+                    values[t][feature] = gain_ratio
+                    if feature in target:
+                        values[feature][t] = gain_ratio
+                else:
+                    gain_ratio_1 = (info_gain + corrector)/(entropy_dict[t] + corrector)
+                    gain_ratio_2 = (info_gain + corrector)/(entropy_dict[feature] + corrector)
+                    values[t][feature] = gain_ratio_1
+                    values[feature][t] = gain_ratio_2
              
     ### Fill the matrix
     result = pd.DataFrame(values).fillna(np.nan)
