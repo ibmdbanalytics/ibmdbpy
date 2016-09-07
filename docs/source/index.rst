@@ -148,7 +148,7 @@ Contributors
 ============
 
 The ibmdbpy project was initiated in April 2015 at IBM Deutschland Reasearch & Development, Böblingen. 
-Herea is the list of the persons who contributed to the project, in the chronological order of their contribution:
+Here is the list of the persons who contributed to the project, in the chronological order of their contribution:
 
 - Edouard Fouché (core)
 - Michael Wurst (core)
