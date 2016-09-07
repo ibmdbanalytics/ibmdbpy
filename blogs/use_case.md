@@ -1,158 +1,84 @@
 
-# Geospatial analyses of crime hotspots with IBM dashDB using iPython notebooks
-
-The importance of crime data analysis has played an important role in public safety.
-The New York city police department has gathered a huge amount of data over a period
-of 10 years and more and categorized the7major felonies committed in the city of New York.
-We can analyze this huge dataset with efficient IBM enabled tools and services to gain
-meaningful insights from the data. The major crime hotspots can be found with the help of
-in-database analytics package for IBM dashDB developed in Python and further spatio-temporal
-analyses can be performed on the data using open source Python packages like __‘geopandas’__
-which depends on ‘shapely’ and 'pandas' for converting geospatial data into a dataframe like
-structure for easier analyses and visualisation.
-Here we describe a use case for spatio-temporal analyses of crime data using dashDB,
-in-database analytics package called __‘ibmdbpy’__ and visualizing the results with the help
-of a few open source python packages – __‘folium’__ and __‘matplotlib’__.
+# Exploring in-database analytics with IBM dashDB and iPython notebooks using ibmdbpy
 
 
+Traditional approaches to data analysis require data to be moved out of the database into a separate
+analytics environment for processing, and then back to the database, which is an expensive process.
+Doing the analysis in the database, where the data resides, eliminates the costs, time and security
+issues associated with the old approach by doing the processing in the data warehouse itself.
 
-```python
-import sys
-sys.path.extend(['C:\\Users\\IBM_ADMIN\\Anaconda2\\Lib\\site-packages\\ibmdbpy'])
-```
+We have used a Python package ibmdbpy to enable the process of in-database analytics with dashDB
+and use it in pandas like syntax from Interactive Python notebooks.
+The ibmdbpy package translates Pandas-like syntax into SQL and uses a middleware API
+(pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution.
+These SQL statements are translated to database queries at runtime as SQL pushdowns
+and the result is retrieved as a memory instance in the form of dataframes, which are
+easy to manipulate for further exploratory analysis. It reduces execution time for reading
+data and running complex queries on the data compared to fetching the entire dataset into
+memory, which might lead to much network overload and crashing of the notebook.
+
+The architecture of ibmdbpy can be very precisely explained as below:
+
+![png](ibmdbpy.png)
+
+Here we describe a simple example on how to use ibmdbpy with dashDB from notebooks especially with geospatial data.
+
+1. Create a [Bluemix account.](http://www.ibm.com/developerworks/cloud/library/cl-bluemix-fundamentals-start-your-free-trial/)
+
+2. Launch a new Jupyter notebook from the [apache spark service.](https://console.ng.bluemix.net/docs/services/AnalyticsforApacheSpark/index.html)
+
+3. Import the package ibmdbpy ( If not installed, install it from pypi using this url : )
+
+4. The first step is to setup a connection with the data source, which is dashDB in our case.
+   It can be done in two ways either with jdbc (For Linux and MAc users) or with odbc (For Windows users)
+
+   In order to setup an ODBC connection (say 'DASHDB'), the connection parameters from dashDB can be used along
+   with the login credentials and then follow the below steps:
+
+   import ibmdbpy
+   from ibmdbpy import IdaDataBase
+   idadb = IdaDataBase('DASHDB')
+
+   That' all you have to do!
+
+   For setting up a JDBC connection, please make sure an existing Java runtime environment is setup and the
+   db2jcc.jar file is available in the classpath and an additonal python library jaydebeapi needs to be installed.
+
+   Once everything is in place, we can just do the following
+
+   import ibmdbpy, jaydebeapi
+   from ibmdbpy import IdaDataBase
+   idadb = IdaDataBase('jdbc:db2://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:50000/BLUDB:user=<uid>;password=<pwd>')
+
+5. Let us now try out a use case for using this package to analyse felonies committed in the city of New York.
+   The dataset is available in NYC Open Data provided by New York City police department and can be downloaded
+   [here.](https://data.cityofnewyork.us/Public-Safety/NYPD-7-Major-Felony-Incidents/hyij-8hr7/data)
+
+
+    The importance of crime data analysis has played an important role in public safety.
+    The New York city police department has gathered a huge amount of data over a period
+    of 10 years and more and categorized the7major felonies committed in the city of New York.
+    We can analyze this huge dataset efficiently with __ibmdbpy__ to gain meaningful insights from
+    the data. The major crime hotspots can be then visualized with the help of __‘folium’__ and __‘matplotlib’__.
+
+
 
 
 ```python
 # Import packages needed for analysis
 import ibmdbpy
 from ibmdbpy import IdaDataFrame, IdaDataBase, IdaGeoDataFrame
-import pandas as pd
 import matplotlib as mpl
 import folium,ggplot,mplleaflet
 import matplotlib.pyplot as plt
-import plotly.plotly as py
-from pylab import rcParams
-rcParams['figure.figsize'] = (25,10)
 %matplotlib inline
-from ggplot import *
-from IPython.display import display
 print('All libraries imported!')
 ```
 
     All libraries imported!
 
 
-Analysis with geopandas - elementwise operations on geometry, is pretty slow!
-
-
-```python
-import geopandas as gp
-from geopandas import GeoSeries,GeoDataFrame
-dsn = 'C:/Users/IBM_ADMIN/Documents/IBM_Internship/crimeDataAnalyses/'
-%time nyc_boroughs = GeoDataFrame.from_file(dsn + 'shapefiles4326/nyc_boroughs.shp')
-nyc_boroughs.set_index('BoroName', inplace=True)
-%time felonies = GeoDataFrame.from_file(dsn + 'nypd7majorfelonies/nypd7majorfelonies1.shp')
-felonies.set_index('Identfr')
-robberies_2015 = felonies.loc[felonies['Occrr_Y']==2015]
-robberies_2015 = robberies_2015.loc[robberies_2015['Offense']== 'ROBBERY',('Precnct','Sector','geometry')]
-robberies_2015.shape
-```
-
-    Wall time: 233 ms
-    Wall time: 2min 26s
-
-
-
-
-
-    (16886, 3)
-
-
-
-Find the number of robberies and area of each borough using shapely operations within and area with Geopandas
-
-
-```python
-%time nyc_boroughs['boro_area'] = nyc_boroughs.geometry.area
-# Find the count of each type of crimes within each borough
-% time robberies_2015['within_SI'] = robberies_2015.geometry.apply(lambda x: x.within(nyc_boroughs.geometry.iloc[0]))
-% time robberies_2015['within_QN'] = robberies_2015.geometry.apply(lambda x: x.within(nyc_boroughs.geometry.iloc[1]))
-% time robberies_2015['within_BK'] = robberies_2015.geometry.apply(lambda x: x.within(nyc_boroughs.geometry.iloc[2]))
-% time robberies_2015['within_MH'] = robberies_2015.geometry.apply(lambda x: x.within(nyc_boroughs.geometry.iloc[3]))
-% time robberies_2015['within_BR'] = robberies_2015.geometry.apply(lambda x: x.within(nyc_boroughs.geometry.iloc[4]))
-si = len(robberies_2015.loc[robberies_2015['within_SI']== True])
-qn = len(robberies_2015.loc[robberies_2015['within_QN']== True])
-bk = len(robberies_2015.loc[robberies_2015['within_BK']== True])
-mh = len(robberies_2015.loc[robberies_2015['within_MH']== True])
-br = len(robberies_2015.loc[robberies_2015['within_BR']== True])
-count = [si,qn,bk,mh,br]
-nyc_boroughs['no_of_robberies'] = count
-nyc_boroughs.loc[:,('no_of_robberies','boro_area')]
-```
-
-    Wall time: 1e+03 µs
-    Wall time: 1.87 s
-    Wall time: 1min 35s
-    Wall time: 1min 18s
-    Wall time: 25 s
-    Wall time: 24.4 s
-
-
-
-
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>no_of_robberies</th>
-      <th>boro_area</th>
-    </tr>
-    <tr>
-      <th>BoroName</th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>Staten Island</th>
-      <td>456</td>
-      <td>0.016046</td>
-    </tr>
-    <tr>
-      <th>Queens</th>
-      <td>3263</td>
-      <td>0.030148</td>
-    </tr>
-    <tr>
-      <th>Brooklyn</th>
-      <td>5667</td>
-      <td>0.019163</td>
-    </tr>
-    <tr>
-      <th>Manhattan</th>
-      <td>3155</td>
-      <td>0.006308</td>
-    </tr>
-    <tr>
-      <th>Bronx</th>
-      <td>4344</td>
-      <td>0.011776</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-We can see that the time taken for each operation is pretty large given the size of the dataset,
-also the within operation happens pairwise, as per geometric operations defined in shapely,
-which delays the process altogether.
-
-Hence we take a second approach to use __ibmdbpy__ to do a similar operation in a much faster
-manner with spatial queries.
+Let us now connect to our dashDB datasource with a JDBC connection.
 
 
 ```python
@@ -175,190 +101,26 @@ from IPython.display import IFrame
 IFrame("https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/", width=950, height=450)
 ```
 
+![png](dashDB.png)
+
+
+The NYC crime data which is already available on dashDB is retrieved as an IdaGeoDataFrame which is
+similar to a pandas data frame. The process to upload the data into dashDB can be found
+[here](https://www.ibm.com/support/knowledgecenter/SS6NHC/com.ibm.swg.im.dashdb.doc/learn_how/loaddata_gsdata.html).
+The crime data is already geocoded and stored as ST_Point in dashDB. Along with it additional geospatial data for
+defining the New York city boroughs are also loaded in dashDB, which will be used for further analyses.
 
 
 
-
-        <iframe
-            width="950"
-            height="450"
-            src="https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
-
-
-
-
-The NYC crime data which is already available on dashDB is retrieved as an IdaDataFrame which is
-similar to a pandas data frame. The crime data is already geocoded and stored as ST_Point in dashDB.
-Along with it additional geospatial data for defining the New York city boroughs are also loaded in
-dashDB, which will be used for further analyses.
-
-
-```python
-%%time
-boros = idadb.ida_query("select objectid,\"BoroName\",db2gse.st_area(geo_data,'KILOMETER') " +
-                        "as area_in_sq_km from nyc_boroughs")
-```
-
-    Wall time: 4.87 s
-
-
-
-```python
-boros.head()
-```
-
-
-
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>OBJECTID</th>
-      <th>BoroName</th>
-      <th>AREA_IN_SQ_KM</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>Staten Island                                 ...</td>
-      <td>150.856763</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>Queens                                        ...</td>
-      <td>282.911619</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>Brooklyn                                      ...</td>
-      <td>179.997796</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>Manhattan                                     ...</td>
-      <td>59.130826</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>Bronx                                         ...</td>
-      <td>110.270598</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
-%%time
-staten = idadb.ida_query("select count(a1.\"Identfr\") from nyc_crime_data a1 , nyc_boroughs b1" +
-                         " where a1.\"Offense\" = 'ROBBERY' and a1.\"Occrr_Y\" = 2015" +
-                         " and b1.\"BoroName\" = 'Staten Island'" +
-                         " and db2gse.st_within(a1.geo_data,b1.geo_data)=1")
-queens = idadb.ida_query("select count(a1.\"Identfr\") from nyc_crime_data a1 , nyc_boroughs b1" +
-                         " where a1.\"Offense\" = 'ROBBERY' and a1.\"Occrr_Y\" = 2015" +
-                         " and b1.\"BoroName\" = 'Queens'" +
-                         " and db2gse.st_within(a1.geo_data,b1.geo_data)=1")
-brooklyn = idadb.ida_query("select count(a1.\"Identfr\") from nyc_crime_data a1 , nyc_boroughs b1" +
-                         " where a1.\"Offense\" = 'ROBBERY' and a1.\"Occrr_Y\" = 2015" +
-                         " and b1.\"BoroName\" = 'Brooklyn'" +
-                         " and db2gse.st_within(a1.geo_data,b1.geo_data)=1")
-manhattan = idadb.ida_query("select count(a1.\"Identfr\") from nyc_crime_data a1 , nyc_boroughs b1" +
-                         " where a1.\"Offense\" = 'ROBBERY' and a1.\"Occrr_Y\" = 2015" +
-                         " and b1.\"BoroName\" = 'Manhattan'" +
-                         " and db2gse.st_within(a1.geo_data,b1.geo_data)=1")
-bronx = idadb.ida_query("select count(a1.\"Identfr\") from nyc_crime_data a1 , nyc_boroughs b1" +
-                         " where a1.\"Offense\" = 'ROBBERY' and a1.\"Occrr_Y\" = 2015" +
-                         " and b1.\"BoroName\" = 'Bronx'" +
-                         " and db2gse.st_within(a1.geo_data,b1.geo_data)=1")
-```
-
-    Wall time: 3min 44s
-
-
-
-```python
-import numpy as np
-boros['robberies2015'] = np.array([staten,queens,brooklyn,manhattan,bronx])
-boros.head()
-```
-
-
-
-
-<div>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>OBJECTID</th>
-      <th>BoroName</th>
-      <th>AREA_IN_SQ_KM</th>
-      <th>robberies2015</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>Staten Island                                 ...</td>
-      <td>150.856763</td>
-      <td>456.0</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>2</td>
-      <td>Queens                                        ...</td>
-      <td>282.911619</td>
-      <td>3263.0</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>3</td>
-      <td>Brooklyn                                      ...</td>
-      <td>179.997796</td>
-      <td>5667.0</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>4</td>
-      <td>Manhattan                                     ...</td>
-      <td>59.130826</td>
-      <td>3155.0</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>5</td>
-      <td>Bronx                                         ...</td>
-      <td>110.270598</td>
-      <td>4344.0</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-In the above approach,the process is much faster, however, writing complex SQL queries
-might not be th best way to go about it. Some users might want to use a more Python-like
+The process of data retrieval and spatial analysis is much faster with ibmdbpy when compared to some well know
+spatial analysis libraries like shapely and geopandas, which usually performs pairwise geometric operations
+between two differnet geometries. Some users might want to use a more Python-like
 syntax to perform the same exploratory analysis using IdaGeoDataFrames from __ibmdbpy-spatial extension__ .
 
 
 ```python
 import numpy as np
-%time nyc_crime_geo = IdaDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
+%time nyc_crime_geo = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
 %time robberies_2015 = nyc_crime_geo[nyc_crime_geo['Offense']=='ROBBERY']
 %time robberies_2015 = robberies_2015[robberies_2015['Occrr_Y'] == 2015]
 %time robberies2015_brooklyn = len(robberies_2015[robberies_2015['Borough']=='BROOKLYN'])
@@ -494,3 +256,7 @@ map1
 
 ![png](plot2.png)
 
+So using ibmdbpy we can analyse a huge and complex dataset meaningfully and more importantly in a much efficient manner
+which saves time and effort to analyse geographic data separately and load big datasets as raw shapefiles.
+
+Hope you find this approach useful !
