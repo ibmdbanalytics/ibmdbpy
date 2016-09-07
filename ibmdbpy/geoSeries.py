@@ -33,7 +33,6 @@ import ibmdbpy
 from ibmdbpy.series import IdaSeries
 from ibmdbpy.exceptions import IdaGeoDataFrameError
 
-
 class IdaGeoSeries(ibmdbpy.IdaSeries):
     """
     An IdaSeries whose column must have geometry type.
@@ -1497,9 +1496,6 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
                 db2gse_function = 'DB2GSE.ST_ISSIMPLE',
                 valid_types = ['ST_GEOMETRY'])
 
-#==============================================================================
-### Binary geospatial methods
-#==============================================================================
 
 #==============================================================================
 ### Public utilities for geospatial methods
@@ -1631,6 +1627,3 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
             return IdaGeoSeries.from_IdaSeries(idaseries)
         else:
             return idaseries
-
-    def _binaryOperationHandler():
-        pass

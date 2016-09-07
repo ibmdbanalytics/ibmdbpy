@@ -220,7 +220,7 @@ def idageodf_county(idadb):
     The table has one geometry column named 'SHAPE' of type 'ST_MULTIPOLYGON'
     Don't use it for destructive nor non-destructive methods (modify columns)
     """
-    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
+    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer='OBJECTID')
     return idageodf
 
 @pytest.fixture(scope="function")
@@ -231,7 +231,7 @@ def idageodf_customer(idadb):
     The table has one geometry column named 'SHAPE' of type 'ST_POINT'
     Don't use it for destructive nor non-destructive methods (modify columns)
     """
-    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
+    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER', indexer='OBJECTID')
     return idageodf    
     
 @pytest.fixture(scope="function")
