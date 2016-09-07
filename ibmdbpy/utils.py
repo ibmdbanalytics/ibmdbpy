@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
+from builtins import range
 from builtins import input
 from future import standard_library
 standard_library.install_aliases()
@@ -27,6 +28,8 @@ from time import time
 from functools import wraps
 
 import six
+import pandas as pd
+from copy import deepcopy
 
 #-----------------------------------------------------------------------------
 # Environment variable setter
@@ -110,6 +113,86 @@ def query_yes_no(question, default=None):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' "
                              "(or 'y' or 'n').\n")
+                             
+def chunklist(l, n):
+    """ Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
+
+
+def silent(function):
+    """
+    Decorate that silent the function it decorates,
+    i.e SQL queries will not be printed.
+
+    Notes
+    -----
+    * Legagy from Benchmark submodule
+
+    """
+    @wraps(function)
+    def wrapper(self, *args, **kwds):
+        original_value = os.environ['VERBOSE']
+        set_verbose(False)
+        result = function(self, *args, **kwds)
+        os.environ['VERBOSE'] = original_value
+        return result
+    return wrapper
+
+def to_nK(dataframe, nKrow):
+    """
+    Create a version of the dataframe that has n Krows.
+
+    Parameters
+    ----------
+    dataframe : DataFrame
+        DataFrame to use as a basis
+    nKrow : int
+        Number of Krows the return dataframe should contain
+
+    Returns
+    -------
+    DataFrame
+        A Version of the inputed dataframe with n Krows
+
+    Notes
+    -----
+    * If the dataset is smaller than nKrow, it will be imputed randomly 
+    with some existing rows, otherwise ve return a random sample
+
+    * Legagy from Benchmark submodule
+    """
+    if nKrow < 1:
+        raise ValueError("n should be an integer with minimum value 1")
+    if not isinstance(nKrow, int):
+        raise ValueError("n should be an integer with minimum value 1")
+    def some(df, nrow):
+        """Return n random rows from the given dataframe"""
+        from numpy import random
+        return df.ix[random.choice(range(len(df)), nrow)]
+
+    if nKrow*1000 > dataframe.shape[0]:
+        df = pd.concat([dataframe, some(dataframe, nKrow*1000 - dataframe.shape[0])], ignore_index=True)
+    else:
+        df = pd.concat([some(dataframe, nKrow*1000)], ignore_index=True)
+    return df
+
+def extend_dataset(df, n):
+    """
+    Extend a dataframe horizontaly by duplicating its columns n times
+
+    Note
+    ----
+
+    * Legagy from Benchmark submodule
+    """
+    df_2 = deepcopy(df)
+    df_out = deepcopy(df)
+    while n > 0:
+        df_2.columns = ["%s_extended_%s"%(column,n) for column in df.columns]
+        df_out = pd.concat([df_out,df_2], axis = 1)
+        n -= 1
+    return df_out
 
 def check_tablename(tablename):
     """
@@ -225,8 +308,3 @@ def _check_input(idadf, target, features):
             features = list(idadf.columns)
             
     return target, features
-    
-def chunklist(l, n):
-    """ Yield successive n-sized chunks from l."""
-    for i in range(0, len(l), n):
-        yield l[i:i+n]

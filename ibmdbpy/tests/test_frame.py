@@ -63,7 +63,7 @@ class Test_OpenDataFrameObject(object):
     def test_idadf_attr_index(self, idadf, df):
         # Ok, but what do we do if too big ?
         assert type(idadf.index) in [pandas.core.index.Int64Index,pandas.core.index.Index] # Not sure here
-        assert idadf.index.equals(df.index)
+        assert list(idadf.index) == list(df.index)
 
     def test_idadf_attr_columns(self, idadf, df):
         assert isinstance(idadf.columns, pandas.core.index.Index)
@@ -73,7 +73,7 @@ class Test_OpenDataFrameObject(object):
         assert isinstance(idadf.axes, list)
         assert len(idadf.axes) == 2
         assert idadf.axes[1].equals(idadf.columns)
-        assert idadf.axes[0].equals(idadf.index)
+        assert list(idadf.axes[0]) == list(idadf.index)
 
     def test_idadf_attr_shape(self, idadf, df):
         assert isinstance(idadf.shape, tuple)

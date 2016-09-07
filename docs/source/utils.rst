@@ -56,6 +56,17 @@ User prompt
 -----------
 .. autofunction:: query_yes_no
 
+Legagy from benchmark
+---------------------
+
+.. autofunction:: chunklist
+
+.. autofunction:: silent
+
+.. autofunction:: to_nK
+
+.. autofunction:: extend_dataset
+
 Convention checking
 ===================
 

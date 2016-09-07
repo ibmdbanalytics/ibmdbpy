@@ -64,7 +64,6 @@ Some optional libraries can be installed to benefit from extra features, for exa
 	* jaydebeapi (Connection via JDBC)
 	* pytest (for running tests)
 	* sphinx (for building the documentation)
-	* bokeh (visualization of benchmarks)
 
 JayDeBeApi requires a C++ compiler, which may make it difficult to install for some users.
 

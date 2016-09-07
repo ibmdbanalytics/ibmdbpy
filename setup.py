@@ -68,14 +68,13 @@ setup(name='ibmdbpy',
       extras_require={
       	'jdbc':['jaydebeapi'],
       	'test':['pytest'],
-      	'doc':['sphinx'],
-      	'bench':['bokeh']
+      	'doc':['sphinx']
       },
       description='A Pandas-like SQL-wrapper for in-database analytics with IBM dashDB/DB2.',
       long_description=longdesc,
       url='https://github.com/ibmdbanalytics/ibmdbpy',
       author='IBM Corp.',
-      author_email='fouche@de.ibm.com',
+      author_email='NRAUSCH@de.ibm.com',
       license='BSD',
       classifiers=classifiers,
       keywords='data analytics database development IBM dashDB DB2 pandas scikitlearn scalability machine-learning knowledge discovery',

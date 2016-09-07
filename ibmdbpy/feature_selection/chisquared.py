@@ -4,6 +4,13 @@ Created on Mon Dec 14 11:31:52 2015
 
 @author: efouche
 """
+from __future__ import division
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import dict
+from future import standard_library
+standard_library.install_aliases()
 
 from collections import OrderedDict
 
