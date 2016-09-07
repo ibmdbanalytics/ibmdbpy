@@ -26,6 +26,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import unicode_literals
 from __future__ import absolute_import
+from builtins import dict
 from builtins import zip
 from builtins import str
 from builtins import int
@@ -53,7 +54,7 @@ import ibmdbpy.aggregation
 import ibmdbpy.filtering
 import ibmdbpy.utils
 
-from ibmdbpy.utils import timed
+from ibmdbpy.utils import timed, chunklist
 from ibmdbpy.internals import InternalState
 from ibmdbpy.exceptions import IdaDataFrameError
 from ibmdbpy.internals import idadf_state
@@ -988,7 +989,7 @@ class IdaDataFrame(object):
             return False
 
     # Should we maybe allow this only in IdaDataBase object ?
-    @timed
+    #@timed
     def ida_query(self, query, silent = False, first_row_only = False, autocommit = False):
         """
         Convenience function delegated from IdaDataBase.
@@ -1293,13 +1294,16 @@ class IdaDataFrame(object):
     @idadf_state
     def levels(self, columns = None):
         # TODO: Test, doc, name?
+        """
+        Return the numbers of distinct values
+        """
         if columns is not None:
             if isinstance(columns, six.string_types):
                 columns = [columns]
             for column in columns:
                 message = ''
                 if column not in self.columns:
-                    message += "Column %s does not belong to current idadataframe. \n"
+                    message += "Column %s does not belong to current idadataframe. \n"%column
                 if message:
                     raise ValueError(message)                    
         else:
@@ -1321,8 +1325,9 @@ class IdaDataFrame(object):
         result.index = columns
         return result
         
-    @idadf_state
+    
     #@timed
+    @idadf_state
     def count_groupby(self, columns = None, count_only = False, having = None):
         if columns is not None:
             if isinstance(columns, six.string_types):
@@ -1465,7 +1470,7 @@ class IdaDataFrame(object):
 
     @timed
     @idadf_state
-    def corr(self, method="pearson", features=None):
+    def corr(self, method="pearson", features=None, ignore_indexer=True):
         """
         Compute the correlation matrix, composed of correlation coefficients
         between all pairs of columns in self.
@@ -1493,7 +1498,7 @@ class IdaDataFrame(object):
         the pearson correlation coefficient method to these ranks. 
         """
         from ibmdbpy.statistics import corr
-        return corr(idadf=self, features=features)
+        return corr(idadf=self, features=features, ignore_indexer=ignore_indexer)
 
     # TODO: to implement
     @timed
@@ -1638,65 +1643,86 @@ class IdaDataFrame(object):
         
     @timed
     @idadf_state
-    def within_class_var(self, target, features = None):
+    def within_class_var(self, target, features = None, ignore_indexer=True):
         if features is None:
-            features = [x for x in self.columns if x != target]
+            numerical_columns = self._get_numerical_columns()
+            features = [x for x in numerical_columns if x != target]
         else:
             if isinstance(features, six.string_types):
                 features = [features]
                 
+        if ignore_indexer is True:
+            if self.indexer:
+                if self.indexer in features:
+                    features.remove(self.indexer)
+                
         result = pd.Series()
         
-        C = self.levels(target)
+        #C = self.levels(target)
         N = len(self)
 
-
-######### VERSION 1
-        
-#        for feature in features:
-#            subquery = "(SELECT \"%s\",AVG(\"%s\") as \"average\" FROM %s GROUP BY \"%s\") AS B"%(target, feature, self.name, target)
-#            condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
-#            groupby = "GROUP BY A.\"%s\""%target
-#            query = "SELECT SUM(POWER(\"%s\" - \"average\", 2)) AS \"SUM\" FROM %s AS A INNER JOIN %s %s %s"%(feature, self.name, subquery, condition, groupby)
-#            classvar = self.ida_query(query)
-#            #print(classvar)
-#            result[feature] = classvar.sum() /(N -C)
-
-####################
-
-########## VERSION 2
+        if len(features) < 5:
           
-        avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(features)]
-        sumlist = ["SUM(POWER(\"%s\" - \"average%s\", 2))"%(feature, index) for index, feature in enumerate(features)]
-        
-        avgstr = ", ".join(avglist)
-        sumstr = ", ".join(sumlist)
-        
-        subquery = "(SELECT \"%s\", %s FROM %s GROUP BY \"%s\") AS B"%(target, avgstr, self.name, target)
-        condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
-        groupby = "GROUP BY A.\"%s\""%target
-        query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
-        
-        classvar = self.ida_query(query)
-        if len(features) == 1:
-            classvar = pd.DataFrame(classvar)
-        
-        classvar.columns = pd.Index(features)
-        result = pd.Series()
-        for attr in classvar:
-            result[attr] = classvar[attr].sum()/(N -C)
+            avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(features)]
+            sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(features)]
             
-###################
+            avgstr = ", ".join(avglist)
+            sumstr = ", ".join(sumlist)
             
-        #if len(result) == 1:
-        #    result = result[0]
+            subquery = "(SELECT \"%s\", %s FROM %s GROUP BY \"%s\") AS B"%(target, avgstr, self.name, target)
+            condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
+            groupby = "GROUP BY A.\"%s\""%target
+            query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
+            
+            classvar = self.ida_query(query)
+            if len(features) == 1:
+                classvar = pd.DataFrame(classvar)
+                
+            C = len(classvar)
+            if N == C:
+                N += 1
+            
+            
+            classvar.columns = pd.Index(features)
+            result = pd.Series()
+            for attr in classvar:
+                result[attr] = classvar[attr].sum()/(N -C)
+        
+        else:
+            chunkgen = chunklist(features, 5)
+            result = pd.Series()
+            for chunk in chunkgen:
+                avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(chunk)]
+                sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(chunk)]
+                
+                avgstr = ", ".join(avglist)
+                sumstr = ", ".join(sumlist)
+                
+                subquery = "(SELECT \"%s\", %s FROM %s GROUP BY \"%s\") AS B"%(target, avgstr, self.name, target)
+                condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
+                groupby = "GROUP BY A.\"%s\""%target
+                query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
+                
+                classvar = self.ida_query(query)
+                
+                if len(chunk) == 1:
+                    classvar = pd.DataFrame(classvar)
+                    
+                C = len(classvar)
+                if N == C:
+                    N += 1
+                    
+                classvar.columns = pd.Index(chunk)
+                
+                for attr in classvar:
+                    result[attr] = classvar[attr].sum()/(N -C)
         
         return result
         
     @timed
     @idadf_state
-    def within_class_std(self, target, features = None):
-        return np.sqrt(self.within_class_var(target, features))
+    def within_class_std(self, target, features = None, ignore_indexer= True):
+        return np.sqrt(self.within_class_var(target, features, ignore_indexer))
 
     @timed
     @idadf_state
@@ -1735,7 +1761,7 @@ class IdaDataFrame(object):
             if isinstance(features, six.string_types):
                 features = [features]
                 
-        avglist = ["AVG(\"%s\")"%feature for feature in features]
+        avglist = ["CAST(AVG(\"%s\") as FLOAT)"%feature for feature in features]
         avgstr = ", ".join(avglist)
         
         query = "SELECT \"%s\", %s FROM %s GROUP BY \"%s\""%(groupby, avgstr, self.name, groupby)

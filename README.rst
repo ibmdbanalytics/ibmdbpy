@@ -12,9 +12,11 @@ The ibmdbpy project is compatible with Python releases 2.7 up to 3.4 and can be 
 
 The project is still at an early stage and many of its features are still in development. However, several experiments have already demonstrated that it provides significant performance advantages when operating on medium or large amounts of data, that is, on tables of 1 million rows or more.
 
-The latest version of ibmdbpy is available on the `Python Package Index`__.
+The latest version of ibmdbpy is available on the `Python Package Index`__ and Github_.
 
 __ https://pypi.python.org/pypi/ibmdbpy
+
+.. _Github: https://github.com/ibmdbanalytics/ibmdbpy
 
 How ibmdbpy works
 -----------------
@@ -64,25 +66,20 @@ The result fetched by ibmdbpy is a tuple containing all values of the matrix. Th
 
 Et voilà !
 
-How the spatial functions work
-------------------------------
+How the geospatial functions work
+---------------------------------
 
-The geospatial extension translates geopandas-like syntax into SQL and uses a middleware API (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution.
-It identifies the geometry column for spatial tables and enables the user to perform spatial queries based upon this column.
-The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
+The ibmdbpy package now supports geospatial functions! It provides a Python interface for data manipulation and access to in-database algorithms in IBM dashDB and IBM DB2 Spatial Extender. It identifies the geometry column for spatial tables and enables the user to perform spatial queries based upon this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
 
 The following scenario illustrates how spatial functions work.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a dashDB instance named DASHDB) via ODBC:
+We can create an IDA geo data frame that points to a sample table in dashDB:
 
 >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
 >>> idadb = IdaDataBase('DASHDB')
-
-We can create an IDA geo data frame that points to a sample table in dashDB:
-
 >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
 
-Note that to create an IDA geo data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
+Note that to create an IdaGeoDataframe using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
 
 Now let us compute the area of the counties in the GEO_COUNTY table. The result of the area will be stored as a new column 'area' in the IdaGeoDataFrame:
 
@@ -104,18 +101,30 @@ Here is the SQL request that was executed for this example::
 
 That's as simple as that!
 
+Feature Selection
+=================
+
+Ibmdbpy provides a range of functions to support efficient in-database feature selection, e.g. to estimate the relevance of attributes with respect to a particular target. Functions and documentation can be found in the submodule ``ibmdbpy.feature_selection``. 
+
 Project Roadmap
 ===============
 
 * Full test coverage (a basic coverage is already provided)
 * Add more functions and improve what already exists
-* Add wrappers for several ML-Algorithms
-* Feature selection extension
-* Add Spark as computational engine
+* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...)
+
+A more detailed roadmap is available on Github, in the ``ROADMAP.txt`` file 
 
 Contributors
 ============
 
-The ibmdbpy project was initiated in April 2015, and developed by Edouard Fouché and the geospatial extension was
-contributed by Avipsa Roy and Rafael Rodriguez Morales in March,2016 under the supervision of Dr. Gregor Moehler,
-at IBM Deutschland Reasearch & Development, Böblingen.
+The ibmdbpy project was initiated in April 2015 at IBM Deutschland Reasearch & Development, Böblingen. 
+Here is the list of the persons who contributed to the project, in the chronological order of their contribution:
+
+- Edouard Fouché (core)
+- Michael Wurst (core)
+- William Moore (documentation)
+- Craig Blaha (documentation)
+- Rafael Rodriguez Morales (geospatial extension, core)
+- Avipsa Roy (geospatial extension)
+- Nicole Schoen (core)

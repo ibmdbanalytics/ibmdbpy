@@ -40,6 +40,12 @@ class Loc(object):
             """
             Use the loc object of an IdaDataFrame or IdaSeries instance to
             do projection or selection in a table.
+            
+            Notes
+            -----
+            The determinism of the result is guaranteed only if the IdaDataFrame
+            has a valid indexer. 
+            
             Examples
             --------
             >>> idairis.loc[0:49] # Select the first 50 rows
@@ -69,13 +75,10 @@ class Loc(object):
                         if (x < 0)|(x > self.idadf.shape[0]):
                             raise ValueError("The index [%s] is out of range" %(index))
 
-
-            newidadf = self.idadf._clone()
-
             if cols is not None:
                 if isinstance(cols, six.string_types):
                     if cols not in self.idadf.columns:
-                            raise KeyError("The label [%s] is not in the [columns]" %(cols))
+                            raise KeyError("The label %s is not in the [columns]" %(cols))
                     newidadf = self.idadf._clone_as_serie(cols)
                 else:
                     not_existing = [col for col in cols if col not in self.idadf.columns]
@@ -87,17 +90,20 @@ class Loc(object):
                     if col not in cols:
                         del newidadf.internal_state.columndict[col]
 
-                if (self.idadf.indexer is not None)&(self.idadf.indexer not in cols):
-                    newidadf.internal_state.columndict[self.idadf.indexer] = "\""+self.idadf.indexer+"\""
+                if self.idadf.indexer is not None:
+                    if self.idadf.indexer not in cols:
+                        newidadf.internal_state.columndict[self.idadf.indexer] = "\""+self.idadf.indexer+"\""
 
                 newidadf.internal_state.index = index
                 newidadf.internal_state.update()
-                newidadf._reset_attributes(["shape", "dtypes", "index", "columns"])
+                #newidadf._reset_attributes(["shape", "dtypes", "index", "columns"]) # this was causing troubles 
 
-                if (self.idadf.indexer is not None)&(self.idadf.indexer not in cols):
-                    del newidadf.internal_state.columndict[self.idadf.indexer]
-                    newidadf.internal_state.update()
-                    newidadf._reset_attributes(["shape", "dtypes", "index", "columns"])
+                if self.idadf.indexer is not None:
+                    if self.idadf.indexer not in cols:
+                        
+                        del newidadf.internal_state.columndict[self.idadf.indexer]
+                        newidadf.internal_state.update()
+                        newidadf._reset_attributes(["shape", "dtypes", "index", "columns"])
 
 
             else:

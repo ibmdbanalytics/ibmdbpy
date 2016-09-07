@@ -2,7 +2,6 @@ recursive-include ibmdbpy *.txt
 recursive-include ibmdbpy *.py
 recursive-include docs *
 
-
 include LICENSE.txt
 include MANIFEST.in
 include DEPLOY.txt
@@ -11,5 +10,4 @@ include setup.cfg
 include *.gitignore
 
 prune docs/build
-prune ibmdbpy/feature_selection
 recursive-excluse *.jar

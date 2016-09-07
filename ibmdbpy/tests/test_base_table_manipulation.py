@@ -70,8 +70,8 @@ class Test_DeleteDataBaseObjects(object):
             idadb.drop_model(idadf.name)
         with pytest.raises(TypeError):
             idadb.drop_model(idaview.name)
-        with pytest.raises(TypeError):
-            idadb.drop_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE")
+        #with pytest.raises(TypeError):
+        #    idadb.drop_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE")
 
 class Test_TableManipulation(object):
     def test_idadb_rename(self, idadb, idadf_tmp):

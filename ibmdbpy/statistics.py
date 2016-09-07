@@ -21,6 +21,7 @@ from builtins import int
 from future import standard_library
 standard_library.install_aliases()
 
+from collections import OrderedDict
 import itertools
 import math
 import warnings
@@ -31,6 +32,7 @@ import numpy as np
 import six
 
 import ibmdbpy
+from ibmdbpy.utils import chunklist
 
 """
 Statistics module for IdaDataFrames
@@ -676,31 +678,42 @@ def cov(idadf, other = None):
 
     return result
 
-def corr(idadf, features=None):
+def corr(idadf, features=None,ignore_indexer=True):
     """
     See IdaDataFrame.corr
     """
     if isinstance(idadf, ibmdbpy.IdaSeries):
         raise TypeError("corr() missing 1 required positional argument: 'other'")
     # TODO: catch case n <= 1
-    columns = idadf._get_numerical_columns()
-    if not columns:
+    numerical_columns = idadf._get_numerical_columns()
+    
+    if not numerical_columns:
         print(idadf.name + " has no numeric columns")
         return
+        
+    if ignore_indexer is True:
+        if idadf.indexer:
+            if idadf.indexer in numerical_columns:
+                numerical_columns.remove(idadf.indexer)
     
+    #print(features)
     #target, features = ibmdbpy.utils._check_input(target, features)
     if features is not None:
-        for column in columns:
-            if column not in features:
-                columns.remove(column)
+        for feature in features:
+            if feature not in numerical_columns:
+                raise TypeError("Correlation-based measure not available for non-numerical columns %s"%feature)
+    else:
+        features = numerical_columns
+    
     #if target not in columns:
     #    raise ValueError("%s is not a column of numerical type in %s"%(target, idadf.name))
-
     
-    combinations = [x for x in itertools.combinations(columns, 2)]
-    columns_set = [{x[0], x[1]} for x in combinations]
+    values = OrderedDict()
     
-    if len(columns) < 64: # the limit of variables for an SQL statement is 4096, i.e 64^2
+    combinations = [x for x in itertools.combinations(features, 2)]
+    #columns_set = [{x[0], x[1]} for x in combinations]
+    
+    if len(features) < 64: # the limit of variables for an SQL statement is 4096, i.e 64^2
         agg_list = []
         for column_pair in combinations:
             agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
@@ -712,26 +725,41 @@ def corr(idadf, features=None):
     
         data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
     
-        tuple_list = []
-        for column1 in columns:
-            list_value = []
-            for column2 in columns:
-                if column1 == column2:
-                    list_value.append(1.0)
-                else:
-                    for index, column_set in enumerate(columns_set):
-                        if {column1, column2} == column_set:
-                            list_value.append(data[index])
-                            break
-            tuple_list.append(tuple(list_value))
+        for i, element in enumerate(combinations):
+            if element[0] not in values:
+                values[element[0]] = {}
+            if element[1] not in values:
+                values[element[1]] = {}
+            values[element[0]][element[1]] = data[i]
+            values[element[1]][element[0]] = data[i]
+            
+        result = pd.DataFrame(values).fillna(1)
+    else:        
+        chunkgen = chunklist(combinations, 100)
+        
+        for chunk in chunkgen: 
+            agg_list = []
+            for column_pair in chunk:
+                agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
+                agg_list.append(agg)
+        
+            agg_string = ', '.join(agg_list)
+        
+            name = idadf.internal_state.current_state
+        
+            data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
+        
+            for i, element in enumerate(chunk):
+                if element[0] not in values:
+                    values[element[0]] = OrderedDict()
+                if element[1] not in values:
+                    values[element[1]] = OrderedDict()
+                values[element[0]][element[1]] = data[i]
+                values[element[1]][element[0]] = data[i]
+            
+        result = pd.DataFrame(values).fillna(1)
     
-        result = pd.DataFrame(tuple_list)
-        result.index = columns
-        result.columns = columns
-    else:
-        raise NotImplementedError("TODO")
-    
-
+    result = result.reindex(result.columns)
     if len(result) == 1:
         result = result[0]
 

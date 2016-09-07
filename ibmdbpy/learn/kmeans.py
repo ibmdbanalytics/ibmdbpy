@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
+from builtins import int
 from builtins import dict
 from builtins import str
 from future import standard_library
@@ -347,7 +348,9 @@ class KMeans(object):
         if outtable is None:
             outtable = idadf._idadb._get_valid_modelname('PREDICT_KMEANS_')
         else:
-            outtable = ibmdbpy.utils.check_tablename(self.outtable)
+            if self.outtable:
+                outtable = self.outtable
+            outtable = ibmdbpy.utils.check_tablename(outtable)
             if idadf._idadb.exists_table(outtable):
                 idadf._idadb.drop_table(outtable)
 

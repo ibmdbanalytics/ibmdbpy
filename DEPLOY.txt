@@ -1,4 +1,4 @@
-Update to Pypi:
+Upload to Pypi:
 1. Download from Github
 2. in ibmdbpy-master:
 python setup.py sdist bdist_wheel
@@ -7,3 +7,26 @@ twine upload dist/ibmdbpy-VERSION*
 To make the doc:
 cd docs
 make html
+
+To run the test:
+cd tests
+py.test (see documentation for options --dsn, --jdbc --table etc)
+
+To upload the doc:
+1. Make a zip with the content of the docs/build/html folder
+2. Upload the documentation in the ibmdbpy pypi administrator interface
+
+Good practices: 
+=> Test the deployement on testpypi before release:
+python setup.py register -r pypitest
+python setup.py sdist upload -r pypitest
+
+=> Use twine to upload the package
+Note that you should have the ~/.pypirc correctly set
+A nice explaination here, from Peter Downs: http://peterdowns.com/posts/first-time-with-pypi.html
+
+=> Ensure back-compatibility to Python 2
+The code is natively developed in Python 3. 
+We use future and six as compatibility layer
+Run pasteurize before uploading new content, 
+e.g "pasteurize -wv ." will pasteurize all py files in the path, with verbose mode 
