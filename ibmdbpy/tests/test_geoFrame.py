@@ -111,3 +111,90 @@ class Test_IdaGeoDataFrame(object):
     def test_idageodf_getattr_unresolved(self, idageodf_county):
         with pytest.raises(AttributeError):
             idageodf_county.__getattr__('not_an_attribute')
+
+    def test_idageodf_equals(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.equals(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_distance(self, idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.distance(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_crosses(self,idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.crosses(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_intersects(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.intersects(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_overlaps(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.overlaps(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_touches(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.touches(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_disjoint(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.disjoint(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_contains(self, idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.contains(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_within(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.within(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_mbr_intersects(self, idageodf_customer, idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.mbr_intersects(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_difference(self, idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.difference(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_intersection(self, idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.intersection(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_union(self, idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer
+        idageodf.set_geometry('SHAPE')
+        idageodf_county.set_geometry('SHAPE')
+        assert (isinstance(idageodf.union(idageodf_county), IdaGeoDataFrame))
+
+    def test_idageodf_binary_operation_handler_non_geometry_column(
+            self, idageodf_customer,idageodf_county):
+        idageodf = idageodf_customer  # ST_POLYGON
+        with pytest.raises(TypeError):
+            idageodf._binary_operation_handler(
+                idageodf_county,
+                db2gse_function='DB2GSE.ST_AGEOSPATIALFUNCTION',
+                valid_types=['ST_POINT'])
