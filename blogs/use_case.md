@@ -1,25 +1,27 @@
 
-# Exploring in-database analytics with IBM dashDB and iPython notebooks using ibmdbpy
+# Exploring geospatial in-database analytics with IBM dashDB and iPython notebooks using ibmdbpy
 
 
-Traditional approaches to data analysis require data to be moved out of the database into a separate
-analytics environment for processing, and then back to the database, which is an expensive process.
-Doing the analysis in the database, where the data resides, eliminates the costs, time and security
+Traditional approaches to data analysis require data to be moved out of the database or files into a separate
+analytics environment for processing, and then back to the database or files, which is an expensive process.
+Doing the analysis in a database, where the data resides, eliminates the costs, time and security
 issues associated with the old approach by doing the processing in the data warehouse itself.
 
-We have used the Python package ibmdbpy to enable the process of in-database analytics with dashDB
-and use it in pandas like syntax from Interactive Python notebooks.
+We have used the Python package [ibmdbpy](https://github.com/ibmdbanalytics/ibmdbpyhttps://github.com/ibmdbanalytics/ibmdbpy)
+ to enable the process of in-database analytics with dashDB
+and use it in Pandas-like syntax from Interactive Python notebooks.
 The ibmdbpy package translates Pandas-like syntax into SQL and uses a middleware API
 (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution.
-These SQL statements are translated to database queries at runtime as SQL pushdowns
-and the result is retrieved as a memory instance in the form of dataframes, which are
+These SQL statements are translated to database queries at runtime as SQL pushdowns. 
+The result is retrieved as a memory instance in the form of dataframes, which are
 easy to manipulate for further exploratory analysis. It reduces execution time for reading
 data and running complex queries on the data compared to fetching the entire dataset into
-memory, which might lead to much network overload and crashing of the notebook.
+memory. It, therefore, avoids network overload and crashing of the notebook due to missing local memory.
 
-The architecture of ibmdbpy can be very precisely explained as below:
 
 ![png](ibmdbpy.png)
+
+## Getting started
 
 Here we describe a simple example on how to use ibmdbpy with dashDB from notebooks especially with geospatial data.
 
@@ -29,40 +31,74 @@ Here we describe a simple example on how to use ibmdbpy with dashDB from noteboo
 
 3. Import the package ibmdbpy ( If not installed, install it from pypi using this url : )
 
+TODO: add the import statement and link
+
 4. The first step is to setup a connection with the data source, which is dashDB in our case.
    It can be done in two ways either with jdbc (For Linux and MAc users) or with odbc (For Windows users)
 
    In order to setup an ODBC connection (say 'DASHDB'), the connection parameters from dashDB can be used along
    with the login credentials and then follow the below steps:
 
-   import ibmdbpy
-   from ibmdbpy import IdaDataBase
-   idadb = IdaDataBase('DASHDB')
+```python
+import ibmdbpy
+from ibmdbpy import IdaDataBase
+idadb = IdaDataBase('DASHDB')
+```
+
 
    That' all you have to do!
 
+   FIXME: I dont think the following is required on Bluemix, right? If not, then we need the commands to set it up
    For setting up a JDBC connection, please make sure an existing Java runtime environment is setup and the
    db2jcc.jar file is available in the classpath and an additonal python library jaydebeapi needs to be installed.
 
+
    Once everything is in place, we can just do the following
 
-   import ibmdbpy, jaydebeapi
-   from ibmdbpy import IdaDataBase
-   idadb = IdaDataBase('jdbc:db2://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:50000/BLUDB:user=<uid>;password=<pwd>')
+```python
+import ibmdbpy, jaydebeapi
+from ibmdbpy import IdaDataBase
+username = raw_input("Enter user name (default is 'showcase'):") or "showcase"
+password = getpass.getpass("Enter password:")
+idadb = IdaDataBase(jdbc)
+```
 
-5. Let us now try out a use case for using this package to analyse felonies committed in the city of New York.
-   The dataset is available in NYC Open Data provided by New York City police department and can be downloaded
-   [here.](https://data.cityofnewyork.us/Public-Safety/NYPD-7-Major-Felony-Incidents/hyij-8hr7/data)
+FIXME: what is this small example actually about? we should at least do some ipbdbpy operation...
+FIXME: I think we need a bit more on how ibmdbpy actually works, some more examples with explanations would do it.
+
+## Usecase New York crime analysis
+
+Let us now try out a use case for using this package to analyze crimes committed in the city of New York.
+The New York city police department has gathered a huge amount of data over a period
+of 10 years and more and categorized the7major crime types (felonies) committed in the city of New York.
+
+The dataset is available in NYC Open Data provided by New York City police department and can be downloaded
+[here.](https://data.cityofnewyork.us/Public-Safety/NYPD-7-Major-Felony-Incidents/hyij-8hr7/data)
+We can analyze this huge dataset efficiently with `ibmdbpy` to gain meaningful insights from
+the data. The major crime hotspots can be then visualized with the help of `folium` and `matplotlib`.
+
+0. TODO: briefly describe loading data into dashdb...
+
+More details on loading geospatial data into dashDB can be found
+[here](https://www.ibm.com/support/knowledgecenter/SS6NHC/com.ibm.swg.im.dashdb.doc/learn_how/loaddata_gsdata.html).
+
+The NYC crime data is now available on dashDB. Let's take a look at the data in dashDB:
+
+```python
+from IPython.display import IFrame
+IFrame("https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/", width=950, height=450)
+```
+
+![png](dashDB.png)
 
 
-    The importance of crime data analysis has played an important role in public safety.
-    The New York city police department has gathered a huge amount of data over a period
-    of 10 years and more and categorized the7major felonies committed in the city of New York.
-    We can analyze this huge dataset efficiently with __ibmdbpy__ to gain meaningful insights from
-    the data. The major crime hotspots can be then visualized with the help of __‘folium’__ and __‘matplotlib’__.
+The crime data is already geo-coded (TODO: explain why?) and stored as ST_Point in dashDB. Along with it additional geospatial data for
+defining the New York city boroughs are also loaded in dashDB, which will be used for further analysis.
 
 
+1. To enable our analysis let's first load all required libraries into our notebook:
 
+FIXME: does not work in bluemix - correct ibmdbpy library?
 
 ```python
 # Import packages needed for analysis
@@ -78,7 +114,7 @@ print('All libraries imported!')
     All libraries imported!
 
 
-Let us now connect to our dashDB datasource with a JDBC connection.
+2. Let us now connect to our dashDB datasource with a JDBC connection.
 
 
 ```python
@@ -95,39 +131,30 @@ print('Connection to dashDB successful!')
     Connection to dashDB successful!
 
 
+3. The crime data is retrieved as an `IdaGeoDataFrame` which is similar to a `pandas` data frame. 
+The process of data retrieval and spatial analysis is much faster with `ibmdbpy` when compared to some well know
+spatial analysis libraries like `shapely` and `geopandas`, which usually performs pairwise geometric operations
+between two different geometries. 
+FIXME: Dont understand this...
 
-```python
-from IPython.display import IFrame
-IFrame("https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/", width=950, height=450)
-```
-
-![png](dashDB.png)
-
-
-The NYC crime data which is already available on dashDB is retrieved as an IdaGeoDataFrame which is
-similar to a pandas data frame. The process to upload the data into dashDB can be found
-[here](https://www.ibm.com/support/knowledgecenter/SS6NHC/com.ibm.swg.im.dashdb.doc/learn_how/loaddata_gsdata.html).
-The crime data is already geocoded and stored as ST_Point in dashDB. Along with it additional geospatial data for
-defining the New York city boroughs are also loaded in dashDB, which will be used for further analyses.
-
-
-
-The process of data retrieval and spatial analysis is much faster with ibmdbpy when compared to some well know
-spatial analysis libraries like shapely and geopandas, which usually performs pairwise geometric operations
-between two differnet geometries. Some users might want to use a more Python-like
+Some users might want to use a more Python-like
 syntax to perform the same exploratory analysis using IdaGeoDataFrames from __ibmdbpy-spatial extension__ .
+
+
+FIXME: dont think we need the time here, because we dont compare to geopandas. 
+Alternatively you can do one analysis in geopandas first, then we can compare the times.
 
 
 ```python
 import numpy as np
-%time nyc_crime_geo = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
+%time nyc_crime_geo  = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
 %time robberies_2015 = nyc_crime_geo[nyc_crime_geo['Offense']=='ROBBERY']
 %time robberies_2015 = robberies_2015[robberies_2015['Occrr_Y'] == 2015]
-%time robberies2015_brooklyn = len(robberies_2015[robberies_2015['Borough']=='BROOKLYN'])
-%time robberies2015_bronx = len(robberies_2015[robberies_2015['Borough']=='BRONX'])
+%time robberies2015_brooklyn  = len(robberies_2015[robberies_2015['Borough']=='BROOKLYN'])
+%time robberies2015_bronx     = len(robberies_2015[robberies_2015['Borough']=='BRONX'])
 %time robberies2015_manhattan = len(robberies_2015[robberies_2015['Borough']=='MANHATTAN'])
-%time robberies2015_queens = len(robberies_2015[robberies_2015['Borough']=='QUEENS'])
-%time robberies2015_staten = len(robberies_2015[robberies_2015['Borough']=='STATEN ISLAND'])
+%time robberies2015_queens    = len(robberies_2015[robberies_2015['Borough']=='QUEENS'])
+%time robberies2015_staten    = len(robberies_2015[robberies_2015['Borough']=='STATEN ISLAND'])
 %time robberies_count = [robberies2015_bronx,robberies2015_brooklyn,robberies2015_manhattan,
                          robberies2015_queens,robberies2015_staten]
 x = np.array([0,1,2,3,4])
@@ -163,7 +190,7 @@ plt.ylabel('Boroughs')
 ![png](output_18_2.png)
 
 
-We can further analyse the spatial distribution of crimes over a period of past
+4. We can further analyze the spatial distribution of crimes over a period of past
 decade as a scatterplot .
 
 ```python
@@ -187,13 +214,15 @@ df.plot(kind='scatter', x='X', y='Y', title = 'Spatial Distribution of Burglarie
 ![png](output_20_1.png)
 
 
-Since the crime data is geocoded, we can use the geospatial functions from the python library geopandas
+5. Since the crime data is geo-coded(?), we can use the geospatial functions from the python library geopandas
 to analyse the geometry and then retrieve the results in the form of a choropleth map based upon the
 variation of crime density of each borough. In order to achieve this, we first use the ST_Area function
-of dashDB spatial to obtain the area of each borough in square meters. Following this, we find the number
+of dashDB spatial to obtain the area of each borough in square kilometers. Following this, we find the number
 of crimes of type __"ROBBERY"__ in each borough in the year __2015__ using the ST_Within function and
 finally compute the density for each borough and try to visualise the results with __Leaflet__ library.
+FIXME: I would start with the number of crimes, and then area - it is more intuitive
 
+FIXME: please use loops instead of one variables per borough
 
 ```python
 # Read the data from dahsDB using ibmdbpy
@@ -256,7 +285,10 @@ map1
 
 ![png](plot2.png)
 
-So using ibmdbpy we can analyse a huge and complex dataset meaningfully and more importantly in a much efficient manner
-which saves time and effort to analyse geographic data separately and load big datasets as raw shapefiles.
+As you can see `ibmdbpy` greatly facilitates your data analysis in python as it can analyze a huge and complex datasets
+in an efficient manner using in-database analytics.
 
-Hope you find this approach useful !
+
+Hope you find this approach useful!
+
+TODO: links 
