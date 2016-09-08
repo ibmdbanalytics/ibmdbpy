@@ -7,7 +7,7 @@ analytics environment for processing, and then back to the database, which is an
 Doing the analysis in the database, where the data resides, eliminates the costs, time and security
 issues associated with the old approach by doing the processing in the data warehouse itself.
 
-We have used a Python package ibmdbpy to enable the process of in-database analytics with dashDB
+We have used the Python package ibmdbpy to enable the process of in-database analytics with dashDB
 and use it in pandas like syntax from Interactive Python notebooks.
 The ibmdbpy package translates Pandas-like syntax into SQL and uses a middleware API
 (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution.
