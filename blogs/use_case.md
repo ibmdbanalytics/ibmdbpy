@@ -127,8 +127,10 @@ defining the New York city boroughs are also loaded in dashDB, which will be use
 1. To enable our analysis let's first load all required libraries into our notebook:
 
 
-```python
+```
 !pip install --user ibmdbpy
+```
+```python
 # Import packages needed for analysis
 import ibmdbpy 
 from ibmdbpy import IdaDataFrame, IdaDataBase, IdaGeoDataFrame
@@ -160,29 +162,22 @@ print('Connection to dashDB successful!')
 
 
 3. The crime data is retrieved as an `IdaGeoDataFrame` which is similar to a `pandas` data frame. 
-The process of data retrieval and spatial analysis is much faster with `ibmdbpy` when compared to some well known
-spatial analysis libraries like `shapely` and `geopandas`, which usually need an additonal installation of GDAL and
-reads the data directly into memory which makes the process of data load very slow.
-
-
-
-
-FIXME: dont think we need the time here, because we dont compare to geopandas. 
-Alternatively you can do one analysis in geopandas first, then we can compare the times.
-
+The process of data retrieval and spatial analysis is much faster with `ibmdbpy` with the added advantage of lazy-loading.
+When compared to some well known spatial analysis libraries like `shapely` and `geopandas`, which usually need an additonal 
+installation of GDAL and reads the data directly into memory which makes the process of data load very slow, the data loading 
+is pretty fast in `ibmdbpy`.
 
 ```python
 import numpy as np
 %time nyc_crime_geo  = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
 %time robberies_2015 = nyc_crime_geo[nyc_crime_geo['Offense']=='ROBBERY']
 %time robberies_2015 = robberies_2015[robberies_2015['Occrr_Y'] == 2015]
-%time robberies2015_brooklyn  = len(robberies_2015[robberies_2015['Borough']=='BROOKLYN'])
-%time robberies2015_bronx     = len(robberies_2015[robberies_2015['Borough']=='BRONX'])
+%time robberies2015_brooklyn = len(robberies_2015[robberies_2015['Borough']=='BROOKLYN'])
+%time robberies2015_bronx = len(robberies_2015[robberies_2015['Borough']=='BRONX'])
 %time robberies2015_manhattan = len(robberies_2015[robberies_2015['Borough']=='MANHATTAN'])
-%time robberies2015_queens    = len(robberies_2015[robberies_2015['Borough']=='QUEENS'])
-%time robberies2015_staten    = len(robberies_2015[robberies_2015['Borough']=='STATEN ISLAND'])
-%time robberies_count = [robberies2015_bronx,robberies2015_brooklyn,robberies2015_manhattan,
-                         robberies2015_queens,robberies2015_staten]
+%time robberies2015_queens = len(robberies_2015[robberies_2015['Borough']=='QUEENS'])
+%time robberies2015_staten = len(robberies_2015[robberies_2015['Borough']=='STATEN ISLAND'])
+%time robberies_count = [robberies2015_bronx,robberies2015_brooklyn,robberies2015_manhattan,robberies2015_queens,robberies2015_staten]
 x = np.array([0,1,2,3,4])
 y = np.array(robberies_count)
 my_yticks = ['Bronx','Brooklyn','Manhattan','Queens','Staten Island']
@@ -192,26 +187,6 @@ plt.title('Frequency Distribution of Robberies by Borough in 2015')
 plt.xlabel('No. of Robberies')
 plt.ylabel('Boroughs')
 ```
-
-    Wall time: 302 ms
-    Wall time: 1.89 s
-    Wall time: 624 ms
-    Wall time: 1.45 s
-    Wall time: 1.45 s
-    Wall time: 1.45 s
-    Wall time: 1.42 s
-    Wall time: 1.42 s
-    Wall time: 0 ns
-    Wall time: 4 ms
-
-
-
-
-
-    <matplotlib.text.Text at 0xf577f390>
-
-
-
 
 ![png](output_18_2.png)
 
@@ -230,13 +205,6 @@ df.plot(kind='scatter', x='X', y='Y', title = 'Spatial Distribution of Burglarie
 ```
 
 
-
-
-    <matplotlib.axes._subplots.AxesSubplot at 0x397f6dd8>
-
-
-
-
 ![png](output_20_1.png)
 
 
@@ -248,7 +216,6 @@ of crimes of type __"ROBBERY"__ in each borough in the year __2015__ using the S
 finally compute the density for each borough and try to visualise the results with __Leaflet__ library.
 FIXME: I would start with the number of crimes, and then area - it is more intuitive
 
-FIXME: please use loops instead of one variables per borough
 
 ```python
 # Read the data from dahsDB using ibmdbpy
@@ -316,5 +283,3 @@ in an efficient manner using in-database analytics.
 
 
 Hope you find this approach useful!
-
-TODO: links 
