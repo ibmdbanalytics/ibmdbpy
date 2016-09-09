@@ -31,8 +31,8 @@ Here we describe a simple example on how to use ibmdbpy with dashDB from noteboo
 
 3. Import the package ibmdbpy ( If not installed, install it using pip command )
 
-```python
-pip install --user ibmdbpy
+```
+!pip install --user ibmdbpy
 ```
 
 4. The first step is to setup a connection with the data source, which is dashDB in our case.
@@ -86,11 +86,11 @@ from ibmdbpy import IdaGeoDataFrame
 idageodf = IdaDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
 idageodf.head()
  	OBJECTID 	SHAPE 	                               NAME 	              INSURANCE_VALUE
- 	1         POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	    155263
- 	2         POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	   201204
- 	3         POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550
- 	4         POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	     278992
- 	5         POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick 	    190152
+ 	1         POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo      155263
+ 	2         POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein     201204
+ 	3         POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell  260550
+ 	4         POINT (-80.7158029630 40.1151442910) 	Arletta Henne       278992
+ 	5         POINT (-80.6682444120 40.1808573446) 	Elvia Shadrick      190152
 
 # Set the geometry attribute for the IdaGeoDataFrame for further analyses
 idageodf.set_geometry('SHAPE')
