@@ -85,7 +85,7 @@ Let's try to read a sample data from dahsDB called 'GEO_CUSTOMER' which contains
 from ibmdbpy import IdaGeoDataFrame
 idageodf = IdaDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
 idageodf.head()
- 	OBJECTID 	SHAPE 	                               NAME 	              INSURANCE_VALUE
+ 	OBJECTID 	SHAPE 	                               NAME                INSURANCE_VALUE
  	1         POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo      155263
  	2         POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein     201204
  	3         POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell  260550
