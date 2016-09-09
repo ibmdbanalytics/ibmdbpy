@@ -1882,7 +1882,7 @@ class IdaDataBase(object):
         for rows in dataframe.values:
             value_string = ''
             for colindex, value in enumerate(rows):
-                if str(value) == "nan":
+                if pd.isnull(value): # handles np.nan and None
                     value_string += "NULL,"  # Handle missing values
                 elif isinstance(value, six.string_types):
                     ## Handle apostrophe in values
