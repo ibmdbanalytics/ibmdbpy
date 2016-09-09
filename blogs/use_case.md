@@ -29,42 +29,69 @@ Here we describe a simple example on how to use ibmdbpy with dashDB from noteboo
 
 2. Launch a new Jupyter notebook from the [apache spark service.](https://console.ng.bluemix.net/docs/services/AnalyticsforApacheSpark/index.html)
 
-3. Import the package ibmdbpy ( If not installed, install it from pypi using this url : )
+3. Import the package ibmdbpy ( If not installed, install it using pip command )
 
-TODO: add the import statement and link
+```python
+!pip install --user ibmdbpy
+```
 
 4. The first step is to setup a connection with the data source, which is dashDB in our case.
    It can be done in two ways either with jdbc (For Linux and MAc users) or with odbc (For Windows users)
 
-   In order to setup an ODBC connection (say 'DASHDB'), the connection parameters from dashDB can be used along
-   with the login credentials and then follow the below steps:
+   In order to setup a JDBC connection , the connection parameters from dashDB can be used along
+   with the login credentials.  For a dashDB instance on Bluemix, the JDBC URL string can be found 
+   on the dashDB Connection Information page.
 
 ```python
 import ibmdbpy
 from ibmdbpy import IdaDataBase
-idadb = IdaDataBase('DASHDB')
-```
-
-
-   That' all you have to do!
-
-   FIXME: I dont think the following is required on Bluemix, right? If not, then we need the commands to set it up
-   For setting up a JDBC connection, please make sure an existing Java runtime environment is setup and the
-   db2jcc.jar file is available in the classpath and an additonal python library jaydebeapi needs to be installed.
-
-
-   Once everything is in place, we can just do the following
-
-```python
-import ibmdbpy, jaydebeapi
-from ibmdbpy import IdaDataBase
-username = raw_input("Enter user name (default is 'showcase'):") or "showcase"
-password = getpass.getpass("Enter password:")
+jdbc = "jdbc:db2://host_name:50001/BLUDB:user=user_name;password=password"
 idadb = IdaDataBase(jdbc)
 ```
 
-FIXME: what is this small example actually about? we should at least do some ipbdbpy operation...
-FIXME: I think we need a bit more on how ibmdbpy actually works, some more examples with explanations would do it.
+
+That' all you have to do!
+ 
+Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
+They behave like pointers to remote tables.
+
+Let us open the iris data set, assuming it is stored in the database under the name ‘IRIS’.
+
+```python
+from ibmdbpy import IdaDataFrame
+idadf = IdaDataFrame(idadb, 'IRIS')
+```
+
+We can very easily explore the data in the IdaDataFrame by using built in functions using pandas-like syntax ``IdaDataFrame.head()``
+
+```python
+idadf.head()
+   sepal_length  sepal_width  petal_length  petal_width species
+0           5.1          3.5           1.4          0.2  setosa
+1           4.9          3.0           1.4          0.2  setosa
+2           4.7          3.2           1.3          0.2  setosa
+3           4.6          3.1           1.5          0.2  setosa
+4           5.0          3.6           1.4          0.2  setosa
+```
+
+With the addition of the geospatial extension, we can also explore geospatial data with an IdaGeoDataFrame object.
+These objects can understand a special attribute called geometry which contain geocoded information like a location,
+a trajectory or a region in standard geospatial data formats like POINT, LINESTRING or POLYGON.
+
+Let's try to read a sample data from dahsDB called 'GEO_CUSTOMER' which contains location of a customer in the form of 
+(X,Y) coordinates.
+
+```python
+from ibmdbpy import IdaGeoDataFrame
+idageodf = IdaDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
+idageodf.head()
+ 	OBJECTID 	SHAPE 	                               NAME 	              INSURANCE_VALUE
+0 	1 	      POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo 	    155263
+1 	2 	      POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein 	   201204
+2 	3 	      POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell 	260550
+3 	4 	      POINT (-80.7158029630 40.1151442910) 	Arletta Henne 	     278992
+4 	5 	     POINT (-80.6682444120 40.1808573446) 	 Elvia Shadrick 	    190152
+```
 
 ## Usecase New York crime analysis
 
@@ -77,12 +104,10 @@ The dataset is available in NYC Open Data provided by New York City police depar
 We can analyze this huge dataset efficiently with `ibmdbpy` to gain meaningful insights from
 the data. The major crime hotspots can be then visualized with the help of `folium` and `matplotlib`.
 
-0. TODO: briefly describe loading data into dashdb...
+The data was available as a csv file so it had to be geocoded and transformed to a new spatial reference system WGS84
+and converted to a *.shp format before loading to dashDB.
 
-More details on loading geospatial data into dashDB can be found
-[here](https://www.ibm.com/support/knowledgecenter/SS6NHC/com.ibm.swg.im.dashdb.doc/learn_how/loaddata_gsdata.html).
-
-The NYC crime data is now available on dashDB. Let's take a look at the data in dashDB:
+Once the NYC crime data is available on dashDB, we can take a look at it from within our notebook:
 
 ```python
 from IPython.display import IFrame
@@ -98,11 +123,11 @@ defining the New York city boroughs are also loaded in dashDB, which will be use
 
 1. To enable our analysis let's first load all required libraries into our notebook:
 
-FIXME: does not work in bluemix - correct ibmdbpy library?
 
 ```python
+!pip install --user ibmdbpy
 # Import packages needed for analysis
-import ibmdbpy
+import ibmdbpy 
 from ibmdbpy import IdaDataFrame, IdaDataBase, IdaGeoDataFrame
 import matplotlib as mpl
 import folium,ggplot,mplleaflet
@@ -132,13 +157,11 @@ print('Connection to dashDB successful!')
 
 
 3. The crime data is retrieved as an `IdaGeoDataFrame` which is similar to a `pandas` data frame. 
-The process of data retrieval and spatial analysis is much faster with `ibmdbpy` when compared to some well know
-spatial analysis libraries like `shapely` and `geopandas`, which usually performs pairwise geometric operations
-between two different geometries. 
-FIXME: Dont understand this...
+The process of data retrieval and spatial analysis is much faster with `ibmdbpy` when compared to some well known
+spatial analysis libraries like `shapely` and `geopandas`, which usually need an additonal installation of GDAL and
+reads the data directly into memory which makes the process of data load very slow.
 
-Some users might want to use a more Python-like
-syntax to perform the same exploratory analysis using IdaGeoDataFrames from __ibmdbpy-spatial extension__ .
+
 
 
 FIXME: dont think we need the time here, because we dont compare to geopandas. 
