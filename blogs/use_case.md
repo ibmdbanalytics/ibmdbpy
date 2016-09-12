@@ -36,7 +36,7 @@ Here we describe a simple example on how to use ibmdbpy with dashDB from noteboo
 ```
 
 4. The first step is to setup a connection with the data source, which is dashDB in our case.
-   It can be done in two ways either with jdbc (For Linux and MAc users) or with odbc (For Windows users)
+   It can be done in two ways either with jdbc (For Linux and MAC users) or with odbc (For Windows users)
 
    In order to setup a JDBC connection , the connection parameters from dashDB can be used along
    with the login credentials.  For a dashDB instance on Bluemix, the JDBC URL string can be found 
@@ -53,25 +53,24 @@ idadb = IdaDataBase(jdbc)
 Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
 They behave like pointers to remote tables.
 
-Let us open the iris data set, assuming it is stored in the database under the name ‘IRIS’.
+Let us open the CUST_RETENTION_DEMOGRAPHICS data set, since it is already avaialble in the SAMPLES schema in DASHDB.
 
-FIXME: the iris data set is not pre-loaded to dashDB. Please use one of the preloaded samples, like SHOWCASE_SYSTEMS
 
 ```python
 from ibmdbpy import IdaDataFrame
-idadf = IdaDataFrame(idadb, 'IRIS')
+idadf = IdaDataFrame(idadb,'SAMPLES.CUST_RETENTION_DEMOGRAPHICS')
 ```
 
 We can very easily explore the data in the IdaDataFrame by using built in functions using pandas-like syntax ``IdaDataFrame.head()``
 
 ```python
 idadf.head()
-   sepal_length  sepal_width  petal_length  petal_width species
-0           5.1          3.5           1.4          0.2  setosa
-1           4.9          3.0           1.4          0.2  setosa
-2           4.7          3.2           1.3          0.2  setosa
-3           4.6          3.1           1.5          0.2  setosa
-4           5.0          3.6           1.4          0.2  setosa
+   CUST_ID	GENGER	MARRIED	INCOME	FIRST_PURCHASE_VALUE	LOYALTY	SHARE_OF_WALLET	CUST_LIFETIME_VALUE
+0	 1	      1	     0	      4	     33.55	               1	      46	              759.12
+1	 2	      1	     0	      3	     94.01	               1	      28	              160.77
+2	 3	      1	     0	      3	     157.55	              1	      30	              486.42
+3	 4	      0	     0	      2	     211.49	              0	      82	              1983.20
+4	 5	      0	     0	      4	     165.22	              1	      100	             2445.97
 ```
 
 With the geospatial functions of ibmdbpy, we can also explore geospatial data using `IdaGeoDataFrame` objects.
