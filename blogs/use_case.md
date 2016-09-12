@@ -49,13 +49,13 @@ jdbc = "jdbc:db2://host_name:50001/BLUDB:user=user_name;password=password"
 idadb = IdaDataBase(jdbc)
 ```
 
-
-That's all you have to do!
  
 Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
 They behave like pointers to remote tables.
 
 Let us open the iris data set, assuming it is stored in the database under the name ‘IRIS’.
+
+FIXME: the iris data set is not pre-loaded to dashDB. Please use one of the preloaded samples, like SHOWCASE_SYSTEMS
 
 ```python
 from ibmdbpy import IdaDataFrame
@@ -74,18 +74,17 @@ idadf.head()
 4           5.0          3.6           1.4          0.2  setosa
 ```
 
-With the addition of the geospatial extension, we can also explore geospatial data with an IdaGeoDataFrame object.
-These objects can understand a special attribute called geometry which contain geocoded information like a location,
-a trajectory or a region in standard geospatial data formats like POINT, LINESTRING or POLYGON.
+With the geospatial functions of ibmdbpy, we can also explore geospatial data using `IdaGeoDataFrame` objects.
+The `IdaGeoDataFrame` objects contain geometries representing locations, trajectories or a regions based on the 
+geospatial data types `POINT`, `LINESTRING` or `POLYGON`.
 
-Let's try to read a sample data from dahsDB called 'GEO_CUSTOMER' which contains location of a customer in the form of 
-(X,Y) coordinates.
+The following example reads a data from the dashDB's sample table 'GEO_CUSTOMER' containing customer locations.
 
 ```python
 from ibmdbpy import IdaGeoDataFrame
 idageodf = IdaDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
 idageodf.head()
- 	OBJECTID 	SHAPE 	                               NAME                INSURANCE_VALUE
+ 	OBJECTID  SHAPE 	                            NAME                INSURANCE_VALUE
  	1         POINT (-80.5561002596 40.1528103049) 	Felice Dicarlo      155263
  	2         POINT (-80.6569863704 40.0406902830) 	Aurelia Hussein     201204
  	3         POINT (-80.6247752421 40.1320339439) 	Hildegard Kittrell  260550
@@ -96,19 +95,23 @@ idageodf.head()
 idageodf.set_geometry('SHAPE')
 ```
 
+TODO: i think we should do something with the data here, reading alone is not sufficient for a sample
+
 ## A simple use case
 
-Let us now try out a simple use case for using spatial extension of ibmdbpy to analyze crimes committed in the city of New York.
+The following use case works with the spatial functionality of ibmdbpy to analyze crimes committed in the city of New York.
 The New York city police department has gathered a huge amount of data over a period
-of 10 years and more and categorized the7major crime types (felonies) committed in the city of New York.
+of 10 years and more and categorized the 7major crime types (felonies) committed in the city of New York.
 
-The dataset is available in NYC Open Data provided by New York City police department and can be downloaded
-[here.](https://data.cityofnewyork.us/Public-Safety/NYPD-7-Major-Felony-Incidents/hyij-8hr7/data)
+The dataset is provided by New York City police department and
+[available in NYC Open Data](https://data.cityofnewyork.us/Public-Safety/NYPD-7-Major-Felony-Incidents/hyij-8hr7/data)
+ 
 We can analyze this huge dataset efficiently with `ibmdbpy` to gain meaningful insights from
 the data. The major crime hotspots can be then visualized with the help of `folium` and `matplotlib`.
 
-The data was available as a csv file so it had to be geocoded and transformed to a new spatial reference system WGS84
+The data is available as a csv file so it had to be geocoded and transformed to a new spatial reference system WGS84
 and converted to a *.shp format before loading to dashDB.
+FIXME: If we want customers to follow us here, we need to describe the steps
 
 Once the NYC crime data is available on dashDB, we can take a look at it from within our notebook:
 
@@ -119,12 +122,16 @@ IFrame("https://dashdb-entry-yp-dal09-07.services.dal.bluemix.net:8443/", width=
 
 ![png](dashDB.png)
 
+FIXME: I am not sure we should go the python way here, since we would have to describe how to get the URL. Either use imbdbpy to display the 
+contents (head() function) or we show the table view screenshot simply saying that we can look at it from within dashDB.
 
-The crime data is already geo-coded (TODO: explain why?) and stored as ST_Point in dashDB. Along with it additional geospatial data for
+The crime data is stored as ST_Point in dashDB. In addition additional geospatial data for
 defining the New York city boroughs are also loaded in dashDB, which will be used for further analysis.
 
+REMARK: dont say "geocoded", because usually it means translating addresses into locations.
+TODO: where do we get the borough data from
 
-1. To enable our analysis let's first load all required libraries into our notebook:
+1. Before we start our analysis we load all required libraries into our notebook:
 
 
 ```
@@ -167,6 +174,12 @@ When compared to some well known spatial analysis libraries like `shapely` and `
 installation of GDAL and reads the data directly into memory which makes the process of data load very slow, the data loading 
 is pretty fast in `ibmdbpy`.
 
+FIXME: what about the comment I made last time:
+dont think we need the time here, because we dont compare to geopandas. 
+Alternatively you can do one analysis in geopandas first, then we can compare the times.
+
+FIXME: add the loop into the example
+
 ```python
 import numpy as np
 %time nyc_crime_geo  = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
@@ -191,8 +204,8 @@ plt.ylabel('Boroughs')
 ![png](output_18_2.png)
 
 
-4. We can further analyze the spatial distribution of crimes over a period of past
-decade as a scatterplot .
+4. In the next step we analyze the spatial distribution of crimes over a period of past
+decade and display it as scatterplot .
 
 ```python
 idadf = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID',geometry = 'GEO_DATA')
@@ -208,12 +221,13 @@ df.plot(kind='scatter', x='X', y='Y', title = 'Spatial Distribution of Burglarie
 ![png](output_20_1.png)
 
 
-5. Since the crime data is geo-coded(?), we can use the geospatial functions from the python library geopandas
+5. Since the crime data has location data, we can use the geospatial functions from the python library geopandas
 to analyse the geometry and then retrieve the results in the form of a choropleth map based upon the
 variation of crime density of each borough. In order to achieve this, we first use the ST_Area function
 of dashDB spatial to obtain the area of each borough in square kilometers. Following this, we find the number
-of crimes of type __"ROBBERY"__ in each borough in the year __2015__ using the ST_Within function and
+of crimes of type __"ROBBERY"__ in each borough in the year __2015__ using the `ST_Within()` function and
 finally compute the density for each borough and try to visualise the results with __Leaflet__ library.
+
 FIXME: I would start with the number of crimes, and then area - it is more intuitive
 
 
@@ -281,5 +295,3 @@ map1
 As you can see `ibmdbpy` greatly facilitates your data analysis in python as it can analyze a huge and complex datasets
 in an efficient manner using in-database analytics.
 
-
-Hope you find this approach useful!
