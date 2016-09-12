@@ -189,17 +189,15 @@ FIXME: add the loop into the example
 
 ```python
 import numpy as np
-%time nyc_crime_geo  = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
-%time robberies_2015 = nyc_crime_geo[nyc_crime_geo['Offense']=='ROBBERY']
-%time robberies_2015 = robberies_2015[robberies_2015['Occrr_Y'] == 2015]
-%time robberies2015_brooklyn = len(robberies_2015[robberies_2015['Borough']=='BROOKLYN'])
-%time robberies2015_bronx = len(robberies_2015[robberies_2015['Borough']=='BRONX'])
-%time robberies2015_manhattan = len(robberies_2015[robberies_2015['Borough']=='MANHATTAN'])
-%time robberies2015_queens = len(robberies_2015[robberies_2015['Borough']=='QUEENS'])
-%time robberies2015_staten = len(robberies_2015[robberies_2015['Borough']=='STATEN ISLAND'])
-%time robberies_count = [robberies2015_bronx,robberies2015_brooklyn,robberies2015_manhattan,robberies2015_queens,robberies2015_staten]
+nyc_crime_geo  = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
+robberies_2015 = nyc_crime_geo[nyc_crime_geo['Offense']=='ROBBERY']
+robberies_2015 = robberies_2015[robberies_2015['Occrr_Y'] == 2015]
+Borough = ['BROOKLYN','BRONX','MANHATTAN','QUEENS','STATEN ISLAND']
+count = []
+for items in Borough:
+    count.append(len(robberies_2015[robberies_2015['Borough']== items]))
 x = np.array([0,1,2,3,4])
-y = np.array(robberies_count)
+y = np.array(count)
 my_yticks = ['Bronx','Brooklyn','Manhattan','Queens','Staten Island']
 plt.yticks(x, my_yticks)
 %time plt.barh(x, y)
