@@ -40,6 +40,57 @@ respectively, indexer of the first IdaGeoDataFrame with which the method is call
 IdaGeoDataFrame which is passed as an argument to the method and a third column which contains the result of the
 geometric operation between the geometry columns of the first and second IdaGeoDataFrames.
 
+Contains
+--------
+.. automethod:: IdaGeoDataFrame.contains
+
+Crosses
+-------
+.. automethod:: IdaGeoDataFrame.crosses
+
+Difference
+----------
+.. automethod:: IdaGeoDataFrame.difference
+
+Disjoint
+--------
+.. automethod:: IdaGeoDataFrame.disjoint
+
+Distance
+--------
+.. automethod:: IdaGeoDataFrame.distance
+
+Equals
+------
+.. automethod:: IdaGeoDataFrame.equals
+
+Intersection
+------------
+.. automethod:: IdaGeoDataFrame.intersection
+
+Intersects
+----------
+.. automethod:: IdaGeoDataFrame.intersects
+
+Mbr_Intersects
+--------------
+.. automethod:: IdaGeoDataFrame.mbr_intersects
+
+Overlaps
+--------
+.. automethod:: IdaGeoDataFrame.overlaps
+
+Touches
+-------
+.. automethod:: IdaGeoDataFrame.touches
+
+Union
+-----
+.. automethod:: IdaGeoDataFrame.union
+
 Within
 ------
 .. automethod:: IdaGeoDataFrame.within
+
+
+

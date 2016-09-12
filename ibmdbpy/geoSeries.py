@@ -144,7 +144,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> tornadoes = IdaGeoDataFrame(idadb,'SAMPLES.GEO_TORNADO',indexer='OBJECTID')
+        >>> tornadoes.set_geometry('SHAPE')
+        >>> tornadoes['generalize'] = tornadoes.generalize(threshold = 4)
+        >>> tornadoes[['OBJECTID','generalize']].head()
+        OBJECTID  generalize
+        1         MULTILINESTRING ((-90.2200062071 38.7700071663...
+        2         MULTILINESTRING ((-89.3000059755 39.1000072739...
+        3         MULTILINESTRING ((-84.5800047496 40.8800078382...
+        4         MULTILINESTRING ((-94.3700070010 34.4000061520...
+        5         MULTILINESTRING ((-90.6800062393 37.6000069289...
         """
         try:
             threshold = float(threshold)
@@ -206,7 +215,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> tornadoes = IdaGeoDataFrame(idadb,'SAMPLES.GEO_TORNADO',indexer='OBJECTID')
+        >>> tornadoes.set_geometry('SHAPE')
+        >>> tornadoes['buffer_20_km'] = tornadoes.buffer(distance = 20, unit = 'KILOMETER')
+        >>> tornadoes[['OBJECTID','SHAPE','buffer_20_km']].head()
+        OBJECTID  SHAPE                                        buffer_20_km
+        1         MULTILINESTRING ((-90.2200062071 38.770....  POLYGON ((-90.3065519651 38.9369737029, -90.32..
+        2         MULTILINESTRING ((-89.3000059755 39.100....  POLYGON ((-89.3798853739 39.2690904737, -89.39.
+        3         MULTILINESTRING ((-84.5800047496 40.880....  POLYGON ((-84.7257488606 41.0222185578, -84.73...
+        4         MULTILINESTRING ((-94.3700070010 34.400....  POLYGON ((-94.5212609425 34.5296645617, -94.53...
+        5         MULTILINESTRING ((-90.6800062393 37.600....  POLYGON ((-90.8575378881 37.7120296620, -90.86...
         """
         if not isinstance(distance, Number):
             # distance can be positive or negative
@@ -247,7 +265,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> counties['centroid'] = counties.centroid()
+        >>> counties[['NAME','centroid']].head()
+        NAME         centroid
+        Wood         POINT (-83.6490410160 41.3923524865)
+        Cass         POINT (-94.3483719161 33.0944709011)
+        Washington   POINT (-89.4241634562 38.3657576429)
+        Fulton       POINT (-74.4337987380 43.1359187016)
+        Clay         POINT (-96.5066339619 46.8908550036)
         """
         return self._unary_operation_handler(
                 db2gse_function = 'DB2GSE.ST_CENTROID',
@@ -327,7 +354,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> counties['boundary'] = counties.boundary()
+        >>> counties[['NAME','boundary']].head()
+        NAME         boundary
+        Madison      LINESTRING (-90.4500428418 32.5737889565, -90....
+        Lake         LINESTRING (-114.6043395348 47.7897504535, -11...
+        Broward      LINESTRING (-80.8798118938 26.2594597939, -80....
+        Buena Vista  LINESTRING (-95.3880180283 42.5617494883, -95....
+        Jones        LINESTRING (-77.0903250894 34.8027619185, -77..
         """
         return self._unary_operation_handler(
                 db2gse_function = 'DB2GSE.ST_BOUNDARY',
@@ -364,7 +400,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> tornadoes = IdaGeoDataFrame(idadb,'SAMPLES.GEO_TORNADO',indexer='OBJECTID')
+        >>> tornadoes.set_geometry('SHAPE')
+        >>> tornadoes['envelope'] = tornadoes.envelope()
+        >>> tornadoes[['OBJECTID', 'SHAPE', 'envelope']].head()
+        OBJECTID   SHAPE                                      envelope
+        1          MULTILINESTRING ((-90.2200062071 38.77..   POLYGON ((-90.2200062071 38.77..
+        2          MULTILINESTRING ((-89.3000059755 39.10..   POLYGON ((-89.3000059755 39.10..
+        3          MULTILINESTRING ((-84.5800047496 40.88..   POLYGON ((-84.5800047496 40.88..
+        4          MULTILINESTRING ((-94.3700070010 34.40..   POLYGON ((-94.3700070010 34.40..
+        5          MULTILINESTRING ((-90.6800062393 37.60..   POLYGON ((-90.6800062393 37.60..
         """
         return self._unary_operation_handler(
                 db2gse_function = 'DB2GSE.ST_ENVELOPE',
@@ -575,7 +620,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> tornadoes = IdaGeoDataFrame(idadb,'SAMPLES.GEO_TORNADO',indexer='OBJECTID')
+        >>> tornadoes.set_geometry('SHAPE')
+        >>> tornadoes['srs_name'] = tornadoes.srs_name()
+        >>> tornadoes[['OBJECTID', 'SHAPE', 'srs_name']].head()
+        OBJECTID   SHAPE 	                                            srs_name
+        1 	       MULTILINESTRING ((-90.2200062071 38.7700071663...    SAMPLE_GCS_WGS_1984
+        2 	       MULTILINESTRING ((-89.3000059755 39.1000072739...    SAMPLE_GCS_WGS_1984
+        3 	       MULTILINESTRING ((-84.5800047496 40.8800078382...    SAMPLE_GCS_WGS_1984
+        4 	       MULTILINESTRING ((-94.3700070010 34.4000061520...    SAMPLE_GCS_WGS_1984
+        5 	       MULTILINESTRING ((-90.6800062393 37.6000069289...    SAMPLE_GCS_WGS_1984
         """
         return self._unary_operation_handler(
                 db2gse_function = 'DB2GSE.ST_SRSNAME',
@@ -659,7 +713,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-         # TODO add examples
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> counties['area_in_km'] = counties.area(unit = 'KILOMETER')
+        >>> counties[['NAME','area_in_km']].head()
+        NAME         area_in_km
+        Wood         1606.526429
+        Cass         2485.836511
+        Washington   1459.393496
+        Fulton       1382.620091
+        Clay         2725.095566
         """
         additional_args = []
         if unit is not None:
@@ -750,7 +813,16 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # TODO add examples
+        >>> tornadoes = IdaGeoDataFrame(idadb,'SAMPLES.GEO_TORNADO',indexer='OBJECTID')
+        >>> tornadoes.set_geometry('SHAPE')
+        >>> tornadoes['length'] = tornadoes.length(unit = 'KILOMETER')
+        >>> tornadoes[['OBJECTID', 'SHAPE', 'length']].head()
+        OBJECTID    SHAPE                                              length
+        1           MULTILINESTRING ((-90.2200062071 38.7700071663..   17.798545
+        2           MULTILINESTRING ((-89.3000059755 39.1000072739...  6.448745
+        3           MULTILINESTRING ((-84.5800047496 40.8800078382...  0.014213
+        4           MULTILINESTRING ((-94.3700070010 34.4000061520..   0.014173
+        5           MULTILINESTRING ((-90.6800062393 37.6000069289..   4.254681
         """
         additional_args = []
         if unit is not None:

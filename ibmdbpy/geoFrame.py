@@ -329,6 +329,49 @@ class IdaGeoDataFrame(IdaDataFrame):
     ### Binary geospatial methods
     # ==============================================================================
     def equals(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the geometry of the first IdaGeoDataFrame
+        crosses the second.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+
+        References
+        ----------
+        DB2 Spatial Extender ST_CROSSES() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.equals(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          0
+        2            1840         0
+        2            109          0
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_EQUALS',
@@ -336,6 +379,56 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def distance(self, ida2, unit=None):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with a numeric value
+        which is the geographic distance measured between the
+        geometries of the input IdaGeoDataFrames.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+        unit : str, optional
+            Name of the unit, it is case-insensitive.
+            If omitted, the following rules are used:
+                * If geometry is in a projected or geocentric coordinate
+                system, the linear unit associated with this coordinate system
+                is used.
+                * If geometry is in a geographic coordinate system, the angular
+                unit associated with this coordinate system is used.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_DISTANCE() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.distance(ida2,unit = 'KILOMETER')
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          26.918942
+        2            1840         4.868971
+        2            109          16.387094
+        """
         additional_args = []
         if unit is not None:
             unit = self._check_linear_unit(unit)  # Can raise exceptions
@@ -347,6 +440,52 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def crosses(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the geometry of the first IdaGeoDataFrame
+        crosses the second.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_CROSSES() function.
+
+        See also
+        --------
+        linear_units : list of valid units.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.crosses(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          0
+        2            1840         0
+        2            109          0
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_CROSSES',
@@ -354,6 +493,48 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def intersects(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the geometries of the input IdaGeoDataFrames
+        intersect each other.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_INTERSECTS() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.intersects(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          0
+        2            1840         0
+        2            109          0
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_INTERSECTS',
@@ -361,6 +542,49 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def overlaps(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the geometries of the input IdaGeoDataFrames
+        overlap each other.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_OVERLAPS() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.overlaps(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          0
+        2            1840         0
+        2            109          0
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_OVERLAPS',
@@ -368,6 +592,48 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def touches(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the boundary of the first geometry touches
+        the second.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_TOUCHES() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.touches(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          0
+        2            1840         0
+        2            109          0
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_TOUCHES',
@@ -375,6 +641,48 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def disjoint(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the geometries in the input dataframes are
+        disjoint.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_DISJOINT() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.disjoint(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          1
+        2            1840         1
+        2            109          1
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_DISJOINT',
@@ -382,6 +690,51 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def contains(self, ida2):
+        """
+        Valid types for the column in the calling IdaGeoDataFrame:
+        ST_Geometry or one of its subtypes.
+
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the second geometry contains the first.
+
+        For None geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_CONTAINS() function.
+
+        Examples
+        --------
+        >>> idageodf_customer = IdaGeoDataFrame(idadb,'SAMPLES.GEO_CUSTOMER',indexer='OBJECTID')
+        >>> idageodf_customer.set_geometry('SHAPE')
+        >>> idageodf_county = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> idageodf_county.set_geometry('SHAPE')
+        >>> ida1 = idageodf_customer[idageodf_customer['INSURANCE_VALUE']>250000]
+        >>> ida2 = idageodf_county[idageodf_county['NAME']=='Madison']
+        >>> result = ida2.contains(ida1)
+        >>> result[result['RESULT']==1].head()
+        INDEXERIDA1    INDEXERIDA2    RESULT
+        21473          134            1
+        21413          134            1
+        21414          134            1
+        21417          134            1
+        21419          134            1
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_CONTAINS',
@@ -393,15 +746,25 @@ class IdaGeoDataFrame(IdaDataFrame):
         Valid types for the column in the calling IdaGeoDataFrame:
         ST_Geometry or one of its subtypes.
 
-        Returns an IdaGeoDataFrame of indices of hte two input IdaGeoDataFrames and a result column
-        with 1 or 0 depending upon the output of the DB2GSE function ST_WITHIN() , which represent
-        whether the first geometry is inside the second.
+        Returns an IdaGeoDataFrame of indices of the two input
+        IdaGeoDataFrames and a result column with 1 or 0 depending
+        upon whether the first geometry is inside the second.
 
         For None geometries the output is None.
 
         Returns
         -------
-        IdaGeoDataFrame.
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
 
         References
         ----------
@@ -431,6 +794,47 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def mbr_intersects(self, ida2):
+        """
+        This method takes a second IdaGeoDataFrame an an input
+        and checks if the Minimum Bounding rectangles of the
+        geometries from both IdaGeoDataFrames intersect and
+        stores the result as 0 or 1 in the RESULT column of
+        the resulting IdaGeoDataFrame.
+
+        For None geometries the output is None.
+        For empty geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_MBRIntersects() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.difference(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          0
+        2            1840         0
+        2            109          0
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_MBRINTERSECTS',
@@ -438,6 +842,46 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def difference(self, ida2):
+        """
+        This method takes a second IdaGeoDataFrame an an input
+        and returns the difference of the geometries from both
+        IdaGeoDataFrames as a new geometry stored in the RESULT
+        column of the resulting IdaGeoDataFrame.
+
+        For None geometries the output is None.
+        For empty geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_Difference() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.difference(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          POLYGON ((-96.6219873342 30.0442882117, -96.61...
+        2            1840         POLYGON ((-96.6219873342 30.0442882117, -96.61...
+        2            109          POLYGON ((-96.6219873342 30.0442882117, -96.61...
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_DIFFERENCE',
@@ -445,6 +889,46 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def intersection(self, ida2):
+        """
+        This method takes a second IdaGeoDataFrame an an input
+        and returns the intersection of the geometries from both
+        IdaGeoDataFrames as a new geometry stored in the RESULT
+        column of the resulting IdaGeoDataFrame.
+
+        For None geometries the output is None.
+        For empty geometries the output is POINT EMPTY.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_Intersection() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.intersection(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          POINT EMPTY
+        2            1840         POINT EMPTY
+        2            109          POINT EMPTY
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_INTERSECTION',
@@ -452,6 +936,46 @@ class IdaGeoDataFrame(IdaDataFrame):
             valid_types_ida2=['ST_GEOMETRY'])
 
     def union(self, ida2):
+        """
+        This method takes a second IdaGeoDataFrame an an input
+        and returns the union of the geometries from both
+        IdaGeoDataFrames as a new geometry stored in the RESULT
+        column of the resulting IdaGeoDataFrame.
+
+        For None geometries the output is None.
+        For empty geometries the output is None.
+
+        Returns
+        -------
+        Returns an IdaGeoDataFrame with three columns:
+
+        INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
+        INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
+        RESULT : the result of the operation
+
+        Parameters
+        ----------
+        ida2 : IdaGeoDataFrame
+            Name of the second IdaGeoDataFrame on which the function ST_EQUALS()
+            will be invoked.
+
+        References
+        ----------
+        DB2 Spatial Extender ST_Union() function.
+
+        Examples
+        --------
+        >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
+        >>> counties.set_geometry('SHAPE')
+        >>> ida1 = counties[counties['NAME'] == 'Austin']
+        >>> ida2 = counties[counties['NAME'] == 'Kent']
+        >>> result = ida1.union(ida2)
+        >>> result.head()
+        INDEXERIDA1  INDEXERIDA2  RESULT
+        2            163          MULTIPOLYGON (((-96.6219873342 30.0442882117, ...
+        2            1840         MULTIPOLYGON (((-96.6219873342 30.0442882117, ...
+        2            109          MULTIPOLYGON (((-96.6219873342 30.0442882117, ..
+        """
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_UNION',
@@ -464,7 +988,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
 
         """
-        Returns an IdaDataFrame with three columns:
+        Returns an IdaGeoDataFrame with three columns:
         [
         INDEXERIDA1 : indexer of the first IdaGeoSeries (None if not set),
         INDEXERIDA2 : indexer of the second IdaGeoSeries (None if not set),
@@ -485,7 +1009,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         Returns
         -------
-        IdaDataFrame
+        IdaGeoDataFrame
         """
         ida1 = self  # For code clearness
         if not (ida1.dtypes.TYPENAME[0] in valid_types_ida1 or

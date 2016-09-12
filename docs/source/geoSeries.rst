@@ -23,8 +23,8 @@ Open an IdaGeoSeries
 
    .. automethod:: __init__
 
-Geospatial Methods whic return an IdaGeoSeries
-==============================================
+Geospatial Methods which return an IdaGeoSeries
+===============================================
 Once the geometry property of the IdaGeoDataFrame is set, the geospatial methods of IdaGeoSeries can be accessed
 with the IdaGeoDataFrame object. Currently the following methods are supported.
 
