@@ -13,6 +13,8 @@
 * ibmdbpy uses future and six as compatibility layers, should use only future if possible
 * Fix the number of warnings occurring when building the doc (make html)
 * Add support for more datatypes (upload DataFrame and download Tables) such as Timestamps
+* Refine the test routine: Instead of giving the choice of testing with a particular table, test systematically with several small but relevant tables (e.g. containing missing values, with different data types, etc)
+
 
 # Detailed information
 
