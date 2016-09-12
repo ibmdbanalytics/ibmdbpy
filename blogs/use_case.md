@@ -185,14 +185,12 @@ The process of data retrieval and spatial analysis is much faster with `ibmdbpy`
 When compared to some well known spatial analysis libraries like `shapely` and `geopandas`, which usually need an additonal 
 installation of GDAL and reads the data directly into memory.
 
-FIXME: add the loop into the example
-
 ```python
 import numpy as np
 nyc_crime_geo  = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID')
 robberies_2015 = nyc_crime_geo[nyc_crime_geo['Offense']=='ROBBERY']
 robberies_2015 = robberies_2015[robberies_2015['Occrr_Y'] == 2015]
-Borough = ['BROOKLYN','BRONX','MANHATTAN','QUEENS','STATEN ISLAND']
+Borough = ['BRONX','BROOKLYN','MANHATTAN','QUEENS','STATEN ISLAND']
 count = []
 for items in Borough:
     count.append(len(robberies_2015[robberies_2015['Borough']== items]))
