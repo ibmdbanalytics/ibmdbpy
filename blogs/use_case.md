@@ -1,5 +1,5 @@
 
-# Exploring geospatial in-database analytics with IBM dashDB and iPython notebooks using ibmdbpy
+# Exploring geospatial In-database Analytics with IBM dashDB and ibmdbpy
 
 
 Traditional approaches to data analysis require data to be moved out of the database or files into a separate
