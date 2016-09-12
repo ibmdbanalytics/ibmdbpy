@@ -65,7 +65,7 @@ We can very easily explore the data in the IdaDataFrame by using built in functi
 
 ```python
 idadf.head()
-   CUST_ID	GENGER	MARRIED	INCOME	FIRST_PURCHASE_VALUE	LOYALTY	SHARE_OF_WALLET	CUST_LIFETIME_VALUE
+   CUST_ID	GENGER	MARRIED	INCOME	FIRST_PURCHASE_VALUE LOYALTY SHARE_OF_WALLET  CUST_LIFETIME_VALUE
 0	 1	      1	     0	      4	     33.55	               1	      46	              759.12
 1	 2	      1	     0	      3	     94.01	               1	      28	              160.77
 2	 3	      1	     0	      3	     157.55	              1	      30	              486.42
