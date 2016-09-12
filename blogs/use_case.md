@@ -50,7 +50,7 @@ idadb = IdaDataBase(jdbc)
 ```
 
 
-That' all you have to do!
+That's all you have to do!
  
 Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
 They behave like pointers to remote tables.
@@ -96,9 +96,9 @@ idageodf.head()
 idageodf.set_geometry('SHAPE')
 ```
 
-## Usecase New York crime analysis
+## A simple use case
 
-Let us now try out a use case for using this package to analyze crimes committed in the city of New York.
+Let us now try out a simple use case for using spatial extension of ibmdbpy to analyze crimes committed in the city of New York.
 The New York city police department has gathered a huge amount of data over a period
 of 10 years and more and categorized the7major crime types (felonies) committed in the city of New York.
 
