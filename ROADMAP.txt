@@ -12,6 +12,7 @@
 * Add ODBC support from Linux
 * ibmdbpy uses future and six as compatibility layers, should use only future if possible
 * Fix the number of warnings occurring when building the doc (make html)
+* Add support for more datatypes (upload DataFrame and download Tables) such as Timestamps
 
 # Detailed information
 
