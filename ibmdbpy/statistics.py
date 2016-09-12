@@ -807,6 +807,7 @@ def ida_min(idadf):
     """
     na_tuple = _get_number_of_nas(idadf, idadf.columns)
     min_tuple = _numeric_stats(idadf, "min", idadf.columns)
+    if not hasattr(min_tuple,"__iter__") : min_tuple = (min_tuple,) # dirty fix 
     min_list = [np.nan if ((y > 0) and not isinstance(x, Number))
                 else x for x, y in zip(min_tuple, na_tuple)]
     min_tuple = tuple(min_list)
@@ -824,6 +825,7 @@ def ida_max(idadf):
     """
     na_tuple = _get_number_of_nas(idadf, idadf.columns)
     max_tuple = _numeric_stats(idadf, "max", idadf.columns)
+    if not hasattr(max_tuple,"__iter__") : max_tuple = (max_tuple,) # dirty fix 
     max_list = [np.nan if ((y > 0) and not isinstance(x, Number))
                 else x for x, y in zip(max_tuple, na_tuple)]
     max_tuple = tuple(max_list)
