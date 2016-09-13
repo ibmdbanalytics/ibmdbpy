@@ -29,15 +29,12 @@ Here we describe a simple example on how to use ibmdbpy with dashDB from noteboo
 
 2. Launch a new Jupyter notebook from the [apache spark service.](https://console.ng.bluemix.net/docs/services/AnalyticsforApacheSpark/index.html)
 
-3. Import the package ibmdbpy ( If not installed, install it using pip command )
-
+3. Import the package ibmdbpy ( If not installed, install it using pip command ) 
 ```
 !pip install --user ibmdbpy
 ```
-
-4. The first step is to setup a connection with the data source, which is dashDB in our case.
-   It can be done in two ways either with jdbc (For Linux and MAC users) or with odbc (For Windows users)
-
+4. The first step is to setup a connection with the data source, which is dashDB in our case. 
+   It can be done in two ways either with jdbc (For Linux and MAC users) or with odbc (For Windows users).
    In order to setup a JDBC connection , the connection parameters from dashDB can be used along
    with the login credentials.  For a dashDB instance on Bluemix, the JDBC URL string can be found 
    on the dashDB Connection Information page.
@@ -50,10 +47,10 @@ idadb = IdaDataBase(jdbc)
 ```
 
  
-Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
-They behave like pointers to remote tables.
+ 5. Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
+    They behave like pointers to remote tables.
 
-Let us open the CUST_RETENTION_DEMOGRAPHICS data set, since it is already avaialble in the SAMPLES schema in DASHDB.
+    Let us open the CUST_RETENTION_DEMOGRAPHICS data set, since it is already avaialble in the SAMPLES schema in DASHDB.
 
 
 ```python
@@ -77,8 +74,7 @@ With the geospatial functions of ibmdbpy, we can also explore geospatial data us
 The `IdaGeoDataFrame` objects contain geometries representing locations, trajectories or a regions based on the 
 geospatial data types `POINT`, `LINESTRING` or `POLYGON`.
 
-The following example reads a data from the dashDB's sample table 'GEO_CUSTOMER' containing customer locations.
-
+ 6. The following example reads a data from the dashDB's sample table 'GEO_CUSTOMER' containing customer locations.
 ```python
 from ibmdbpy import IdaGeoDataFrame
 idageodf = IdaDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
