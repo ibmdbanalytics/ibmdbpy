@@ -207,7 +207,8 @@ plt.ylabel('Boroughs')
 
 
 4. In the next step we analyze the spatial distribution of crimes over a period of past
-decade and display it as scatterplot .
+decade and display it as scatterplot using the ST_X() and ST_Y() functions of dashDB spatial
+to extract the geoemtric coordinates of the location of the crime.
 
 ```python
 idadf = IdaGeoDataFrame(idadb,'NYC_CRIME_DATA',indexer = 'OBJECTID',geometry = 'GEO_DATA')
@@ -222,6 +223,15 @@ df.plot(kind='scatter', x='X', y='Y', title = 'Spatial Distribution of Burglarie
 
 ![png](output_20_1.png)
 
+This translates into a spatial query to be executed inside dashDB , like this:
+
+```
+SELECT "Identfr","Occrrnc_Dt","Offense","Precnct","Borough",
+DB2GSE.ST_X(GEO_DATA) AS "X",
+DB2GSE.ST_Y(GEO_DATA) AS "Y" 
+FROM (SELECT * FROM (SELECT * FROM DASH5548.NYC_CRIME_DATA WHERE ("Occrr_Y" = 2015)) 
+WHERE ("Offense" = 'ROBBERY'))
+```
 
 5. Since the crime data has location data, we can use the geospatial functions from the python library geopandas
 to analyse the geometry and then retrieve the results in the form of a choropleth map based upon the
@@ -290,6 +300,26 @@ map1
 
 ![png](plot2.png)
 
-As you can see `ibmdbpy` greatly facilitates your data analysis in python as it can analyze a huge and complex datasets
+The within operation translates into a spatial query inside dashDB and creates a temporary view
+to operate on two different geometries stored in two different IdaGeoDataFrames and retrieve the
+result of the spatial operation ST_WITHIN() inside a completely new IdaGeoDataFrame.
+The query running in the background is as follows:
+
+```
+CREATE VIEW "VIEW_59826_1473751090" AS 
+(SELECT IDA1."OBJECTID" AS "INDEXERIDA1",
+IDA2."OBJECTID" AS "INDEXERIDA2",
+DB2GSE.ST_WITHIN(IDA1.GEO_DATA,IDA2.GEO_DATA) AS "RESULT" 
+FROM (SELECT * FROM 
+(SELECT * FROM DASH5548.NYC_CRIME_DATA 
+WHERE ("Offense" = 'ROBBERY')) 
+WHERE ("Occrr_Y" = 2015)) AS IDA1, 
+(SELECT * FROM (SELECT "BoroCode","BoroName","Shape_Leng",
+"Shape_Area","OBJECTID","GEO_DATA",
+DB2GSE.ST_AREA(GEO_DATA,'KILOMETER') AS "area_in_sq_km" 
+FROM DASH5548.NYC_BOROUGHS) WHERE ("BoroName" = 'Manhattan')) AS IDA2 )
+```
+
+As you can see `ibmdbpy` greatly facilitates your data analysis by simplifying such a huge SQL query into a plain and simple Python syntax. This facilitates not only to perform spatial operations in python but also to analyze huge and complex datasets
 in an efficient manner using in-database analytics.
 
