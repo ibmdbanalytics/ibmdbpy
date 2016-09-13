@@ -273,8 +273,7 @@ boros_df['robberies_2015'] = [staten_count,queens_count,brooklyn_count,manhattan
 boros_df['crime_density'] = (boros_df['robberies_2015']/boros_df['area_in_sq_km'])*0.01
 #Generate choropleth map with folium
 import folium, json
-with open('NYCboros.json', 'r') as f:
-     boros_geo = json.load(f)
+boros_geo = <Copy the content of the file NYCboros.json here as a string>
 robberies = boros_df[['BoroCode','crime_density']]
 map1 = folium.Map(location= (40.709475, -74.00275),
                   zoom_start=10, tiles = 'cartodbpositron')
