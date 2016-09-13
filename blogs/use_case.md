@@ -25,15 +25,15 @@ memory. It, therefore, avoids network overload and crashing of the notebook due 
 
 Here we describe a simple example on how to use ibmdbpy with dashDB from notebooks especially with geospatial data.
 
-1. Create a [Bluemix account.](http://www.ibm.com/developerworks/cloud/library/cl-bluemix-fundamentals-start-your-free-trial/)
+⋅⋅* Create a [Bluemix account.](http://www.ibm.com/developerworks/cloud/library/cl-bluemix-fundamentals-start-your-free-trial/)
 
-2. Launch a new Jupyter notebook from the [apache spark service.](https://console.ng.bluemix.net/docs/services/AnalyticsforApacheSpark/index.html)
+⋅⋅* Launch a new Jupyter notebook from the [apache spark service.](https://console.ng.bluemix.net/docs/services/AnalyticsforApacheSpark/index.html)
 
-3. Import the package ibmdbpy ( If not installed, install it using pip command ) 
+⋅⋅* Import the package ibmdbpy ( If not installed, install it using pip command ) 
 ```
 !pip install --user ibmdbpy
 ```
-4. The first step is to setup a connection with the data source, which is dashDB in our case. 
+⋅⋅* The first step is to setup a connection with the data source, which is dashDB in our case. 
    It can be done in two ways either with jdbc (For Linux and MAC users) or with odbc (For Windows users).
    In order to setup a JDBC connection , the connection parameters from dashDB can be used along
    with the login credentials.  For a dashDB instance on Bluemix, the JDBC URL string can be found 
@@ -47,7 +47,7 @@ idadb = IdaDataBase(jdbc)
 ```
 
  
- 5. Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
+⋅⋅* Using our previously opened IdaDataBase instance named ‘idadb’, we can open one or several IdaDataFrame objects. 
     They behave like pointers to remote tables.
 
     Let us open the CUST_RETENTION_DEMOGRAPHICS data set, since it is already avaialble in the SAMPLES schema in DASHDB.
@@ -58,7 +58,7 @@ from ibmdbpy import IdaDataFrame
 idadf = IdaDataFrame(idadb,'SAMPLES.CUST_RETENTION_DEMOGRAPHICS')
 ```
 
-We can very easily explore the data in the IdaDataFrame by using built in functions using pandas-like syntax ``IdaDataFrame.head()``
+⋅⋅* We can very easily explore the data in the IdaDataFrame by using built in functions using pandas-like syntax ``IdaDataFrame.head()``
 
 ```python
 idadf.head()
@@ -74,7 +74,7 @@ With the geospatial functions of ibmdbpy, we can also explore geospatial data us
 The `IdaGeoDataFrame` objects contain geometries representing locations, trajectories or a regions based on the 
 geospatial data types `POINT`, `LINESTRING` or `POLYGON`.
 
- 6. The following example reads a data from the dashDB's sample table 'GEO_CUSTOMER' containing customer locations.
+⋅⋅* The following example reads a data from the dashDB's sample table 'GEO_CUSTOMER' containing customer locations.
 ```python
 from ibmdbpy import IdaGeoDataFrame
 idageodf = IdaDataFrame(idadb, 'SAMPLES.GEO_CUSTOMER')
@@ -90,7 +90,7 @@ idageodf.head()
 idageodf.set_geometry('SHAPE')
 ```
 
-Now, if we want to compute the distance between two locations we can do the following:
+⋅⋅* Now, if we want to compute the distance between two locations we can do the following:
 
 ```python
 from ibmdbpy import IdaGeoDataFrame
@@ -102,7 +102,7 @@ res.head()
  	1            2           0.150827
 
 ```
-Again, we can use the filter operations in ibmdbpy to find the customer with the highest insurance value 
+⋅⋅* Again, we can use the filter operations in ibmdbpy to find the customer with the highest insurance value 
 
 ```python
 ida = IdaGeoDataFrame(idadb,'SAMPLES.GEO_CUSTOMER')
@@ -139,7 +139,7 @@ The crime data is stored as ST_Point in dashDB. In addition additional geospatia
 defining the New York city boroughs are also loaded in dashDB from [here] (http://www1.nyc.gov/site/planning/data-maps/open-data/districts-download-metadata.page), which will be used for further analysis.
 
 
-1. Before we start our analysis we load all required libraries into our notebook:
+⋅⋅* Before we start our analysis we load all required libraries into our notebook:
 
 
 ```
@@ -158,7 +158,7 @@ print('All libraries imported!')
     All libraries imported!
 
 
-2. Let us now connect to our dashDB datasource with a JDBC connection.
+⋅⋅* Let us now connect to our dashDB datasource with a JDBC connection.
 
 
 ```python
@@ -175,7 +175,7 @@ print('Connection to dashDB successful!')
     Connection to dashDB successful!
 
 
-3. The crime data is retrieved as an `IdaGeoDataFrame` which is similar to a `pandas` data frame. 
+⋅⋅* The crime data is retrieved as an `IdaGeoDataFrame` which is similar to a `pandas` data frame. 
 The process of data retrieval and spatial analysis is much faster with `ibmdbpy` with the added advantage of lazy-loading.
 When compared to some well known spatial analysis libraries like `shapely` and `geopandas`, which usually need an additonal 
 installation of GDAL and reads the data directly into memory from shapefiles or other spatial data formats.
@@ -202,7 +202,7 @@ plt.ylabel('Boroughs')
 ![png](output_18_2.png)
 
 
-4. In the next step we analyze the spatial distribution of crimes over a period of past
+⋅⋅* In the next step we analyze the spatial distribution of crimes over a period of past
 decade and display it as scatterplot using the ST_X() and ST_Y() functions of dashDB spatial
 to extract the geoemtric coordinates of the location of the crime.
 
@@ -229,7 +229,7 @@ FROM (SELECT * FROM (SELECT * FROM DASH5548.NYC_CRIME_DATA WHERE ("Occrr_Y" = 20
 WHERE ("Offense" = 'ROBBERY'))
 ```
 
-5. Since the crime data has location data, we can use the geospatial functions from the python library geopandas
+⋅⋅* Since the crime data has location data, we can use the geospatial functions from the python library geopandas
 to analyse the geometry and then retrieve the results in the form of a choropleth map based upon the
 variation of crime density of each borough. In order to achieve this, we first find the number of crimes within each borough 
 of type __"ROBBERY"__ in each borough in the year __2015__ using the `within` function and then use the `area()` function from ibmdbpy spatial to obtain the area of each borough in square kilometers. We finally compute the density of robberies for each 
