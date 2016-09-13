@@ -203,7 +203,7 @@ plt.xlabel('No. of Robberies')
 plt.ylabel('Boroughs')
 ```
 
-![png](output_18_2.png)
+![png](plot1.png)
 
 
 4. In the next step we analyze the spatial distribution of crimes over a period of past
