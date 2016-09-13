@@ -203,7 +203,7 @@ plt.xlabel('No. of Robberies')
 plt.ylabel('Boroughs')
 ```
 
-![png](plot1.png)
+![png](output_20_1.png)
 
 
 4. In the next step we analyze the spatial distribution of crimes over a period of past
@@ -221,7 +221,7 @@ df.plot(kind='scatter', x='X', y='Y', title = 'Spatial Distribution of Burglarie
 ```
 
 
-![png](output_20_1.png)
+![png](plot1.png)
 
 This translates into a spatial query to be executed inside dashDB , like this:
 
