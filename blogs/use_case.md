@@ -183,7 +183,7 @@ print('Connection to dashDB successful!')
 3. The crime data is retrieved as an `IdaGeoDataFrame` which is similar to a `pandas` data frame. 
 The process of data retrieval and spatial analysis is much faster with `ibmdbpy` with the added advantage of lazy-loading.
 When compared to some well known spatial analysis libraries like `shapely` and `geopandas`, which usually need an additonal 
-installation of GDAL and reads the data directly into memory.
+installation of GDAL and reads the data directly into memory from shapefiles or other spatial data formats.
 
 ```python
 import numpy as np
