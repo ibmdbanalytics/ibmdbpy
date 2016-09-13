@@ -153,8 +153,7 @@ defining the New York city boroughs are also loaded in dashDB from [here] (http:
 # Import packages needed for analysis
 import ibmdbpy 
 from ibmdbpy import IdaDataFrame, IdaDataBase, IdaGeoDataFrame
-import matplotlib as mpl
-import folium,ggplot,mplleaflet
+import folium
 import matplotlib.pyplot as plt
 %matplotlib inline
 print('All libraries imported!')
