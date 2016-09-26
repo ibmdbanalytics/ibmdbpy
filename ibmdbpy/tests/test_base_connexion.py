@@ -91,7 +91,7 @@ class Test_UploadDataFrame(object):
     def test_idadb_as_idadataframe(self, idadb, df):
         ida = idadb.as_idadataframe(df, "TEST_AS_IDADF_18729493954_23849590", clear_existing = True)
         assert(all(ida.columns == df.columns))
-        assert(all(ida.index == df.index))
+        assert(list(ida.index) == list(df.index))
         assert(ida.shape == df.shape)
         idadb.drop_table("TEST_AS_IDADF_18729493954_23849590")
 

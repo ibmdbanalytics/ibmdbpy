@@ -2065,7 +2065,11 @@ class IdaDataFrame(object):
         # (ROW_NUMBER() OVER())-1 is because ROWID starts with 1 instead of 0
         df = self.ida_query("SELECT ((ROW_NUMBER() OVER())-1) AS ROWNUMBER FROM %s"
                             %self._name)
-
+        
+        # Fix a bug in the jpype interface, where the element of the series 
+        # actually are of type jpype._jclass.java.lang.Long
+        if "jpype" in str(type(df[0])):
+            return Index(map(lambda x: int(x.toString()),df))
         return Index(df)
 
     def _get_shape(self):

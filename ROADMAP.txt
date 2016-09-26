@@ -16,6 +16,7 @@
 * Refine the test routine: Instead of giving the choice of testing with a particular table, test systematically with several small but relevant tables (e.g. containing missing values, with different data types, etc)
 * Catch properly failures for operation on unsupported datatypes: for example, min and max are not supported for ST_* (geospatial) column types
 * Remove Benchmarking section from the docu (start.rst), since those features where discarded
+* DataFrame.sort( is deprecated, use .sort_values(inplace=True) instead
 
 # Detailed information
 

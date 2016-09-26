@@ -26,8 +26,8 @@ class Test_Import(object):
     def test_idadf_as_dataframe(self, idadf):
         tmp = idadf.as_dataframe() # For avoiding overhead off loading several time
         assert isinstance(tmp, pandas.core.frame.DataFrame)
-        assert tmp.columns.equals(idadf.columns)
-        assert tmp.index.equals(idadf.index)
+        assert list(tmp.columns) == list(idadf.columns)
+        assert list(tmp.index) == list(idadf.index)
         assert tmp.name == idadf.tablename
 
 class Test_ConnexionManagement(object):
