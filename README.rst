@@ -128,3 +128,12 @@ Here is the list of the persons who contributed to the project, in the chronolog
 - Rafael Rodriguez Morales (geospatial extension, core)
 - Avipsa Roy (geospatial extension)
 - Nicole Schoen (core)
+
+How to contribute
+=================
+
+You want to contribute? That's great! There are many things you can do. 
+
+If you are a member of the ibmdbanalytics group, you can create branchs and merge them to master. Otherwise, you can fork the project and do a pull request. You are very welcome to contribute to the code and to the documentation. 
+
+There are many ways to contribute. If you found bugs and have improvement ideas or need some new specific features, please open a ticket! We do care about it. 

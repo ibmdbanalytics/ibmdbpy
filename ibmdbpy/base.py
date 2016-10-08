@@ -395,10 +395,19 @@ class IdaDataBase(object):
         data = self.ida_query(query)
         data = self._upper_columns(data)
 
-        # DASHDB FIX: schema "SAMPLES" saved as "SAMPLES "
-        for col in data:
-            for index, val in enumerate(data[col]):
-                data[col][index] = val.strip()
+        # DASHDB FIX: schema "SAMPLES" and "GOSALES" saved with an extra blank,
+        # like "SAMPLES ". So here we apply the function ".strip()" to all cells. 
+        # By doing so, we delete the extra blank.
+        # Note that this works because all cells are of type string.
+
+        # OLD version, created an unexpected bug in some pandas version
+        # TypeError: unorderable types: bytes() > int()
+        #for col in data:
+        #    for index, val in enumerate(data[col]):
+        #        data[col][index] = val.strip()
+
+        # Can be done with a one liner :) 
+        data = data.apply(lambda x: x.apply(lambda x: x.strip()))
 
         # Cache the result
         if show_all is True:
