@@ -1329,6 +1329,10 @@ class IdaDataFrame(object):
     #@timed
     @idadf_state
     def count_groupby(self, columns = None, count_only = False, having = None):
+        """
+        Count the occurence of the values of a column or group of columns
+        """
+        # TODO: Document, test 
         if columns is not None:
             if isinstance(columns, six.string_types):
                 columns = [columns]
@@ -1355,7 +1359,11 @@ class IdaDataFrame(object):
         data.columns = columns + ["count"]
         return data 
     
-    def min_freq_of_instance(self, columns = None):
+    def mean_freq_of_instance(self, columns = None):
+        """
+        Return the average occurence of the values of a column or group of columns
+        """
+        # TODO: Document, test 
         if columns is not None:
             if isinstance(columns, six.string_types):
                 columns = [columns]
@@ -1379,6 +1387,9 @@ class IdaDataFrame(object):
 #    @timed
     @idadf_state
     def unique(self, column):
+        """
+        Return the unique values of a column 
+        """
         # TODO: Document, test
         if column in self._unique:
             return self._unique[column]
@@ -2107,6 +2118,10 @@ class IdaDataFrame(object):
                                "WHERE TABNAME=\'%s\' AND TABSCHEMA=\'%s\' "+
                                "ORDER BY COLNO")%(name, self.schema))
 
+        # Workaround for some ODBC version which does not get the entire
+        # string of the column name in the cursor descriptor. 
+        # This is hardcoded, so be careful
+        data.columns = ["COLNAME", "TYPENAME"]
         data.columns = [x.upper() for x in data.columns]
         data.set_index(keys='COLNAME', inplace=True)
         del data.index.name

@@ -393,6 +393,12 @@ class IdaDataBase(object):
                  ' OWNER, TYPE from SYSCAT.TABLES ' + where_part +
                  ' ORDER BY "TABSCHEMA","TABNAME"')
         data = self.ida_query(query)
+        
+        # Workaround for some ODBC version which does not get the entire
+        # string of the column name in the cursor descriptor. 
+        # This is hardcoded, so be careful
+        data.columns = ['TABSCHEMA', 'TABNAME', 'OWNER', 'TYPE']
+        
         data = self._upper_columns(data)
 
         # DASHDB FIX: schema "SAMPLES" and "GOSALES" saved with an extra blank,
@@ -400,8 +406,9 @@ class IdaDataBase(object):
         # By doing so, we delete the extra blank.
         # Note that this works because all cells are of type string.
 
-        # OLD version, created an unexpected bug in some pandas version
+        # OLD version, created an unexpected bug in some worng ODBC version
         # TypeError: unorderable types: bytes() > int()
+        # less pythonic, do not use anymore 
         #for col in data:
         #    for index, val in enumerate(data[col]):
         #        data[col][index] = val.strip()
@@ -1074,6 +1081,7 @@ class IdaDataBase(object):
         If column argument is set to None, a random column is generated which 
         can take values for 1 to ncat.
         Used for benchmark purpose. 
+        Note: This method is deprecated. Can be probably be removed without impact 
         """
         if column is not None:
             if column not in idadf.columns:
@@ -1169,6 +1177,8 @@ class IdaDataBase(object):
             and base them on the sorting of a set of columns, defined by the 
             user, or all columns if no column combination results in unique 
             identifiers.
+            
+            This method is DEPRECATED. 
         """
         if isinstance(idadf, ibmdbpy.IdaSeries):
             raise TypeError("Adding column ID is not supported for IdaSeries")

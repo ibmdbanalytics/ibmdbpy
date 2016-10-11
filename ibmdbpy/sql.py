@@ -103,7 +103,7 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
             #query with SELECT statement, mind that resultset might be empty
             if first_row_only is True:
                 if firstRow is not None:
-                    #this following processing was proposed by Edoard
+                    #this following processing was proposed by Edouard
                     tuple_as_list = list(tuple(firstRow))
                     for index, element in enumerate(tuple_as_list):
                         if element is None:
@@ -115,8 +115,14 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
                     #first_row_only is True but the query retuned nothing
                     return tuple()
             else:
-                result = read_sql(query, idadb._con)                
-                #convert to Series if only one column       
+                result = read_sql(query, idadb._con) 
+                #convert to Series if only one column   
+                
+                # Note: This may solve problem in case the interface does not
+                # get properly the column names. This is just a suggestion. 
+                # Uncomment it if you feel you need it, but so far it worked well without
+                # result.columns = [column[0] for column in cursor.description]
+                
                 if len(result.columns) == 1:
                     result = result[result.columns[0]]                        
             return result
@@ -172,7 +178,7 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
                 if firstRow is None:
                     return tuple()
                 else:
-                    #this following processing was proposed by Edoard            
+                    #this following processing was proposed by Edouard            
                     for index, element in enumerate(firstRow):
                         if element is None:
                             firstRow[index] = np.nan
@@ -187,6 +193,10 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
                 #if firstRow is None, resultset was empty, so create an empty 
                 #DataFrame with the column names
                 result = read_sql(query, idadb._con)
+                # Note: This may solve problem in case the interface does not
+                # get properly the column names. This is just a suggestion. 
+                # Uncomment it if you feel you need it, but so far it worked well without
+                # result.columns = [column[0] for column in cursor.description]
             else:
                 #get the column names for the DataFrame
                 colNames = [column[0] for column in cursor.description]
