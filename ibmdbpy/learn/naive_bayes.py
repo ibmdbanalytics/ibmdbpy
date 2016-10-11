@@ -365,7 +365,7 @@ class NaiveBayes(object):
             raise
         finally:
             idadf.internal_state._delete_view()
-            idadf._cursor.commit()
+            idadf._idadb._autocommit()
 
         self.labels_ = ibmdbpy.IdaDataFrame(idadf._idadb, self.outtable)
         return self.labels_
@@ -399,7 +399,7 @@ class NaiveBayes(object):
         Retrieve information about the model to print the results. The Naive 
         Bayes IDAX function stores its result in 2 tables:
             * <MODELNAME>_MODEL
-            * <MODELNAME>_DISC
+            * <MODELNAME>_DISCRANGES
 
         Parameters
         ----------
@@ -420,16 +420,19 @@ class NaiveBayes(object):
 
         model_main = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_MODEL"')
+        model_main.columns = ['ATTRIBUTE', 'VAL', 'CLASS', 'CLASSVALCOUNT', 'ATTRCLASSCOUNT',
+       'CLASSCOUNT', 'TOTALCOUNT']
         model_main.columns = [x.upper() for x in model_main.columns]
 
         disc = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_DISC"')
+        self._idadb.current_schema + '"."' + modelname + '_DISCRANGES"')
+        disc.columns = ['COLNAME', 'BREAK']
         disc.columns = [x.upper() for x in disc.columns]
 
         if verbose is True:
             print("MODEL")
             print(model_main)
-            print("DISC")
+            print("DISCRANGES")
             print(disc)
 
         return

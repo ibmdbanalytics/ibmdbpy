@@ -390,7 +390,7 @@ class AssociationRules(object):
         #    outtable = idadf._idadb._get_valid_modelname('PREDICT_ASSOCRULES_')
 
         if self.outtable is None:
-            self.outtable = idadf._idadb._get_valid_tablename('NAIVEBAYES_')
+            self.outtable = idadf._idadb._get_valid_tablename('ASSOCRULES_')
         else:
             self.outtable = ibmdbpy.utils.check_tablename(self.outtable)
             if idadf._idadb.exists_table(self.outtable):
@@ -490,20 +490,29 @@ class AssociationRules(object):
         if self._idadb is None:
             raise IdaAssociationRulesError("No Association rules model was trained before.")
 
+        # Note: The name of the columns in hardcoded, this is done so as a 
+        # workaround for some bug in a specific ODBC linux driver. 
+        # In case the implementation of the IDA method changes, this may break
+        # But still would not be difficult to fix 
+
         assocpatterns = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_ASSOCPATTERNS"')
+        assocpatterns.columns = ["ITEMSETID","ITEMID"]
         assocpatterns.columns = [x.upper() for x in assocpatterns.columns]
 
         assocpatterns_stats = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_ASSOCPATTERNS_STATISTICS"')
+        assocpatterns_stats = ["ITEMSETID" , "LENGTH" , "COUNT"  , "SUPPORT" , "LIFT"  ,"PRUNED"]
         assocpatterns_stats.columns = [x.upper() for x in assocpatterns_stats.columns]
 
         assocrules = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_ASSOCRULES"')
+        assocrules.columns = ["RULEID", "ITEMSETID", "BODYID", "HEADID", "CONFIDENCE", "PRUNED"]
         assocrules.columns = [x.upper() for x in assocrules.columns]
 
         items = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_ITEMS"')
+        items.columns = ["ITEMID","ITEM","ITEMNAME","COUNT","SUPPORT"]
         items.columns = [x.upper() for x in items.columns]
 
         if verbose is True:

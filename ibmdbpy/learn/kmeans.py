@@ -26,6 +26,7 @@ from lazy import lazy
 import pandas as pd
 
 import ibmdbpy
+from ibmdbpy import IdaDataFrame
 from ibmdbpy.exceptions import IdaKMeansError
 import six
 
@@ -436,18 +437,29 @@ class KMeans(object):
 
         model_main = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_MODEL"')
+        # Woraround for specific version of ODBC
+        model_main.columns = ['MODELCLASS', 'COMPARISONTYPE', 'COMPARISONMEASURE', 'NUMCLUSTERS']
         model_main.columns = [x.upper() for x in model_main.columns]
+
 
         col_info = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_COLUMNS"',)
+        col_info.columns = ['COLUMNNAME', 'DATATYPE', 'OPTYPE', 'USAGETYPE', 'COLUMNWEIGHT',
+       'AUTOTRANSFORM', 'TRANSFORMEDCOLUMN', 'COMPAREFUNCTION', 'IMPORTANCE',
+       'OUTLIERTREATMENT', 'LOWERLIMIT', 'UPPERLIMIT', 'CLOSURE',
+       'STATISTICSTYPE']
         col_info.columns = [x.upper() for x in col_info.columns]
 
         col_stats = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_COLUMN_STATISTICS"')
+        col_stats.columns = ['CLUSTERID', 'COLUMNNAME', 'CARDINALITY', 'MODE', 'MINIMUM', 'MAXIMUM',
+       'MEAN', 'VARIANCE', 'VALIDFREQ', 'MISSINGFREQ', 'INVALIDFREQ',
+       'IMPORTANCE']
         col_stats.columns = [x.upper() for x in col_stats.columns]
 
         km_out_stat = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_CLUSTERS"')
+        km_out_stat.columns = ['CLUSTERID', 'NAME', 'DESCRIPTION', 'SIZE', 'RELSIZE', 'WITHINSS']
         km_out_stat.columns = [x.upper() for x in km_out_stat.columns]
 
         k = model_main.iloc[0][3]

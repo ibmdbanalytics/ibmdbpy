@@ -402,11 +402,10 @@ class IdaDataBase(object):
         data = self._upper_columns(data)
 
         # DASHDB FIX: schema "SAMPLES" and "GOSALES" saved with an extra blank,
-        # like "SAMPLES ". So here we apply the function ".strip()" to all cells. 
         # By doing so, we delete the extra blank.
         # Note that this works because all cells are of type string.
 
-        # OLD version, created an unexpected bug in some worng ODBC version
+        # OLD version, created an unexpected bug in some wrong ODBC version
         # TypeError: unorderable types: bytes() > int()
         # less pythonic, do not use anymore 
         #for col in data:
@@ -439,6 +438,11 @@ class IdaDataBase(object):
         2   DASHXXXXXX  KMEANS_11948_1434976568  DASHXXXXXX
         """
         data = self.ida_query("call idax.list_models()")
+        # Workaround for some ODBC version which does not get the entire
+        # string of the column name in the cursor descriptor. 
+        # This is hardcoded, so be careful
+        data.columns = ['modelschema', 'modelname', 'owner', 'created', 'state',
+       'miningfunction', 'algorithm', 'usercategory']
         data = self._upper_columns(data)
         return data
 
