@@ -43,7 +43,10 @@ class Test_ConnectToDB(object):
 
     def test_idadb_instance_fail(self, idadb):
         with pytest.raises(IdaDataBaseError):
-            IdaDataBase(dsn = 'NOTEXISTING_DATASOURCE')
+            if idadb._con_type == 'odbc':
+                IdaDataBase(dsn = 'NOTEXISTING_DATASOURCE')
+            else:
+                IdaDataBase(dsn='jdbc:NOTEXISTING_DATASOURCE')
         with pytest.raises(IdaDataBaseError):
             IdaDataBase(dsn = 'jdbc:db2://awh-yp-small03.services.dal.bluemix.net:50000/BLUDB:user=XXXXXXXXXX;password=XXXXXXXXXXXX',
                         uid="hello", pwd="world")
@@ -65,13 +68,16 @@ class Test_ConnexionManagement(object):
 
     def test_idadb_rollback(self, idadb, df):
         # TODO: Does not work for JDBC -> Why no rollback for jaydebeapi ?
-        try : idadb.drop_table("TEST_ROLLBACK_59673030586849305074")
-        except : pass
-        idadb.commit()
-        idadb._create_table(df, "TEST_ROLLBACK_59673030586849305074")
-        idadb.rollback()
-        #idadb.commit()
-        assert(idadb.exists_table("TEST_ROLLBACK_59673030586849305074") == 0)
+        if idadb._con_type == 'odbc':
+            try:
+                idadb.drop_table("TEST_ROLLBACK_59673030586849305074")
+            except:
+                pass
+            idadb.commit()
+            idadb._create_table(df, "TEST_ROLLBACK_59673030586849305074")
+            idadb.rollback()
+            idadb.commit()
+            assert(idadb.exists_table("TEST_ROLLBACK_59673030586849305074") == 0)
 
     def test_idadb_close(self, idadb_tmp):
         idadb_tmp.close()

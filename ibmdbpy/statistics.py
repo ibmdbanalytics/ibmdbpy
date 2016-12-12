@@ -613,7 +613,7 @@ def quantile(idadf, q=0.5):
 
     result = result.T
     result = result[result.columns[0]]
-    result.name = None
+    result.name = q[0]
     result = result.astype('float')
 
     if len(result) == 1:
