@@ -1448,7 +1448,7 @@ class IdaDataBase(object):
             self.rollback()
         self._reset_attributes("cache_show_tables")
         self._con.close()
-        print("A SQL-Handle for database %s was closed." % self.data_source_name)
+        print("Connection closed.")
 
     def reconnect(self):
         """
