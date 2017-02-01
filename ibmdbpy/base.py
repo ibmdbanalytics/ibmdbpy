@@ -210,7 +210,7 @@ class IdaDataBase(object):
                 import jaydebeapi
                 import jpype
             except ImportError:
-                ImportError("Please install optional dependency jaydebeapi "+
+                raise ImportError("Please install optional dependency jaydebeapi "+
                             "to work with JDBC.")
             
             here = os.path.abspath(os.path.dirname(__file__))
