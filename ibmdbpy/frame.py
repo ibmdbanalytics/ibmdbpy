@@ -335,14 +335,10 @@ class IdaDataFrame(object):
         dtype='object')
         """
         if hasattr(self, "internal_state"):
-            # idea : return the list of keys of interal_state.columndict
-            try:
-                return pd.Index(self.internal_state.columndict.keys())
-            except:
-                self.internal_state._create_view()
-                cols = self._get_columns()
-                self.internal_state._delete_view()
-                return cols
+            self.internal_state._create_view()
+            cols = self._get_columns()
+            self.internal_state._delete_view()
+            return cols
         else:
             return self._get_columns()
 
