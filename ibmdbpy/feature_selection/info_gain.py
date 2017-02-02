@@ -101,7 +101,7 @@ def info_gain(idadf, target = None, features = None, ignore_indexer=True):
             result = result.iloc[0,0]
         else:
             result = result[result.columns[0]].copy()
-            result.sort(ascending = False) 
+            result.sort_values(inplace=True, ascending=False)
 
     return result        
 

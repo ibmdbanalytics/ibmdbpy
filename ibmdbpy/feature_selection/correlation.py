@@ -112,7 +112,7 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
                 result = result.iloc[0,0]
             else:
                 result = result[result.columns[0]].copy()
-                result.sort(ascending = False) 
+                result.sort_values(inplace=True, ascending=False)
         else:
             order = [x for x in result.columns if x in features] + [x for x in features if x not in result.columns]
             result = result.reindex(order)
