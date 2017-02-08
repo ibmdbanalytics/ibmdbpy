@@ -1048,7 +1048,10 @@ class IdaDataFrame(object):
                 if (self.indexer is not None)&(self.indexer in self.columns):
                     order = " ORDER BY \"" + str(self.indexer) + "\" ASC"
                 elif self.indexer is None:
-                    warnings.warn("Row order is not guaranteed if no indexer was given and the dataset was not sorted.")
+                    column = self.columns[0]
+                    if self._get_numerical_columns():
+                        column = self._get_numerical_columns()[0]
+                    order = " ORDER BY \"" + column + "\" ASC"
 
             data = self.ida_query("SELECT * FROM %s%s FETCH FIRST %s ROWS ONLY"%(name, order, nrow))
             if data.shape[0] != 0:
@@ -1100,24 +1103,20 @@ class IdaDataFrame(object):
                 data = self.ida_query(query)
                 data.columns = self.columns
                 data.set_index(data[self.indexer], inplace=True)
-            elif self.indexer:
-                order = "ORDER BY \"" + str(self.indexer) + "\" DESC"
+            else:
+                sortkey = ''
+                if self.indexer:
+                    sortkey = str(self.indexer)
+                else:
+                    sortkey = self.columns[0]
+                    if self._get_numerical_columns():
+                        sortkey = self._get_numerical_columns()[0]
+                order = "ORDER BY \"" + sortkey + "\" DESC"
                 query = "SELECT * FROM %s %s FETCH FIRST %s ROWS ONLY"%(name, order, nrow)
                 data = self.ida_query(query)
                 data.columns = self.columns
-                data.set_index(data[self.indexer], inplace=True)
-            else:
-                # Important : index in python starts with 0, in dashDB 1
-                query = ("SELECT * FROM (SELECT * FROM (SELECT "+column_string+
-                     ", ((ROW_NUMBER() OVER("+ self.internal_state.get_order()+
-                     "))-1) AS ROWNUMBER FROM " + name +
-                     ") ORDER BY ROWNUMBER DESC FETCH FIRST " + str(nrow) +
-                     " ROWS ONLY) ORDER BY ROWNUMBER ASC")
-                data = self.ida_query(query)
-                warnings.warn("Row order is not guaranteed if no indexer" +
-                                  " was given and the dataset was not sorted.", UserWarning)
-                data.set_index(data.columns[-1], inplace=True) # Set the index
-                data.columns = self.columns
+                data.set_index(data[sortkey], inplace=True)
+                data.sort_values(sortkey, inplace=True)
 
             del data.index.name
 #            data = ibmdbpy.utils._convert_dtypes(self, data)
