@@ -298,6 +298,11 @@ class Test_DataExploration(object):
         assert isinstance(ida_head, pandas.core.frame.DataFrame)
         assert len(ida_head) == 10
 
+    def test_idadf_head_10_sort(self, idadb, idadf, df):
+        ida_head = idadf.head(10, sort=False)
+        assert isinstance(ida_head, pandas.core.frame.DataFrame)
+        assert len(ida_head) == 10
+
     def test_idadf_head_with_indexer(self, idadb, idadf_indexer, df):
         ida_head = idadf_indexer.head()
         sortby = len(df.columns)-1
@@ -359,6 +364,11 @@ class Test_DataExploration(object):
 
     def test_idadf_tail_10(self, idadb, idadf, df):
         ida_tail = idadf.tail(10)
+        assert isinstance(ida_tail, pandas.core.frame.DataFrame)
+        assert len(ida_tail) == 10
+
+    def test_idadf_tail_10_sort(self, idadb, idadf, df):
+        ida_tail = idadf.tail(10, sort=False)
         assert isinstance(ida_tail, pandas.core.frame.DataFrame)
         assert len(ida_tail) == 10
 
