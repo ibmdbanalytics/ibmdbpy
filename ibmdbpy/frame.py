@@ -1015,19 +1015,32 @@ class IdaDataFrame(object):
         print(self.internal_state.get_state())
 
     @idadf_state
-    def head(self, nrow=5):
+    def head(self, nrow=5, sort=True):
         """
         Print the n first rows of the instance, n is set to 5 by default.
+
         Parameters
         ----------
         nrow : int > 0
             Number of rows to be included in the result.
+
+        sort: default is True
+            If set to True and no indexer is set the data will be
+            sorted by the first numeric column or if no numeric column
+            is available by the first column of the dataframe.
+            If set to False and no indexer is set the row order is not
+            guaranteed and can vary with each execution. For big tables
+            this option might save query processing time.
+
+
         Returns
         -------
         DataFrame or Series
             The index of the corresponding row number and the columns are all 
             columns of self. If the IdaDataFrame has only one column, it 
             returns a Series.
+
+
         Examples
         --------
         >>> ida_iris.head()
@@ -1048,12 +1061,20 @@ class IdaDataFrame(object):
                 if (self.indexer is not None)&(self.indexer in self.columns):
                     order = " ORDER BY \"" + str(self.indexer) + "\" ASC"
                 elif self.indexer is None:
-                    warnings.warn("Row order is not guaranteed if no indexer was given and the dataset was not sorted.")
-
+                    if sort:
+                        column = self.columns[0]
+                        if self._get_numerical_columns():
+                            column = self._get_numerical_columns()[0]
+                        order = " ORDER BY \"" + column + "\" ASC"
+                    else:
+                        order = ''
             data = self.ida_query("SELECT * FROM %s%s FETCH FIRST %s ROWS ONLY"%(name, order, nrow))
+
             if data.shape[0] != 0:
-                columns = self.columns
-                data.columns = columns
+                # otherwise column sort order is reverted
+                if not 'SELECT ' in name:
+                    columns = self.columns
+                    data.columns = columns
 #                data = ibmdbpy.utils._convert_dtypes(self, data)
                 if isinstance(self, ibmdbpy.IdaSeries):
                     data = pd.Series(data)
@@ -1062,7 +1083,7 @@ class IdaDataFrame(object):
 
     # TODO : There is a warning in anaconda when there are missing values -> why ?
     @idadf_state
-    def tail(self, nrow=5):
+    def tail(self, nrow=5, sort=True):
         """
         Print the n last rows of the instance, n is set to 5 by default.
 
@@ -1070,6 +1091,14 @@ class IdaDataFrame(object):
         ----------
         nrow : int > 0
             The number of rows to be included in the result.
+
+        sort: default is True
+            If set to True and no indexer is set the data will be
+            sorted by the first numeric column or if no numeric column
+            is available by the first column of the dataframe.
+            If set to False and no indexer is set the row order is not
+            guaranteed and can vary with each execution. For big tables
+            this option might save query processing time.
 
         Returns
         -------
@@ -1100,31 +1129,30 @@ class IdaDataFrame(object):
                 data = self.ida_query(query)
                 data.columns = self.columns
                 data.set_index(data[self.indexer], inplace=True)
-            elif self.indexer:
-                order = "ORDER BY \"" + str(self.indexer) + "\" DESC"
-                query = "SELECT * FROM %s %s FETCH FIRST %s ROWS ONLY"%(name, order, nrow)
-                data = self.ida_query(query)
-                data.columns = self.columns
-                data.set_index(data[self.indexer], inplace=True)
             else:
-                # Important : index in python starts with 0, in dashDB 1
-                query = ("SELECT * FROM (SELECT * FROM (SELECT "+column_string+
-                     ", ((ROW_NUMBER() OVER("+ self.internal_state.get_order()+
-                     "))-1) AS ROWNUMBER FROM " + name +
-                     ") ORDER BY ROWNUMBER DESC FETCH FIRST " + str(nrow) +
-                     " ROWS ONLY) ORDER BY ROWNUMBER ASC")
+                order = ''
+                if self.indexer:
+                    sortkey = str(self.indexer)
+                    order = "ORDER BY \"" + sortkey + "\""
+                else:
+                    if sort:
+                        sortkey = self.columns[0]
+                        if self._get_numerical_columns():
+                            sortkey = self._get_numerical_columns()[0]
+                        order = "ORDER BY \"" + sortkey + "\""
+                query = ("SELECT * FROM (SELECT * FROM (SELECT " + column_string +
+                         ", ((ROW_NUMBER() OVER(" + order +
+                         "))-1) AS ROWNUMBER FROM " + name +
+                         ") ORDER BY ROWNUMBER DESC FETCH FIRST " + str(nrow) +
+                         " ROWS ONLY) ORDER BY ROWNUMBER ASC")
                 data = self.ida_query(query)
-                warnings.warn("Row order is not guaranteed if no indexer" +
-                                  " was given and the dataset was not sorted.", UserWarning)
-                data.set_index(data.columns[-1], inplace=True) # Set the index
+                data.set_index(data.columns[-1], inplace=True)  # Set the index
                 data.columns = self.columns
 
             del data.index.name
-#            data = ibmdbpy.utils._convert_dtypes(self, data)
-
+            #            data = ibmdbpy.utils._convert_dtypes(self, data)
             if isinstance(self, ibmdbpy.IdaSeries):
                     data = pd.Series(data[data.columns[0]])
-
             return data
 
     @idadf_state

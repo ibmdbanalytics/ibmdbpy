@@ -191,6 +191,30 @@ def idadf(request, idadb):
     idadb.commit()
     return idadf
 
+@pytest.fixture(scope="session")
+def idadf_indexer(request, idadb, idadf):
+    """
+    IdaDataFrame fixture with indexer defined to be used for the whole testing session.
+    Shall not be used during the testing procedure by destructive and
+    semi-destructive functions.
+    """
+    data = get_data(request)
+
+    def fin():
+        try:
+            idadb.drop_table("TEST_IBMDBPY_INDEX")
+            idadb.commit()
+        except:
+            pass
+    request.addfinalizer(fin)
+
+    idadf_index = idadb.as_idadataframe(data, 'TEST_IBMDBPY_INDEX',
+                                        clear_existing=True,
+                                        indexer=idadf.columns[len(idadf.columns) - 1])
+
+    idadb.commit()
+    return idadf_index
+
 @pytest.fixture(scope="function")
 def idadf_tmp(request, idadb):
     """

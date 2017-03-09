@@ -283,32 +283,141 @@ class Test_DataExploration(object):
     # For head and tail we do not test if the rows match because
     # the order is not guaranteed anyway
     def test_idadf_head_default(self, idadb, idadf, df):
+        sortkey = idadf.columns[0]
+        if idadf._get_numerical_columns():
+            sortkey = idadf._get_numerical_columns()[0]
+
         ida_head = idadf.head()
         assert isinstance(ida_head, pandas.core.frame.DataFrame)
         assert len(ida_head) == 5
+        df_head = df.sort_values(sortkey).head()
+        assert (ida_head[sortkey].tolist() == df_head[sortkey].tolist())
+
     def test_idadf_head_10(self, idadb, idadf, df):
         ida_head = idadf.head(10)
         assert isinstance(ida_head, pandas.core.frame.DataFrame)
         assert len(ida_head) == 10
+
+    def test_idadf_head_10_sort(self, idadb, idadf, df):
+        ida_head = idadf.head(10, sort=False)
+        assert isinstance(ida_head, pandas.core.frame.DataFrame)
+        assert len(ida_head) == 10
+
+    def test_idadf_head_with_indexer(self, idadb, idadf_indexer, df):
+        ida_head = idadf_indexer.head()
+        sortby = len(df.columns)-1
+        df_head = df.sort_values(df.columns[sortby]).head()
+        assert isinstance(ida_head, pandas.core.frame.DataFrame)
+        assert len(ida_head) == 5
+        assert(ida_head[idadf_indexer.columns[sortby]].tolist() ==
+                       df_head[df.columns[sortby]].tolist())
+
+    def test_idadf_head_projected_3col(self, idadf, df):
+        if len(idadf.columns) >= 4:
+            columns = idadf.columns[1:4].tolist()
+            newidadf = idadf[columns]
+
+            sortkey = newidadf.columns[0]
+            if newidadf._get_numerical_columns():
+                sortkey = newidadf._get_numerical_columns()[0]
+
+            ida_head = newidadf.head()
+
+            df_sorted = df.sort_values(sortkey)
+            df_head = df_sorted[columns].head()
+
+            assert isinstance(ida_head, pandas.core.frame.DataFrame)
+            assert len(ida_head) == 5
+            assert(ida_head[sortkey].tolist() == df_head[sortkey].tolist())
+
+    def test_idadf_head_sorted(self, idadf, df):
+        sortIdx = len(df.columns) - 1
+        sortkey = idadf.columns[sortIdx]
+        newidadf = idadf.sort(sortkey)
+        ida_head = newidadf.head()
+
+        df_head = df.sort_values(sortkey).head()
+
+        assert(" ORDER BY " in newidadf.internal_state.get_state())
+        assert isinstance(ida_head, pandas.core.frame.DataFrame)
+        assert len(ida_head) == 5
+        assert(ida_head[sortkey].tolist() == df_head[sortkey].tolist())
+
     def test_idadf_head_0(self, idadf):
         with pytest.raises(ValueError):
             idadf.head(0)
+
     def test_idadf_head_negative(self, idadf):
         with pytest.raises(ValueError):
             idadf.head(-1)
 
     ### tail
     def test_idadf_tail_default(self, idadb, idadf, df):
+        sortkey = idadf.columns[0]
+        if idadf._get_numerical_columns():
+            sortkey = idadf._get_numerical_columns()[0]
         ida_tail = idadf.tail()
         assert isinstance(ida_tail, pandas.core.frame.DataFrame)
         assert len(ida_tail) == 5
+        df_tail = df.sort_values(sortkey).tail()
+        assert (ida_tail[sortkey].tolist() == df_tail[sortkey].tolist())
+
     def test_idadf_tail_10(self, idadb, idadf, df):
         ida_tail = idadf.tail(10)
         assert isinstance(ida_tail, pandas.core.frame.DataFrame)
         assert len(ida_tail) == 10
+
+    def test_idadf_tail_10_sort(self, idadb, idadf, df):
+        ida_tail = idadf.tail(10, sort=False)
+        assert isinstance(ida_tail, pandas.core.frame.DataFrame)
+        assert len(ida_tail) == 10
+
+    def test_idadf_tail_with_indexer(self, idadb, idadf_indexer, df):
+        ida_tail = idadf_indexer.tail()
+        sortby = len(df.columns)-1
+        df_head = df.sort_values(df.columns[sortby]).tail()
+        assert isinstance(ida_tail, pandas.core.frame.DataFrame)
+        assert len(ida_tail) == 5
+        assert(ida_tail[idadf_indexer.columns[sortby]].tolist() ==
+                       df_head[df.columns[sortby]].tolist())
+
+    def test_idadf_tail_projected_3col(self, idadf, df):
+        if len(idadf.columns) >= 4:
+            columns = idadf.columns[1:4].tolist()
+            newidadf = idadf[columns]
+
+            sortkey = newidadf.columns[0]
+            if newidadf._get_numerical_columns():
+                sortkey = newidadf._get_numerical_columns()[0]
+
+            ida_tail = newidadf.tail()
+
+            df_sorted = df.sort_values(sortkey)
+            df_tail = df_sorted[columns].tail()
+
+            assert isinstance(ida_tail, pandas.core.frame.DataFrame)
+            assert len(ida_tail) == 5
+            assert(ida_tail[sortkey].tolist() == df_tail[sortkey].tolist())
+
+    @pytest.mark.skip(reason="tail on sorted dataframe fails in general, needs fixing first")
+    def test_idadf_tail_sorted(self, idadf, df):
+        sortIdx = len(df.columns) - 1
+        sortkey = idadf.columns[sortIdx]
+        newidadf = idadf.sort(sortkey)
+        ida_tail = newidadf.tail()
+
+        df_tail = df.sort_values(sortkey).tail()
+
+        assert(" ORDER BY " in newidadf.internal_state.get_state())
+        assert isinstance(ida_tail, pandas.core.frame.DataFrame)
+        assert len(ida_tail) == 5
+        assert(ida_tail[sortkey].tolist() == df_tail[sortkey].tolist())
+
+
     def test_idadf_tail_0(self, idadf):
         with pytest.raises(ValueError):
             idadf.tail(0)
+
     def test_idadf_tail_negative(self, idadf):
         with pytest.raises(ValueError):
             idadf.tail(-1)

@@ -151,7 +151,7 @@ Use ``IdaDataFrame.tail`` to get the last n records of your data set (default 5)
 148           6.2          3.4           5.4          2.3  virginica
 149           5.9          3.0           5.1          1.8  virginica
 
-Note: Because dashDB operates on a distributed system, the order of rows using ``IdaDataFrame.head`` and ``IdaDataFrame.tail`` is not guaranteed unless the table is sorted (using an ‘ORDER BY’ clause) or a column is declared as index for the IdaDataFrame (parameter/attribute ``indexer``).
+Note: Because dashDB operates on a distributed system, the order of rows using ``IdaDataFrame.head`` and ``IdaDataFrame.tail`` is not guaranteed unless the table is sorted (using an ‘ORDER BY’ clause) or a column is declared as index for the IdaDataFrame (parameter/attribute ``indexer``). To better mimic the behaviour of a Pandas dataframe the data is sorted by the first numeric column or if there is none the first column in the dataframe. To disable this implicit sorting specify sort=False on ``IdaDataFrame.head`` and ``IdaDataFrame.tail``. 
 
 IdaDataFrame also implements most attributes that are available in a Pandas DataFrame.
 

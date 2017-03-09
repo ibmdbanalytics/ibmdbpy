@@ -29,7 +29,7 @@ class Test_projection(object):
         assert(type(ida) == ibmdbpy.frame.IdaDataFrame)
         assert(len(ida.columns) == 1)
         head = ida.head()
-        assert(len(head.columns) == 1)
+        assert (head.name == idadf.columns[0])
         pass
 
     def test_projection_1_col_idaseries(self, idadf):

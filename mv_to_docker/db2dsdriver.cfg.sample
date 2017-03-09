@@ -1,0 +1,11 @@
+<?xml version=1.0 encoding=UTF-8 standalone=no ?>
+<configuration>
+  <databases>
+    <database host="DASHDBHOST" name="BLUDB" port="50000"/>
+  </databases>
+
+  <dsncollection>
+    <dsn alias="BLUMIX" host="DASHDBHOST" name="BLUDB" port="50000"/>
+  </dsncollection>
+
+</configuration>

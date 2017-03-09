@@ -1,0 +1,16 @@
+[Data Sources]
+BLUMIX = DASHDB
+
+[ODBC]
+Trace         = 0
+TraceAutoStop = 0
+TraceFile     = 
+TraceLibrary  = 
+
+[BLUMIX]
+Driver      = /tmp/dsdriver/lib/libdb2o.so 
+Description = DashDB connection
+DATABASE    = BLUDB
+HOSTNAME    = DASHDBHOST
+PORT        = 50000
+PROTOCOL    = TCPIP
