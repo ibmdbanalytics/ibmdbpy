@@ -61,9 +61,9 @@ from ibmdbpy.internals import idadf_state
 
 class IdaDataFrame(object):
     """
-    An IdaDataFrame object is a reference to a table in a remote instance of 
-    dashDB/DB2. IDA stands for In-DataBase Analytics. IdaDataFrame copies the 
-    Pandas interface for DataFrame objects to ensure intuitive interaction for 
+    An IdaDataFrame object is a reference to a table in a remote instance of
+    dashDB/DB2. IDA stands for In-DataBase Analytics. IdaDataFrame copies the
+    Pandas interface for DataFrame objects to ensure intuitive interaction for
     end-users.
 
     Examples
@@ -92,10 +92,10 @@ class IdaDataFrame(object):
         tablename : str
             Name of the table to be opened in the database.
         indexer : str, optional
-            Name of the column that should be used as an index. This is 
-            optional. However, if no indexer is given, the order of rows issued 
-            by the head and tail functions is not guaranteed. Also, several 
-            in-database machine learning algorithms need an indexer as a 
+            Name of the column that should be used as an index. This is
+            optional. However, if no indexer is given, the order of rows issued
+            by the head and tail functions is not guaranteed. Also, several
+            in-database machine learning algorithms need an indexer as a
             parameter to be executed.
 
         Attributes
@@ -111,10 +111,10 @@ class IdaDataFrame(object):
         indexer : str
             Name of the column used as an index. "None" if no indexer.
         loc : str
-            Indexer that enables the selection and projection of IdaDataFrame 
+            Indexer that enables the selection and projection of IdaDataFrame
             instances. For more information, see the loc class documentation.
         internal_state : InternalState
-            Object used to internally store the state of the IdaDataFrame. It 
+            Object used to internally store the state of the IdaDataFrame. It
             also allows several non-destructive manipulation methods.
         type : str
             Type of the IdaDataFrame : “Table”, “View”, or “Unknown”.
@@ -131,8 +131,8 @@ class IdaDataFrame(object):
 
         Notes
         -----
-        Attributes "type", "dtypes", "index", "columns", "axes", and "shape" 
-        are evaluated in a lazy way to avoid an overhead when creating an 
+        Attributes "type", "dtypes", "index", "columns", "axes", and "shape"
+        are evaluated in a lazy way to avoid an overhead when creating an
         IdaDataFrame. Sometimes the index may be too big to be downloaded.
 
         Examples
@@ -178,13 +178,13 @@ class IdaDataFrame(object):
             self.schema = idadb.current_schema
             self._name = idadb.current_schema + '.' + tablename
             self.tablename = tablename
-            
+
         # self._name is the original name, this is a "final" variable
 
         # Push a reference to itself in its parent IdaDataBase
         self._idadb._idadfs.append(self)
         # TODO : self.size
-        
+
         # A cache for unique value of each column
         self._unique = dict()
 
@@ -195,8 +195,8 @@ class IdaDataFrame(object):
     @lazy
     def internal_state(self):
         """
-         InternalState instances manage the state of an IdaDataFrame instance 
-         and allow several non-destructive data manipulation methods, such as 
+         InternalState instances manage the state of an IdaDataFrame instance
+         and allow several non-destructive data manipulation methods, such as
          the selection, projection, filtering, and aggregation of columns.
 
         """
@@ -207,18 +207,18 @@ class IdaDataFrame(object):
     @idadf_state
     def name(self):
         return self.internal_state.current_state
-        
-        
+
+
     @property
     def indexer(self):
         """
-        The indexer attribute refers to the name of a column that should be 
-        used to index the table. This makes sense because dashDB is a 
-        column-based database, so row IDs do not make sense and are not 
-        deterministic. As a consequence, the only way to address a particular 
-        row is to refer to it by its index. If no indexer is provided, ibmdbpy 
-        still works but a correct row order is not guaranteed as far as the 
-        dataset is not sorted. Also, note that the indexer column is not taken 
+        The indexer attribute refers to the name of a column that should be
+        used to index the table. This makes sense because dashDB is a
+        column-based database, so row IDs do not make sense and are not
+        deterministic. As a consequence, the only way to address a particular
+        row is to refer to it by its index. If no indexer is provided, ibmdbpy
+        still works but a correct row order is not guaranteed as far as the
+        dataset is not sorted. Also, note that the indexer column is not taken
         into account in data mining algorithms.
         """
         if hasattr(self, "_indexer"):
@@ -241,7 +241,7 @@ class IdaDataFrame(object):
                                     " because this is not a column in '%s'"%self._name)
 
         del self.columns
-        #count = self[value].count_distinct() ## TODO: TO FIX, should return directly just a number 
+        #count = self[value].count_distinct() ## TODO: TO FIX, should return directly just a number
         count = self.levels(value)
         if count < self.shape[0]:
             raise IdaDataFrameError("'%s' cannot be used as indexer "%value +
@@ -311,9 +311,9 @@ class IdaDataFrame(object):
 
         Notes
         -----
-        Because indexes in a database can be only numeric, it is not that 
-        interesting for an IdaDataFrame but can still be useful sometimes. The 
-        function can break if the table is too large. Ask for the user’s 
+        Because indexes in a database can be only numeric, it is not that
+        interesting for an IdaDataFrame but can still be useful sometimes. The
+        function can break if the table is too large. Ask for the user’s
         approval before downloading an index which has more than 10000 values.
         """
         return self._get_index()
@@ -446,7 +446,7 @@ class IdaDataFrame(object):
 
         Notes
         -----
-        The row order is not guaranteed if no indexer is given and the dataset 
+        The row order is not guaranteed if no indexer is given and the dataset
         is not sorted
         """
 
@@ -470,7 +470,7 @@ class IdaDataFrame(object):
                     if column != item:
                         del newidaseries.internal_state.columndict[column]
                 newColumndict = newidaseries.internal_state.columndict
-                
+
                 # Erase attributes
                 newidaseries._reset_attributes(["columns", "shape", "dtypes"])
                 # Set columns and columndict attributes
@@ -478,11 +478,11 @@ class IdaDataFrame(object):
                 newidaseries.internal_state.columndict = newColumndict
                 # Update, i.e. appends an entry to internal_state._cumulative
                 newidaseries.internal_state.update()
-                
+
                 # Performance improvement
                 # avoid, caused wrong dtypes for the result
                 # newidaseries.dtypes = self.dtypes.loc[[item]]
-                
+
                 return newidaseries
 
             # Case of multiple columns
@@ -491,13 +491,13 @@ class IdaDataFrame(object):
                 raise KeyError("%s"%not_a_column)
 
             newidadf = self._clone()
-            
+
             # Form the new columndict
-            newColumndict = OrderedDict()            
+            newColumndict = OrderedDict()
             for col in item:
                 # Column name as key, its definition as value
                 newColumndict[col] = self.internal_state.columndict[col]
-                
+
             # Erase attributes
             newidadf._reset_attributes(["columns", "shape", "dtypes"])
             # Set columns and columndict attributes
@@ -505,11 +505,11 @@ class IdaDataFrame(object):
             newidadf.internal_state.columndict = newColumndict
             # Update, i.e. appends an entry to internal_state._cumulative
             newidadf.internal_state.update()
-            
-            # Performance improvement 
+
+            # Performance improvement
             # avoid, caused wrong dtypes for the result
             # newidadf.dtypes = self.dtypes.loc[item]
-            
+
         return newidadf
 
     def __setitem__(self, key, item):
@@ -545,16 +545,16 @@ class IdaDataFrame(object):
         self.internal_state.columns = ["\"%s\""%col for col in newColumndict.keys()]
         #update, i.e. appends an entry to internal_state._cumulative
         self.internal_state.update()
-        
-        # Flush the "unique" cache 
+
+        # Flush the "unique" cache
         for column in key:
             if column in self._unique:
                 del self._unique[column]
-                
+
     def __delitem__(self, item):
         """
-        Enable non-destructive deletion of columns using a Pandas style syntax. 
-        This happens inplace, which means that the current IdaDataFrame is 
+        Enable non-destructive deletion of columns using a Pandas style syntax.
+        This happens inplace, which means that the current IdaDataFrame is
         modified.
 
         Examples
@@ -574,7 +574,7 @@ class IdaDataFrame(object):
         # Flush the "unique" cache
         if item in self._unique:
             del self._unique[item]
-                
+
         self._idadb.delete_column(self, item, destructive = False)
         return
 
@@ -691,7 +691,7 @@ class IdaDataFrame(object):
         Examples
         --------
         >>> ida = idadf['sepal_length'] + 3
-        
+
         >>> ida = 3 + idadf['sepal_length']
         """
         self._combine_check(other)
@@ -971,8 +971,8 @@ class IdaDataFrame(object):
     def get_primary_key(self):
         # TODO: What happen if the primary key is composed of several columns ?
         """
-        Get the name of the primary key of self, if there is one. Otherwise, 
-        this function returns 0. This function may be deprecated in future 
+        Get the name of the primary key of self, if there is one. Otherwise,
+        this function returns 0. This function may be deprecated in future
         versions because it is not very useful.
         """
         name = self.internal_state.current_state
@@ -990,7 +990,7 @@ class IdaDataFrame(object):
         """
         Convenience function delegated from IdaDataBase.
 
-        Prepare, execute and format the result of a query in a data frame or in 
+        Prepare, execute and format the result of a query in a data frame or in
         a tuple. See the IdaDataBase.ida_query documentation.
         """
         return self._idadb.ida_query(query, silent, first_row_only, autocommit)
@@ -999,7 +999,7 @@ class IdaDataFrame(object):
         """
         Convenience function delegated from IdaDataBase.
 
-        Prepare and execute a query and return only the first element as a 
+        Prepare and execute a query and return only the first element as a
         string. See the IdaDataBase.ida_scalar_query documentation.
 
         """
@@ -1036,8 +1036,8 @@ class IdaDataFrame(object):
         Returns
         -------
         DataFrame or Series
-            The index of the corresponding row number and the columns are all 
-            columns of self. If the IdaDataFrame has only one column, it 
+            The index of the corresponding row number and the columns are all
+            columns of self. If the IdaDataFrame has only one column, it
             returns a Series.
 
 
@@ -1103,7 +1103,7 @@ class IdaDataFrame(object):
         Returns
         -------
         DataFrame
-            The index of the corresponding row number and the columns are all 
+            The index of the corresponding row number and the columns are all
             columns of self.
 
 
@@ -1160,8 +1160,8 @@ class IdaDataFrame(object):
                     sort=None, factor_threshold=20, interactive=False,
                     aggfunc='count'):
         """
-        Compute an aggregation function over all rows of each column that is 
-        specified as a value on the dataset. The result grouped by the columns 
+        Compute an aggregation function over all rows of each column that is
+        specified as a value on the dataset. The result grouped by the columns
         defined in “columns”.
 
         Parameters
@@ -1169,28 +1169,28 @@ class IdaDataFrame(object):
         values: str or list or str optional
             List of columns on which “aggfunc” is computed.
         columns: str or list or str optional
-            List of columns that is used as an index and by which the 
+            List of columns that is used as an index and by which the
             dataframe is grouped.
         max_entries: int, default=1000
-            The maximum number of cells to be part of the output. By default, 
+            The maximum number of cells to be part of the output. By default,
             set to 1000.
         sort: str, optional
-            Admissible values are: “alpha” and “factors”. 
-                * If “alpha”, the index of the output is sorted according to the alphabetical order. 
-                * If “factors”, the index of the output will be sorted according to increasing number of the distinct values. 
-            
+            Admissible values are: “alpha” and “factors”.
+                * If “alpha”, the index of the output is sorted according to the alphabetical order.
+                * If “factors”, the index of the output will be sorted according to increasing number of the distinct values.
+
             By default, the index will be sorted in the same order that is specified in “columns” argument.
 
         factor_threshold: int, default: 20
-            Number of distinct values above which a categorical column should 
-            not be considered categorical anymore and under which a numerical 
+            Number of distinct values above which a categorical column should
+            not be considered categorical anymore and under which a numerical
             column column should not be considered numerical anymore.
         interactive: bool
-            If True, the user is asked if he wants to display the output, given 
+            If True, the user is asked if he wants to display the output, given
             its size.
         aggfunc: str
-            Aggregation function to be computed on each column specified in the 
-            argument “values”. Admissible values are: “count”, “sum”, “avg”. 
+            Aggregation function to be computed on each column specified in the
+            argument “values”. Admissible values are: “count”, “sum”, “avg”.
             This entry is not case-sensitive.
 
         Returns
@@ -1249,18 +1249,18 @@ class IdaDataFrame(object):
         Parameters
         ----------
         columns : str or list of str
-            Columns that should be used to sort the rows in the IdaDataFrame. 
-            If columns is set to None and axis to 0, then the IdaDataFrame 
-            columns are sorted in lexicographical order. 
+            Columns that should be used to sort the rows in the IdaDataFrame.
+            If columns is set to None and axis to 0, then the IdaDataFrame
+            columns are sorted in lexicographical order.
         axis : int (0/1)
-             Axis that is sorted. 0 for sorting row wise, 1 for sorting column 
+             Axis that is sorted. 0 for sorting row wise, 1 for sorting column
              wise.
         ascending : bool, default: True
             Sorting order, True : ascending, False : descending
         inplace : bool, default: False
-            The current object is modified or creates a modified copy. If 
-            False, the function creates a modified copy of the current 
-            dataframe. If True,  the function modifies the current dataframe. 
+            The current object is modified or creates a modified copy. If
+            False, the function creates a modified copy of the current
+            dataframe. If True,  the function modifies the current dataframe.
 
         Raises
         ------
@@ -1271,12 +1271,12 @@ class IdaDataFrame(object):
 
         Notes
         -----
-        If columns is set to None and axis to 0, this undoes all sorting the 
-        IdaDataFrame and returns the original sorting in the dashDB/DB2 
+        If columns is set to None and axis to 0, this undoes all sorting the
+        IdaDataFrame and returns the original sorting in the dashDB/DB2
         database.
 
-        No actual changes are made in dashDB/DB2, only the querying changes. 
-        Everything is registered in an InternalState object. Changes can be 
+        No actual changes are made in dashDB/DB2, only the querying changes.
+        Everything is registered in an InternalState object. Changes can be
         observed by using  head and tail function.
         """
         if isinstance(columns, six.string_types):
@@ -1329,34 +1329,34 @@ class IdaDataFrame(object):
                 if column not in self.columns:
                     message += "Column %s does not belong to current idadataframe. \n"%column
                 if message:
-                    raise ValueError(message)                    
+                    raise ValueError(message)
         else:
             columns = self.columns
-            
+
         agglist = []
         for column in columns:
             agglist.append("COUNT(DISTINCT \"%s\")"%column)
-        
+
         aggstr = ",".join(agglist)
-        
+
         query = "SELECT %s FROM %s"%(aggstr, self.name)
         levels_tuple = self.ida_query(query, first_row_only = True)
-            
+
         if len(levels_tuple) == 1:
             return levels_tuple[0]
-            
+
         result = pd.Series(levels_tuple)
         result.index = columns
         return result
-        
-    
+
+
     #@timed
     @idadf_state
     def count_groupby(self, columns = None, count_only = False, having = None):
         """
         Count the occurence of the values of a column or group of columns
         """
-        # TODO: Document, test 
+        # TODO: Document, test
         if columns is not None:
             if isinstance(columns, six.string_types):
                 columns = [columns]
@@ -1365,29 +1365,29 @@ class IdaDataFrame(object):
                 if column not in self.columns:
                     message += "Column %s does not belong to current idadataframe. \n"
                 if message:
-                    raise ValueError(message)                    
+                    raise ValueError(message)
         else:
             columns = list(self.columns)
         if having:
             if not isinstance(having, Number):
                 raise TypeError("having argument should be a number")
-            
+
         select_columnstr = "\"" + "\",\"".join(columns) + "\", COUNT(*)"
         if count_only:
             select_columnstr = "COUNT(*)"
         groupby_columnstr = "\"" + "\",\"".join(columns) + "\""
         if having:
             groupby_columnstr = groupby_columnstr + " HAVING count >= %s"%having
-        data = self.ida_query("SELECT %s AS count FROM %s GROUP BY %s"%(select_columnstr,self.name,groupby_columnstr))   
-        
+        data = self.ida_query("SELECT %s AS count FROM %s GROUP BY %s"%(select_columnstr,self.name,groupby_columnstr))
+
         data.columns = columns + ["count"]
-        return data 
-    
+        return data
+
     def mean_freq_of_instance(self, columns = None):
         """
         Return the average occurence of the values of a column or group of columns
         """
-        # TODO: Document, test 
+        # TODO: Document, test
         if columns is not None:
             if isinstance(columns, six.string_types):
                 columns = [columns]
@@ -1396,42 +1396,42 @@ class IdaDataFrame(object):
                 if column not in self.columns:
                     message += "Column %s does not belong to current idadataframe. \n"
                 if message:
-                    raise ValueError(message)                    
+                    raise ValueError(message)
         else:
             columns = list(self.columns)
-            
+
         select_columnstr = "COUNT(*)"
         groupby_columnstr = "\"" + "\",\"".join(columns) + "\""
-        
+
         subquery = "SELECT %s AS count FROM %s GROUP BY %s"%(select_columnstr,self.name,groupby_columnstr)
         data = self.ida_scalar_query("SELECT AVG(DISTINCT count) FROM (%s)"%subquery)
-        
+
         return int(data)
-    
+
 #    @timed
     @idadf_state
     def unique(self, column):
         """
-        Return the unique values of a column 
+        Return the unique values of a column
         """
         # TODO: Document, test
         if column in self._unique:
             return self._unique[column]
-            
+
         #name = self.internal_state.current_state
-    
+
         if not isinstance(column, six.string_types):
             raise TypeError("column argument not of string type")
-         
+
         if column not in self.columns:
-            # idadf.name somewhat false in case of modification 
+            # idadf.name somewhat false in case of modification
             raise ValueError("Undefined column \"%s\" in table %s"%(column, self._name))
-            
+
         result = self.ida_query("SELECT DISTINCT \"%s\" FROM %s"%(column, self.name))
-        
+
         self._unique[column] = result
         return result
-        
+
     # TODO: to implement
     @timed
     @idadf_state
@@ -1462,9 +1462,9 @@ class IdaDataFrame(object):
     @idadf_state
     def describe(self, percentiles=[0.25, 0.50, 0.75]):
         """
-        A basic statistical summary about current IdaDataFrame. If at least one 
+        A basic statistical summary about current IdaDataFrame. If at least one
         numerical column exists, the summary includes:
-            * The count of non-missing values for each numerical column. 
+            * The count of non-missing values for each numerical column.
             * The mean for each numerical column.
             * The standart deviation for each numerical column.
             * The minimum and maximum for each numerical column.
@@ -1509,7 +1509,7 @@ class IdaDataFrame(object):
         """
         Compute the correlation matrix, composed of correlation coefficients
         between all pairs of columns in self.
-        
+
         Parameters
         ----------
         method : str, default: pearson
@@ -1522,15 +1522,15 @@ class IdaDataFrame(object):
         correlation matrix: DataFrame
             The axes are the columns of self and the values are the correlation
             coefficients.
-            
+
         Notes
         -----
-        For the Spearman rank correlation, the ordinal rank of columns is 
-        computed. For performance reasons this is easier to compute than the 
-        fractional rank traditionally computed for the Spearman rank 
-        correlation method. This strategy has the property that the sum of the 
+        For the Spearman rank correlation, the ordinal rank of columns is
+        computed. For performance reasons this is easier to compute than the
+        fractional rank traditionally computed for the Spearman rank
+        correlation method. This strategy has the property that the sum of the
         ranking numbers is the same as under ordinal ranking. We then apply
-        the pearson correlation coefficient method to these ranks. 
+        the pearson correlation coefficient method to these ranks.
         """
         from ibmdbpy.statistics import corr
         return corr(idadf=self, features=features, ignore_indexer=ignore_indexer)
@@ -1582,9 +1582,9 @@ class IdaDataFrame(object):
         Returns
         -------
         quantiles: Series or DataFrame
-            If q is an array, the function returns a DataFrame in which the 
-            index is q. The columns are the columns of sel, and the values are 
-            the quantiles. If q is a float, a Series is returned where the 
+            If q is an array, the function returns a DataFrame in which the
+            index is q. The columns are the columns of sel, and the values are
+            the quantiles. If q is a float, a Series is returned where the
             index is the columns of self and the values are the quantiles.
 
         """
@@ -1650,7 +1650,7 @@ class IdaDataFrame(object):
     @timed
     @idadf_state
     def count_distinct(self):
-        # deprecated, use levels instead 
+        # deprecated, use levels instead
         """
         Compute the count of distinct values for all numeric columns of self.
 
@@ -1666,16 +1666,16 @@ class IdaDataFrame(object):
     @idadf_state
     def std(self):
         """
-        Compute the standart deviation for all numeric columns of self.
+        Compute the standard deviation for all numeric columns of self.
 
         Returns
         -------
         std: Series
-            The index consists of the columns of self and the values are the standart deviation.
+            The index consists of the columns of self and the values are the standard deviation.
         """
         from ibmdbpy.statistics import std
         return std(idadf=self)
-        
+
     @timed
     @idadf_state
     def within_class_var(self, target, features = None, ignore_indexer=True):
@@ -1685,75 +1685,75 @@ class IdaDataFrame(object):
         else:
             if isinstance(features, six.string_types):
                 features = [features]
-                
+
         if ignore_indexer is True:
             if self.indexer:
                 if self.indexer in features:
                     features.remove(self.indexer)
-                
+
         result = pd.Series()
-        
+
         #C = self.levels(target)
         N = len(self)
 
         if len(features) < 5:
-          
+
             avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(features)]
             sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(features)]
-            
+
             avgstr = ", ".join(avglist)
             sumstr = ", ".join(sumlist)
-            
+
             subquery = "(SELECT \"%s\", %s FROM %s GROUP BY \"%s\") AS B"%(target, avgstr, self.name, target)
             condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
             groupby = "GROUP BY A.\"%s\""%target
             query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
-            
+
             classvar = self.ida_query(query)
             if len(features) == 1:
                 classvar = pd.DataFrame(classvar)
-                
+
             C = len(classvar)
             if N == C:
                 N += 1
-            
-            
+
+
             classvar.columns = pd.Index(features)
             result = pd.Series()
             for attr in classvar:
                 result[attr] = classvar[attr].sum()/(N -C)
-        
+
         else:
             chunkgen = chunklist(features, 5)
             result = pd.Series()
             for chunk in chunkgen:
                 avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(chunk)]
                 sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(chunk)]
-                
+
                 avgstr = ", ".join(avglist)
                 sumstr = ", ".join(sumlist)
-                
+
                 subquery = "(SELECT \"%s\", %s FROM %s GROUP BY \"%s\") AS B"%(target, avgstr, self.name, target)
                 condition = "ON A.\"%s\" = B.\"%s\""%(target, target)
                 groupby = "GROUP BY A.\"%s\""%target
                 query = "SELECT %s FROM %s AS A INNER JOIN %s %s %s"%(sumstr, self.name, subquery, condition, groupby)
-                
+
                 classvar = self.ida_query(query)
-                
+
                 if len(chunk) == 1:
                     classvar = pd.DataFrame(classvar)
-                    
+
                 C = len(classvar)
                 if N == C:
                     N += 1
-                    
+
                 classvar.columns = pd.Index(chunk)
-                
+
                 for attr in classvar:
                     result[attr] = classvar[attr].sum()/(N -C)
-        
+
         return result
-        
+
     @timed
     @idadf_state
     def within_class_std(self, target, features = None, ignore_indexer= True):
@@ -1786,7 +1786,7 @@ class IdaDataFrame(object):
         """
         from ibmdbpy.statistics import mean
         return mean(idadf=self)
-        
+
     @timed
     @idadf_state
     def mean_groupby(self, groupby, features = None):
@@ -1795,16 +1795,16 @@ class IdaDataFrame(object):
         else:
             if isinstance(features, six.string_types):
                 features = [features]
-                
+
         avglist = ["CAST(AVG(\"%s\") as FLOAT)"%feature for feature in features]
         avgstr = ", ".join(avglist)
-        
+
         query = "SELECT \"%s\", %s FROM %s GROUP BY \"%s\""%(groupby, avgstr, self.name, groupby)
         result = self.ida_query(query)
         result = result.pivot_table(index = result.columns[0])
         result.columns = pd.Index(features)
         return result
-        
+
 
     @timed
     @idadf_state
@@ -1856,8 +1856,8 @@ class IdaDataFrame(object):
     @idadf_state
     def save_as(self, tablename, clear_existing = False):
         """
-        Save self as a table name in the remote database with the name 
-        tablename. This function might erase an existing table if tablename 
+        Save self as a table name in the remote database with the name
+        tablename. This function might erase an existing table if tablename
         already exists and clear_existing is True.
 
         """
@@ -1984,10 +1984,10 @@ class IdaDataFrame(object):
         Notes
         -----
 
-        All changes that are made in the database after the last commit, 
+        All changes that are made in the database after the last commit,
         including those in the child IdaDataFrames, are commited.
 
-        If the environment variable ‘VERBOSE’ is set to True, the commit 
+        If the environment variable ‘VERBOSE’ is set to True, the commit
         operations are notified in the console.
         """
         self._idadb.commit()
@@ -1999,7 +1999,7 @@ class IdaDataFrame(object):
         Notes
         -----
 
-        All changes that are made in the database after the last commit, 
+        All changes that are made in the database after the last commit,
         including those in the child IdaDataFrames, are discarded.
         """
         self._idadb.rollback()
@@ -2014,16 +2014,16 @@ class IdaDataFrame(object):
         Clone the actual object.
         """
         newida = IdaDataFrame(self._idadb, self._name, self.indexer)
-        newida.columns = self.columns 
-        newida.dtypes = self.dtypes     # avoid recomputing it 
-        # otherwise risk of infinite loop between 
+        newida.columns = self.columns
+        newida.dtypes = self.dtypes     # avoid recomputing it
+        # otherwise risk of infinite loop between
         # idadf.columns and internalstate.columndict
-        
+
         # This is not possible to use deepcopy on an IdaDataFrame object
         # because the reference to the parents IdaDataBase with the connection
         # object is not pickleable. As a consequence, we create a new
         # IdaDataFrame and copy all the relevant attributes
-        
+
         newida.internal_state.name = deepcopy(self.internal_state.name)
         newida.internal_state.ascending = deepcopy(self.internal_state.ascending)
         #newida.internal_state.views = deepcopy(self.internal_state.views)
@@ -2074,7 +2074,7 @@ class IdaDataFrame(object):
         elif self._idadb._con_type == 'jdbc':
             cursor = self._idadb._con.cursor()
             cursor.execute("SELECT * FROM %s"%tablename)
-            columnlist = [column[0] for column in cursor.description]           
+            columnlist = [column[0] for column in cursor.description]
             return Index(columnlist)
 
     def _get_all_columns_in_table(self):
@@ -2100,8 +2100,8 @@ class IdaDataFrame(object):
         # (ROW_NUMBER() OVER())-1 is because ROWID starts with 1 instead of 0
         df = self.ida_query("SELECT ((ROW_NUMBER() OVER())-1) AS ROWNUMBER FROM %s"
                             %self._name)
-        
-        # Fix a bug in the jpype interface, where the element of the series 
+
+        # Fix a bug in the jpype interface, where the element of the series
         # actually are of type jpype._jclass.java.lang.Long
         if "jpype" in str(type(df[0])):
             return Index(map(lambda x: int(x.toString()),df))
@@ -2127,7 +2127,7 @@ class IdaDataFrame(object):
         # We need to separate it to keep only the TABLENAME for this query.
         if '.' in name :
             name = name.split('.')[-1]
-        
+
         if name.find("TEMP_VIEW_") == 0:
             #When the column names are going to be retrieved from a temporary
             #view that was created with the definition of the current state of
@@ -2143,7 +2143,7 @@ class IdaDataFrame(object):
                                "ORDER BY COLNO")%(name, self.schema))
 
         # Workaround for some ODBC version which does not get the entire
-        # string of the column name in the cursor descriptor. 
+        # string of the column name in the cursor descriptor.
         # This is hardcoded, so be careful
         data.columns = ["COLNAME", "TYPENAME"]
         data.columns = [x.upper() for x in data.columns]
@@ -2157,14 +2157,14 @@ class IdaDataFrame(object):
         """
         if isinstance(attributes, six.string_types):
             attributes = [attributes]
-            
+
         # Special case : resetting columns
         if "columns" in attributes:
              try:
                  del self.internal_state.columndict
              except:
                  pass
-        
+
         ibmdbpy.utils._reset_attributes(self, attributes)
 
 
@@ -2174,8 +2174,8 @@ class IdaDataFrame(object):
 
     def _table_def(self, factor_threshold=None):
         """
-        Classify columns in the idaDataFrame into 4 classes: CATEGORICAL, 
-        STRING, NUMERIC or NONE. Use the database data type and a 
+        Classify columns in the idaDataFrame into 4 classes: CATEGORICAL,
+        STRING, NUMERIC or NONE. Use the database data type and a
         user-threshold “factor_threshold”:
             * CATEGORICAL columns that have a number of distinct values that is greater than the factor_threshold should be considered a STRING.
             * NUMERIC columns that have a number of distinct values that is smaller or equal to the factor_threshold should be considered CATEGORICAL.
@@ -2232,9 +2232,9 @@ class IdaDataFrame(object):
 
     def _get_numerical_columns(self):
         """
-        Get the columns of self that are considered as numerical. Their data 
-        type in the database determines whether these columns are numerical. 
-        The following data types are considered numerical: 
+        Get the columns of self that are considered as numerical. Their data
+        type in the database determines whether these columns are numerical.
+        The following data types are considered numerical:
             'SMALLINT', 'INTEGER','BIGINT','REAL',
             'DOUBLE','FLOAT','DECIMAL','NUMERIC'
 
@@ -2254,8 +2254,8 @@ class IdaDataFrame(object):
 
     def _get_categorical_columns(self):
         """
-        Get the columns of self that are considered as categorical. Their data 
-        type in the database determines whether these columns are categorical. 
+        Get the columns of self that are considered as categorical. Their data
+        type in the database determines whether these columns are categorical.
         The following data types are considered categorical:
             "VARCHAR","CHARACTER", "VARGRAPHIC", "GRAPHIC", "CLOB".
 
@@ -2287,24 +2287,24 @@ class IdaDataFrame(object):
 
     def _autocommit(self):
         """
-        Autocommit the connection. If the environment variable ‘AUTOCOMMIT’ is 
+        Autocommit the connection. If the environment variable ‘AUTOCOMMIT’ is
         set to True, the function commits the changes.
 
         Notes
         -----
 
-        If you commit, all changes that are made in the database after the last 
+        If you commit, all changes that are made in the database after the last
         commit, including those in the child IdaDataFrames, are commited.
 
-        If the environment variable ‘VERBOSE’ is set to True, the autocommit 
+        If the environment variable ‘VERBOSE’ is set to True, the autocommit
         operations are notified in the console.
         """
         self._idadb._autocommit()
 
     def _combine_check(self, other):
         """
-        Check if self and other refer to the same table and if all columns in 
-        self and other are numeric. This sanity check is used before performing 
+        Check if self and other refer to the same table and if all columns in
+        self and other are numeric. This sanity check is used before performing
         aggregation operations between IdaDataFrame/IdaSeries.
         """
         def check_numeric_columns(idaobject):
