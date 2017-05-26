@@ -58,8 +58,8 @@ def _numeric_stats(idadf, stat, columns):
 
     Notes
     -----
-    Currently, the following functions are supported: count, mean, median, std, 
-    var, min, max, sum. Should return a tuple. Only available for numerical 
+    Currently, the following functions are supported: count, mean, median, std,
+    var, min, max, sum. Should return a tuple. Only available for numerical
     columns.
     """
     # Calculate count, mean, median, std, var, min, max
@@ -77,6 +77,9 @@ def _numeric_stats(idadf, stat, columns):
             return _get_percentiles(idadf, 0.5, columns).values[0]
         elif stat == "std":
             tuple_count = _numeric_stats(idadf, 'count', columns)
+            # in case of only one column, ensure tuple_count is iterable
+            if len(columns) == 1:
+                tuple_count = [tuple_count]
             count_dict = dict((x, y) for x, y in zip(columns, tuple_count))
             agg_list = []
             for column in columns:
@@ -85,6 +88,8 @@ def _numeric_stats(idadf, stat, columns):
             select_string = ', '.join(agg_list)
         elif stat == "var":
             tuple_count = _numeric_stats(idadf, 'count', columns)
+            if len(columns) == 1:
+                tuple_count = [tuple_count]
             count_dict = dict((x, int(y)) for x, y in zip(columns, tuple_count))
             agg_list = []
             for column in columns:
@@ -105,7 +110,7 @@ def _numeric_stats(idadf, stat, columns):
 
 def _get_percentiles(idadf, percentiles, columns):
     """
-    Return percentiles over all entries of a column or list of columns in the 
+    Return percentiles over all entries of a column or list of columns in the
     IdaDataFrame.
 
     Parameters
@@ -223,20 +228,20 @@ def _get_number_of_nas(idadf, columns):
 
 def _count_level(idadf, columnlist=None):
     """
-    Count distinct levels across a list of columns of an IdaDataFrame grouped 
+    Count distinct levels across a list of columns of an IdaDataFrame grouped
     by themselves.
 
 
     Parameters
     ----------
     columnlist : list
-        List of column names that exist in the IdaDataFrame. By default, these 
+        List of column names that exist in the IdaDataFrame. By default, these
         are all columns in IdaDataFrame.
 
     Returns
     -------
         Tuple
-        
+
     Notes
     -----
     The function assumes the follwing:
@@ -251,7 +256,7 @@ def _count_level(idadf, columnlist=None):
 
     query_list = []
     for column in columnlist:
-        # Here cast ? 
+        # Here cast ?
         query_list.append("(SELECT COUNT(*) AS \"" + column +"\" FROM (" +
                           "SELECT \"" + column + "\" FROM " + name +
                           " GROUP BY \"" + column + "\" ))")
@@ -264,19 +269,19 @@ def _count_level(idadf, columnlist=None):
 
 def _count_level_groupby(idadf, columnlist=None):
     """
-    Count distinct levels across a list of columns in the IdaDataFrame grouped 
+    Count distinct levels across a list of columns in the IdaDataFrame grouped
     by themselves. This is used to get the dimension of the resulting cross table.
 
     Parameters
     ----------
     columnlist : list
-        List of column names existing in the IdaDataFrame. By default, these 
+        List of column names existing in the IdaDataFrame. By default, these
         are columns of self
 
     Returns
     -------
         Tuple
-        
+
     Notes
     -----
     The function assumes the follwing:
@@ -298,7 +303,7 @@ def _count_level_groupby(idadf, columnlist=None):
 # TODO: REFACTORING: factors function should maybe return a tuple ?
 def _factors_count(idadf, columnlist, valuelist=None):
     """
-    Count non-missing values for all columns in a list (valuelist) over the 
+    Count non-missing values for all columns in a list (valuelist) over the
     IdaDataFrame grouped by a list of columns(columnlist).
 
     Parameters
@@ -347,9 +352,9 @@ def _factors_sum(idadf, columnlist, valuelist):
     Parameters
     ----------
     columnlist : list
-        List of column names that exist in self. 
+        List of column names that exist in self.
     valuelist : list
-        List of column names that exist in self. 
+        List of column names that exist in self.
 
     Assumptions
     -----------
@@ -380,15 +385,15 @@ def _factors_sum(idadf, columnlist, valuelist):
 
 def _factors_avg(idadf, columnlist, valuelist):
     """
-    Compute the arithmetic average for all columns in a list (valuelist) over 
+    Compute the arithmetic average for all columns in a list (valuelist) over
     the IdaDataFrame grouped by a list of columns (columnlist).
 
     Parameters
     ----------
     columnlist : list
-        List of column names that exist in self. 
+        List of column names that exist in self.
     valuelist : list
-        List of column names that exist in self. 
+        List of column names that exist in self.
 
     Assumptions
     -----------
@@ -572,10 +577,10 @@ def describe(idadf, percentiles=[0.25, 0.50, 0.75]):
     if percentiles is not None:
         percentile_names = [(str(int(x * 100)) + "%") for x in percentiles]
     else:
-        percentile_names = [] 
+        percentile_names = []
     data.index = ['count', 'mean', 'std', 'min'] + percentile_names + ['max']
-    
-    # quick fix -> JDBC problems 
+
+    # quick fix -> JDBC problems
     #for column in data.columns:
     #    data[[column]] = data[[column]].astype(float)
 
@@ -686,16 +691,16 @@ def corr(idadf, features=None,ignore_indexer=True):
         raise TypeError("corr() missing 1 required positional argument: 'other'")
     # TODO: catch case n <= 1
     numerical_columns = idadf._get_numerical_columns()
-    
+
     if not numerical_columns:
         print(idadf.name + " has no numeric columns")
         return
-        
+
     if ignore_indexer is True:
         if idadf.indexer:
             if idadf.indexer in numerical_columns:
                 numerical_columns.remove(idadf.indexer)
-    
+
     #print(features)
     #target, features = ibmdbpy.utils._check_input(target, features)
     if features is not None:
@@ -704,27 +709,27 @@ def corr(idadf, features=None,ignore_indexer=True):
                 raise TypeError("Correlation-based measure not available for non-numerical columns %s"%feature)
     else:
         features = numerical_columns
-    
+
     #if target not in columns:
     #    raise ValueError("%s is not a column of numerical type in %s"%(target, idadf.name))
-    
+
     values = OrderedDict()
-    
+
     combinations = [x for x in itertools.combinations(features, 2)]
     #columns_set = [{x[0], x[1]} for x in combinations]
-    
+
     if len(features) < 64: # the limit of variables for an SQL statement is 4096, i.e 64^2
         agg_list = []
         for column_pair in combinations:
             agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
             agg_list.append(agg)
-    
+
         agg_string = ', '.join(agg_list)
-    
+
         name = idadf.internal_state.current_state
-    
+
         data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
-    
+
         for i, element in enumerate(combinations):
             if element[0] not in values:
                 values[element[0]] = {}
@@ -732,23 +737,23 @@ def corr(idadf, features=None,ignore_indexer=True):
                 values[element[1]] = {}
             values[element[0]][element[1]] = data[i]
             values[element[1]][element[0]] = data[i]
-            
+
         result = pd.DataFrame(values).fillna(1)
-    else:        
+    else:
         chunkgen = chunklist(combinations, 100)
-        
-        for chunk in chunkgen: 
+
+        for chunk in chunkgen:
             agg_list = []
             for column_pair in chunk:
                 agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
                 agg_list.append(agg)
-        
+
             agg_string = ', '.join(agg_list)
-        
+
             name = idadf.internal_state.current_state
-        
+
             data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
-        
+
             for i, element in enumerate(chunk):
                 if element[0] not in values:
                     values[element[0]] = OrderedDict()
@@ -756,9 +761,9 @@ def corr(idadf, features=None,ignore_indexer=True):
                     values[element[1]] = OrderedDict()
                 values[element[0]][element[1]] = data[i]
                 values[element[1]][element[0]] = data[i]
-            
+
         result = pd.DataFrame(values).fillna(1)
-    
+
     result = result.reindex(result.columns)
     if len(result) == 1:
         result = result[0]
@@ -807,7 +812,7 @@ def ida_min(idadf):
     """
     na_tuple = _get_number_of_nas(idadf, idadf.columns)
     min_tuple = _numeric_stats(idadf, "min", idadf.columns)
-    if not hasattr(min_tuple,"__iter__") : min_tuple = (min_tuple,) # dirty fix 
+    if not hasattr(min_tuple,"__iter__") : min_tuple = (min_tuple,) # dirty fix
     min_list = [np.nan if ((y > 0) and not isinstance(x, Number))
                 else x for x, y in zip(min_tuple, na_tuple)]
     min_tuple = tuple(min_list)
@@ -825,7 +830,7 @@ def ida_max(idadf):
     """
     na_tuple = _get_number_of_nas(idadf, idadf.columns)
     max_tuple = _numeric_stats(idadf, "max", idadf.columns)
-    if not hasattr(max_tuple,"__iter__") : max_tuple = (max_tuple,) # dirty fix 
+    if not hasattr(max_tuple,"__iter__") : max_tuple = (max_tuple,) # dirty fix
     max_list = [np.nan if ((y > 0) and not isinstance(x, Number))
                 else x for x, y in zip(max_tuple, na_tuple)]
     max_tuple = tuple(max_list)
