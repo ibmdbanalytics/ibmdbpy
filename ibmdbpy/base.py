@@ -999,7 +999,7 @@ class IdaDataBase(object):
 
         try:
             self._prepare_and_execute("CALL IDAX.DROP_MODEL('model=" + model + "')")
-        except:
+        except Exception as e:
             try:
                 flag = self.exists_table(modelname)
             except TypeError:
@@ -1009,7 +1009,8 @@ class IdaDataBase(object):
                 if flag:
                     # It is a table so make it raise by calling exists_view
                     self.exists_view(modelname)
-            raise ValueError(modelname + " does not exists in database")
+            value_error = ValueError(modelname + " does not exists in database")
+            six.raise_from(value_error, e)
         else:
             tables = self.show_tables()
             if not tables.empty:
