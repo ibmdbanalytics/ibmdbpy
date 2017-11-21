@@ -52,6 +52,7 @@ class Test_DeleteDataBaseObjects(object):
         with pytest.raises(TypeError):
             idadb.drop_view(idadf.name) # this is a table
 
+    @pytest.mark.xfail(raises=ValueError)
     def test_idadb_drop_model_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive = True)
         # Create a simple KMEANS model
