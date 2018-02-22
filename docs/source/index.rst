@@ -15,13 +15,14 @@ ibmdbpy
 Accelerating Python Analytics by In-Database Processing
 =======================================================
 
-The ibmdbpy project provides a Python interface for data manipulation and access to in-database algorithms in IBM dashDB and IBM DB2. It accelerates Python analytics by seamlessly pushing operations written in Python into the underlying database for execution, thereby benefitting from in-database performance-enhancing features, such as columnar storage and parallel processing.
+The ibmdbpy project provides a Python interface to the in-database data-manipulation algorithms provided by IBM Db2:
 
-IBM dashDB is a database management system available on IBM Bluemix, the cloud application development and analytics platform powered by IBM. The ibmdbpy project can be used by Python developers with very little additional knowledge, because it copies the well-known interface of the Pandas library for data manipulation and the Scikit-learn library for the use of machine learning algorithms.
+* It accelerates Python analytics by seamlessly pushing operations written in Python into the underlying database for execution, thereby benefitting from in-database performance-enhancing features, such as columnar storage and parallel processing.
+* It can be used by Python developers with very little additional knowledge, because it copies the well-known interface of the Pandas library for data manipulation and the Scikit-learn library for the use of machine learning algorithms.
+* It is compatible with Python releases 2.7 to 3.4.
+* It can connect to Db2 databases via ODBC or JDBC.
 
-The ibmdbpy project is compatible with Python releases 2.7 up to 3.4 and can be connected to dashDB or DB2 instances via ODBC or JDBC.
-
-The project is still at an early stage and many of its features are still in development. However, several experiments have already demonstrated that it provides significant performance advantages when operating on medium or large amounts of data, that is, on tables of 1 million rows or more.
+Although the ibmdbpy project is still in development, several experiments have demonstrated that it provides significant performance advantages when operating on medium or large amounts of data, that is, on tables of more than one million rows.
 
 The latest version of ibmdbpy is available on the `Python Package Index`__ and Github_.
 
@@ -75,7 +76,6 @@ The result fetched by ibmdbpy is a tuple containing all values of the matrix. Th
    petal_length      0.871754    -0.428440      1.000000     0.962865
    petal_width       0.817941    -0.366126      0.962865     1.000000
 
-Et voilà !
 
 How the geospatial functions work
 ---------------------------------
@@ -108,9 +108,6 @@ Here is the SQL request that was executed for this example::
 
    SELECT t.*,db2gse.ST_Area(t.SHAPE) as area
    FROM SAMPLES.GEO_COUNTY t;
-
-
-That's as simple as that!
 
 Feature Selection
 =================
