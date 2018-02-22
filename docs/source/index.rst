@@ -37,28 +37,28 @@ The ibmdbpy project translates Pandas-like syntax into SQL and uses a middleware
 
 The following scenario illustrates how ibmdbpy works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a dashDB instance named DASHDB) via ODBC:
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance with the name DASHDB) via ODBC:
 
 >>> from ibmdbpy import IdaDataBase, IdaDataFrame
 >>> idadb = IdaDataBase('DASHDB')
 
-A few sample data sets are included in ibmdbpy for you to experiment. We can firstly load the well-known IRIS table into this dashDB instance.
+A few sample data sets are included in ibmdbpy for you to experiment. First, we can load the IRIS table into this database instance.
 
 >>> from ibmdbpy.sampledata import iris
 >>> idadb.as_idadataframe(iris, "IRIS")
 <ibmdbpy.frame.IdaDataFrame at 0x7ad77f0>
 
-Next, we can create an IDA data frame that points to the table we just uploaded. Let’s use that one:
+Next, we can create an IDA data frame that points to the table we just uploaded:
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 
 Note that to create an IDA data frame using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.
 
-Now let us compute the correlation matrix:
+Next, we compute the correlation matrix:
 
 >>> idadf.corr()
 
-In the background, ibmdbpy looks for numerical columns in the table and builds an SQL request that returns the correlation between each pair of columns. Here is the SQL request that was executed for this example::
+In the background, ibmdbpy looks for numerical columns in the table and builds an SQL request that returns the correlation between each pair of columns. Here is the SQL request that was executed for this example:
 
    SELECT CORRELATION("sepal_length","sepal_width"),
    CORRELATION("sepal_length","petal_length"),
@@ -80,11 +80,11 @@ The result fetched by ibmdbpy is a tuple containing all values of the matrix. Th
 How the geospatial functions work
 ---------------------------------
 
-The ibmdbpy package now supports geospatial functions! It provides a Python interface for data manipulation and access to in-database algorithms in IBM dashDB and IBM DB2 Spatial Extender. It identifies the geometry column for spatial tables and enables the user to perform spatial queries based upon this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
+The ibmdbpy package now supports geospatial functions! It provides a Python interface to in-database data-manipulation algorithms in Db2. It identifies the geometry column for spatial tables and lets you run spatial queries based on the data in this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
 
 The following scenario illustrates how spatial functions work.
 
-We can create an IDA geo data frame that points to a sample table in dashDB:
+We can create an IDA geo data frame that points to a sample table:
 
 >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
 >>> idadb = IdaDataBase('DASHDB')

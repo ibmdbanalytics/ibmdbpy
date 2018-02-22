@@ -33,16 +33,14 @@ These statements run the test::
 	> cd tests
 	> py.test
 
-By default, pytest assumes that a database named "DASHDB" is reachable via an ODBC connection and that its credentials are stored in the user's ODBC settings. This may be not the case for most users, so several options are avaiable:
+By default, pytest assumes that a database named "DASHDB" is reachable via an ODBC connection and that its credentials are stored in your ODBC settings. This may be not the case for most users, so several options are avaiable:
 
 	* ``--dsn`` : Data Source Name
 	* ``--uid``, ``--pwd`` : Database login and password
 	* ``--jdbc`` : jdbc url string
 	* ``--table`` : Table to use to test (default: iris)
 
-For testing, all tables from ibmdbpy.sampledata can be used: iris, swiss, titanic.
-
-More tables may be added in the future.
+For testing, all tables from ibmdbpy.sampledata can be used. These include the tables iris, swiss, and titanic.
 
 Strict dependencies
 -------------------

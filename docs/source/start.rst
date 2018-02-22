@@ -6,24 +6,19 @@ Quickstart
 Connect
 =======
 
-First of all, a connection to a remote dashDB/DB2 instance should be established.
-IBM dashDB instances are available on Bluemix, the cloud development platform powered by IBM::
-
-	https://console.ng.bluemix.net/
-
-You will need a Bluemix account. It is possible to get a 30-day trial account, if you don't have a Bluemix account and would like to try Bluemix.
+First, connect to a remote Db2 instance.
 
 ODBC Connection
 ---------------
 
-The default connection type for ibmdbpy is ODBC, which is the default setting for Windows users. Download an IBM DB2 driver, and set up an ODBC connection, including the connection protocol, the port, and the host name, before establishing the connection.
+The default connection type for ibmdbpy is ODBC, which is the default setting for Windows users. First, download an IBM Db2 driver. Then, set up an ODBC connection, including the connection protocol, the port, and the host name.
 
 If your credentials are stored in the Windows ODBC windows connection settings, the database connection can be established very easily by creating an IdaDataBase:
 
 >>> from ibmdbpy.base import IdaDataBase
 >>> idadb = IdaDataBase("DASHDB")
 
-Otherwise, it is possible to connect with your dashDB credentials:
+Otherwise, it is possible to connect with your Db2 credentials:
 
 >>> idadb = IdaDataBase(dsn="DASHDB", uid="<UID>", pwd="<PWD>")
 
@@ -32,7 +27,7 @@ Using ODBC platforms other than Windows may require additional configuration.
 JDBC Connection
 ---------------
 
-The JDBC Connection is based on a Java Virtual Machine, so it is available on every machine that can run Java. In ibmdbpy, users can choose to use JDBC to connect to a remote dashDB/DB2 instance using JDBC. To be able to use JDBC to connect, users need to install the ``JayDeBeApi`` package, set as an optional dependency::
+The JDBC Connection is based on a Java Virtual Machine, so it is available on every machine that can run Java. In ibmdbpy, users can choose to use JDBC to connect to a remote Db2 instance using JDBC. To be able to use JDBC to connect, you must install the ``JayDeBeApi`` package, set as an optional dependency:
 
 	pip install jaydebeapi
 
@@ -46,13 +41,13 @@ Alternatively, an installer can be downloaded from the Java_ website.
 
 .. _Java: http://www.oracle.com/technetwork/java/javase/downloads/
 
-Furthermore, you need to download the latest version of the JDBC driver for DB2. It is available through `IBM Support & Downloads`__.
+Furthermore, you need to download the latest version of the JDBC driver for Db2. It is available through `IBM Support & Downloads`__.
 
 __ http://www-01.ibm.com/support/docview.wss?uid=swg21363866
 
 You need to put the ‘db2jcc.jar’ or ‘db2jcc4.jar’ file in the ibmdbpy site-package folder. When ibmdbpy runs, it checks whether one of those files exists in its installation folder and uses it to establish the connection.
 
-The connection is done using the JDBC URL string. For a dashDB instance on Bluemix, the JDBC URL string can be found on the dashDB Connection Information page.
+The connection is done using the JDBC URL string. For a Db2 Warehouse on Cloud instance, the JDBC URL string can be found on the Db2 Connection Information page.
 
 >>> jdbc = 'jdbc:db2://<HOST>:<PORT>/<DBNAME>:user=<UID>;password=<PWD>'
 >>> IdaDataBase(jdbc)
@@ -82,7 +77,7 @@ Alternatively
 Verbosity
 ---------
 
-The verbose mode automatically prints all SQL-communication between ibmdbpy and dashDB, which can be very useful for debugging or understanding how ibmdbpy works. By default, this is activated, but can be turned down by setting the ``verbose`` option  to ``False`` or by using the ``set_verbose`` function.
+The verbose mode automatically prints all SQL-communication between ibmdbpy and Db2, which can be very useful for debugging or understanding how ibmdbpy works. By default, this is activated, but can be turned down by setting the ``verbose`` option  to ``False`` or by using the ``set_verbose`` function.
 
 >>> idadb = IdaDataBase("DASHDB", verbose=False)
 
@@ -151,7 +146,7 @@ Use ``IdaDataFrame.tail`` to get the last n records of your data set (default 5)
 148           6.2          3.4           5.4          2.3  virginica
 149           5.9          3.0           5.1          1.8  virginica
 
-Note: Because dashDB operates on a distributed system, the order of rows using ``IdaDataFrame.head`` and ``IdaDataFrame.tail`` is not guaranteed unless the table is sorted (using an ‘ORDER BY’ clause) or a column is declared as index for the IdaDataFrame (parameter/attribute ``indexer``). To better mimic the behaviour of a Pandas dataframe the data is sorted by the first numeric column or if there is none the first column in the dataframe. To disable this implicit sorting specify sort=False on ``IdaDataFrame.head`` and ``IdaDataFrame.tail``. 
+Note: Because Db2 operates on a distributed system, the order of rows using ``IdaDataFrame.head`` and ``IdaDataFrame.tail`` is not guaranteed unless the table is sorted (using an ‘ORDER BY’ clause) or a column is declared as index for the IdaDataFrame (parameter/attribute ``indexer``). To better mimic the behaviour of a Pandas dataframe the data is sorted by the first numeric column or if there is none the first column in the dataframe. To disable this implicit sorting specify sort=False on ``IdaDataFrame.head`` and ``IdaDataFrame.tail``. 
 
 IdaDataFrame also implements most attributes that are available in a Pandas DataFrame.
 
@@ -189,7 +184,7 @@ For more information about methods that are supported by IdaDataFrame objects, s
 Selection
 ---------
 
-It is possible to subset the rows of an IdaDataFrame by accessing the IdaDataFrame with a slice object. You can also use the ``IdaDataFrame.loc`` attribute, which contains an ``ibmdbpy.Loc`` object. However, the row selection might be inaccurate if the current IdaDataFrame is not sorted or does not contain an indexer. This is due to the fact that dashDB stores the data across several nodes if available. Moreover, because dashDB is a column oriented database, row numbers are undefined.
+It is possible to subset the rows of an IdaDataFrame by accessing the IdaDataFrame with a slice object. You can also use the ``IdaDataFrame.loc`` attribute, which contains an ``ibmdbpy.Loc`` object. However, the row selection might be inaccurate if the current IdaDataFrame is not sorted or does not contain an indexer. This is due to the fact that Db2 stores the data across several nodes if available. Moreover, because Db2 is a column-oriented database, row numbers are undefined.
 
 >>> idadf_new = idadf[0:9] # Select the first 10 rows
 
@@ -496,12 +491,12 @@ The results are fetched and formatted into the corresponding data structure, for
 
 The following scenario illustrates how ibmdbpy works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a dashDB instance named DASHDB) via ODBC:
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance with the name DASHDB) via ODBC:
 
     >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
     >>> idadb = IdaDataBase('DASHDB')
 
-We can create an IDA geo data frame that points to a sample table in dashDB:
+We can create an IDA geo data frame that points to a sample table:
 
     >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
 
@@ -567,7 +562,7 @@ When the benchmark terminates, or runs long enough and stops (either because of 
 >>> benchmark.visualize()
 ...
 
-Note that the result of a benchmark depends on how many cores and how much RAM are available in the dashDB/DB2 instance.
+Note that the result of a benchmark depends on how many cores and how much RAM are available in the Db2 instance.
 
 Database administration
 =======================
@@ -575,7 +570,7 @@ Database administration
 Upload a DataFrame
 ------------------
 
-It is possible to upload a local Pandas DataFrame to a dashDB instance. A few data sets are also included in ibmdbpy. For example, to upload the data set iris, issue the following command:
+It is possible to upload a local Pandas DataFrame to a Db2 instance. A few data sets are also included in ibmdbpy. For example, to upload the data set iris, issue the following command:
 
 >>> from ibmdbpy.sampledata.iris import iris
 >>> idadb = IdaDataBase('DASHDB')
@@ -596,7 +591,7 @@ Ibmdbpy uses a sophisticated chunking mechanism to improve the performance of th
 Download a data set
 -------------------
 
-It is possible to download a data set from a dashDB instance.
+It is possible to download a data set from a Db2 instance.
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 >>> iris = idadf.as_dataframe()

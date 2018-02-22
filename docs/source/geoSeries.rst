@@ -4,12 +4,12 @@ IdaGeoSeries
 ************
 The spatial methods of an IdaGeoDataFrame can be used to operate on the geometry attribute and wil return a IdaGeoSeries
 object in each case.
-An IdaGeoSeries is essentially a reference to a spatial column of dashDB/DB2 where each entry in the column is a
+An IdaGeoSeries is essentially a reference to a spatial column where each entry in the column is a
 set of shapes corresponding to one observation represented by DB2GSE.ST_GEOMETRY. An entry may consist of only one
 shape (like a ST_POINT/ST_LINESTRING/ST_POLYGON) or multiple shapes that are meant to be thought of as one observation
 (like the many polygons that make up the County of Santa Cruz in California or a state like Connecticut).
 
-dashDB has three basic classes of geometric objects (which are actually DB2 spatial objects following OGC guidelines):
+Db2 has three basic classes of geometric objects, which are Db2 spatial objects that follow OGC guidelines:
 
     + ST_Point / ST_MultiPoint
     + ST_Linestring / ST_MultiLineString
