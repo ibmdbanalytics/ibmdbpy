@@ -15,7 +15,6 @@ setup.py
 # Note: Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 from codecs import open
-import os
 
 # Get the long description from the relevant file
 with open('README.rst', 'r', encoding='utf-8') as f:
