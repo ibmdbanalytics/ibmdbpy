@@ -66,7 +66,7 @@ setup(name='ibmdbpy',
       # optional are jaydebeapi, pytest, sphinx, bokeh
       extras_require={
         'jdbc':['jaydebeapi>=0.2.0,<1.0.0'],
-        'test':['pytest'],
+        'test':['pytest', 'flaky==3.4.0'],
         'doc':['sphinx']
       },
       description='A Pandas-like SQL-wrapper for in-database analytics with IBM dashDB/DB2.',
