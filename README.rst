@@ -4,15 +4,15 @@ ibmdbpy
 Accelerating Python Analytics by In-Database Processing
 =======================================================
 
-The ibmdbpy project provides a Python interface for data manipulation and access to in-database algorithms in IBM dashDB and IBM DB2. It accelerates Python analytics by seamlessly pushing operations written in Python into the underlying database for execution, thereby benefitting from in-database performance-enhancing features, such as columnar storage and parallel processing.
+The ibmdbpy project provides a Python interface for data manipulation and access to in-database algorithms in IBM Db2. It accelerates Python analytics by seamlessly pushing operations written in Python into the underlying database for execution, thereby benefitting from in-database performance-enhancing features, such as columnar storage and parallel processing.
 
-IBM dashDB is a database management system available on IBM Bluemix, the cloud application development and analytics platform powered by IBM. The ibmdbpy project can be used by Python developers with very little additional knowledge, because it copies the well-known interface of the Pandas library for data manipulation and the Scikit-learn library for the use of machine learning algorithms.
+IBM Db2 is a database management system. The ibmdbpy project can be used by Python developers with very little additional knowledge, because it copies the well-known interface of the Pandas library for data manipulation and the Scikit-learn library for the use of machine learning algorithms.
 
-The ibmdbpy project is compatible with Python releases 2.7 up to 3.4 and can be connected to dashDB or DB2 instances via ODBC or JDBC.
+The ibmdbpy project is compatible with Python releases 2.7 up to 3.4 and can be connected to Db2 instances via ODBC or JDBC.
 
 The project is still at an early stage and many of its features are still in development. However, several experiments have already demonstrated that it provides significant performance advantages when operating on medium or large amounts of data, that is, on tables of 1 million rows or more.
 
-The latest version of ibmdbpy is available on the `Python Package Index`__ and Github_.
+The latest version of ibmdbpy is available on the `Python Package Index`_ and Github_.
 
 __ https://pypi.python.org/pypi/ibmdbpy
 
@@ -25,12 +25,12 @@ The ibmdbpy project translates Pandas-like syntax into SQL and uses a middleware
 
 The following scenario illustrates how ibmdbpy works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a dashDB instance named DASHDB) via ODBC:
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance named DASHDB) via ODBC:
 
 >>> from ibmdbpy import IdaDataBase, IdaDataFrame
 >>> idadb = IdaDataBase('DASHDB')
 
-A few sample data sets are included in ibmdbpy for you to experiment. We can firstly load the well-known IRIS table into this dashDB instance.
+A few sample data sets are included in ibmdbpy for you to experiment. We can firstly load the well-known IRIS table into this Db2 instance.
 
 >>> from ibmdbpy.sampledata import iris
 >>> idadb.as_idadataframe(iris, "IRIS")
@@ -69,11 +69,9 @@ Et voilà !
 How the geospatial functions work
 ---------------------------------
 
-The ibmdbpy package now supports geospatial functions! It provides a Python interface for data manipulation and access to in-database algorithms in IBM dashDB and IBM DB2 Spatial Extender. It identifies the geometry column for spatial tables and enables the user to perform spatial queries based upon this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
+The ibmdbpy package provides a Python interface to the in-database geospatial functions of IBM Db2 Spatial Extender. It identifies the geometry column for spatial tables and lets you perform spatial queries based upon this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
 
-The following scenario illustrates how spatial functions work.
-
-We can create an IDA geo data frame that points to a sample table in dashDB:
+The following scenario illustrates how spatial functions work by creating an IDA geo data frame that points to a sample table in Db2:
 
 >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
 >>> idadb = IdaDataBase('DASHDB')
@@ -98,8 +96,6 @@ Here is the SQL request that was executed for this example::
    SELECT t.*,db2gse.ST_Area(t.SHAPE) as area
    FROM SAMPLES.GEO_COUNTY t;
 
-
-That's as simple as that!
 
 Feature Selection
 =================
