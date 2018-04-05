@@ -280,8 +280,11 @@ class IdaDataBase(object):
                     if verbose: print("Found it at %s! Trying to connect..."%jarpath)
                        
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
-           
-            self._connection_string = [jdbc_url, uid, pwd]
+
+            if jaydebeapi.__version__.startswith('0'):
+                self._connection_string = [jdbc_url, uid, pwd]
+            else:
+                self._connection_string = jdbc_url + ':user={};password={};'.format(uid, pwd)
             
             driver_not_found = ("HELP: The JDBC driver for IBM dashDB/DB2 could "+
             "not be found. Please download the latest JDBC Driver at the "+
