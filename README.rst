@@ -124,6 +124,7 @@ Here is the list of the persons who contributed to the project, in the chronolog
 - Rafael Rodriguez Morales (geospatial extension, core)
 - Avipsa Roy (geospatial extension)
 - Nicole Schoen (core)
+- Toni Bollinger (core)
 
 How to contribute
 =================
