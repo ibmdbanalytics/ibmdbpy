@@ -1,11 +1,11 @@
 <?xml version=1.0 encoding=UTF-8 standalone=no ?>
 <configuration>
   <databases>
-    <database host="DB2HOST" name="BLUDB" port="50001"/>
+    <database host="DASHDBHOST" name="BLUDB" port="50001"/>
   </databases>
 
   <dsncollection>
-    <dsn alias="BLUMIX" host="DB2HOST" name="BLUDB" port="50001">
+    <dsn alias="BLUMIX" host="DASHDBHOST" name="BLUDB" port="50001">
       <parameter name="SecurityTransportMode" value="SSL"/>
     </dsn>
   </dsncollection>
