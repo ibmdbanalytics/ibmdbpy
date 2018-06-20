@@ -44,7 +44,7 @@ For raw SQL queries it's not straightforward knowing which columns have geometry
 
 * Handle SQLSTATE 38SU4 error when dealing with Spatial reference systems (see geoSeries.py).
 
-* Include three small datasets, subsets of the tables GEO_COUNTY, GEO_CUSTOMER, and GEO_TORNADO of DashDB sample data in ibmdbpy so that tests of IdaGeoDataFrame and tests of IdaGeoSeries are performed with temporary tables created from this data. Change the tests accordingly if needed.
+* Include three small datasets, subsets of the tables GEO_COUNTY, GEO_CUSTOMER, and GEO_TORNADO of Db2 Warehouse sample data in ibmdbpy so that tests of IdaGeoDataFrame and tests of IdaGeoSeries are performed with temporary tables created from this data. Change the tests accordingly if needed.
 
 * Include also a data set for testing with Linestring types, to test the methods mid_point(), start_point() and end_point().
 
@@ -54,4 +54,4 @@ For raw SQL queries it's not straightforward knowing which columns have geometry
 
 * Check the viability of using a syntax similar to what is currently used for Windows (i.e. giving to ibmdbpy only the previously-set data source name), or allowing to enter the whole ODBC settings as a string.
 
-* Mind that there's a known bug of pypyodbc in python3 when using Pandas' read_sql() method (and dashDB driver), the column names of the returned DataFrame are not properly set. This was found when trying to use ibmdbpy with IBM ODBC Driver, from a Linux environment.
+* Mind that there's a known bug of pypyodbc in python3 when using Pandas' read_sql() method (and Db2 driver), the column names of the returned DataFrame are not properly set. This was found when trying to use ibmdbpy with IBM ODBC Driver, from a Linux environment.

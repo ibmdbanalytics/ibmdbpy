@@ -8,7 +8,7 @@ The ibmdbpy project provides a Python interface for data manipulation and access
 
 IBM Db2 is a database management system. The ibmdbpy project can be used by Python developers with very little additional knowledge, because it copies the well-known interface of the Pandas library for data manipulation and the Scikit-learn library for the use of machine learning algorithms.
 
-The ibmdbpy project is compatible with Python releases 2.7 up to 3.4 and can be connected to Db2 instances via ODBC or JDBC.
+The ibmdbpy project is compatible with Python releases 2.7 up to 3.6 and can be connected to Db2 databases via ODBC or JDBC.
 
 The project is still at an early stage and many of its features are still in development. However, several experiments have already demonstrated that it provides significant performance advantages when operating on medium or large amounts of data, that is, on tables of 1 million rows or more.
 
@@ -25,12 +25,12 @@ The ibmdbpy project translates Pandas-like syntax into SQL and uses a middleware
 
 The following scenario illustrates how ibmdbpy works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance named DASHDB) via ODBC:
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 database named BLUDB) via ODBC:
 
 >>> from ibmdbpy import IdaDataBase, IdaDataFrame
->>> idadb = IdaDataBase('DASHDB')
+>>> idadb = IdaDataBase('BLUDB')
 
-A few sample data sets are included in ibmdbpy for you to experiment. We can firstly load the well-known IRIS table into this Db2 instance.
+A few sample data sets are included in ibmdbpy for you to experiment. We can firstly load the well-known IRIS table into this Db2 database.
 
 >>> from ibmdbpy.sampledata import iris
 >>> idadb.as_idadataframe(iris, "IRIS")
@@ -74,7 +74,7 @@ The ibmdbpy package provides a Python interface to the in-database geospatial fu
 The following scenario illustrates how spatial functions work by creating an IDA geo data frame that points to a sample table in Db2:
 
 >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
->>> idadb = IdaDataBase('DASHDB')
+>>> idadb = IdaDataBase('BLUDB')
 >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
 
 Note that to create an IdaGeoDataframe using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.

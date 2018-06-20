@@ -14,7 +14,7 @@ Configuration for pytest testing framework module
 =================================================
 
 To launch the test routine, do in ibmdbpy-master folder: py.test
-Per default, py.test routine assumes a data source "DASHDB" is defined in ODBC
+Per default, py.test routine assumes a data source "BLUDB" is defined in ODBC
 settings, with userID and password, and test with the well-known 'iris' dataset.
 This can be changed using command line options, defined as following :
 
@@ -39,7 +39,7 @@ table
 Examples
 --------
 py.test
-    Launch py.test routine using iris sampledataset in "DASHDB" ODBC data source.
+    Launch py.test routine using iris sampledataset in "BLUDB" ODBC data source.
 
 py.test --dsn=<DSN>
     Do the test routine with the data source <DSN> as defined in ODBC settings.
@@ -81,7 +81,7 @@ def pytest_addoption(parser):
     """
     parser.addoption("--table", default="iris",
         help="Name of the table to test the dataset")
-    parser.addoption("--dsn", default="DASHDB",
+    parser.addoption("--dsn", default="BLUDB",
         help="Data Source Name")
     parser.addoption("--uid", default='',
         help="User ID")

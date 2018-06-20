@@ -111,7 +111,7 @@ class Test_IdaDataBase_PrivateMethods(object):
         idadb._create_table(df, "INSERT_TEST_585960708904")
         ida = IdaDataFrame(idadb, "INSERT_TEST_585960708904")
         assert(ida.shape[0] == 0)
-        idadb._insert_into_database(df.loc[[1]], "INSERT_TEST_585960708904")
+        idadb._insert_into_database(df.loc[[1]], idadb.current_schema, "INSERT_TEST_585960708904")
         del ida.shape
         assert(ida.shape[0] == 1)
         idadb.drop_table("INSERT_TEST_585960708904")

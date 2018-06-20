@@ -36,7 +36,7 @@ from ibmdbpy.exceptions import IdaGeoDataFrameError
 class IdaGeoSeries(ibmdbpy.IdaSeries):
     """
     An IdaSeries whose column must have geometry type.
-    It has geospatial methods based on DashDB/DB2 Spatial Extender (DB2GSE).
+    It has geospatial methods based on Db2 Warehouse Spatial Extender (DB2GSE).
     
     # TODO: add examples
 

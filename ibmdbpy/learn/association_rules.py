@@ -36,7 +36,7 @@ class AssociationRules(object):
     preferred due to its scalability.
 
     The AssociationRules class provides an interface for using the
-    ASSOCRULES amd PREDICT_ASSOCRULES IDAX methods of dashDB/DB2.
+    ASSOCRULES amd PREDICT_ASSOCRULES IDAX methods of Db2 Warehouse.
     """
 
     def __init__(self, modelname = None, minsupport = None, maxlen = 5, maxheadlen = 1, minconf = 0.5):

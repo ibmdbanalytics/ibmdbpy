@@ -43,7 +43,7 @@ class KMeans(object):
 
 
     The KMeans class provides an interface for using the KMEANS
-    and PREDICT_KMEANS IDAX methods of dashDB/DB2.
+    and PREDICT_KMEANS IDAX methods of Db2 Warehouse.
     """
     def __init__(self, n_clusters=3, modelname = None, max_iter = 5, distance = "euclidean",
                  random_state = 12345, idbased = False, statistics = None):
@@ -113,7 +113,7 @@ class KMeans(object):
 
         Examples
         --------
-        >>> idadb = IdaDataBase("DASHDB")
+        >>> idadb = IdaDataBase("BLUDB")
         >>> idadf = IdaDataFrame(idadb, "IRIS", indexer = "ID")
         >>> kmeans = KMeans(3) # clustering with 3 clusters
         >>> kmeans.fit(idadf)

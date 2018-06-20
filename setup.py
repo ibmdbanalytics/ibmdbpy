@@ -61,7 +61,7 @@ classifiers = [
       ]
 
 setup(name='ibmdbpy',
-      version='0.1.4',
+      version='0.1.4.post3',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       extras_require={
@@ -69,14 +69,14 @@ setup(name='ibmdbpy',
         'test':['pytest', 'flaky==3.4.0'],
         'doc':['sphinx']
       },
-      description='A Pandas-like SQL-wrapper for in-database analytics with IBM dashDB/DB2.',
+      description='A Pandas-like SQL-wrapper for in-database analytics with IBM Db2 Warehouse.',
       long_description=longdesc,
       url='https://github.com/ibmdbanalytics/ibmdbpy',
       author='IBM Corp.',
-      author_email='NRAUSCH@de.ibm.com',
+      author_email='Toni.Bollinger@de.ibm.com',
       license='BSD',
       classifiers=classifiers,
-      keywords='data analytics database development IBM dashDB DB2 pandas scikitlearn scalability machine-learning knowledge discovery',
+      keywords='data analytics database development IBM Db2 Warehouse pandas scikitlearn scalability machine-learning knowledge discovery',
       packages=find_packages(exclude=['docs', 'tests*']),
       package_data={
         'ibmdbpy.sampledata': ['*.txt']}
