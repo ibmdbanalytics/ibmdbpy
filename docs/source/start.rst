@@ -6,7 +6,7 @@ Quickstart
 Connect
 =======
 
-First, connect to a remote Db2 instance.
+First, connect to a remote Db2 database.
 
 ODBC Connection
 ---------------
@@ -16,18 +16,18 @@ The default connection type for ibmdbpy is ODBC, which is the default setting fo
 If your credentials are stored in the Windows ODBC windows connection settings, the database connection can be established very easily by creating an IdaDataBase:
 
 >>> from ibmdbpy.base import IdaDataBase
->>> idadb = IdaDataBase("DASHDB")
+>>> idadb = IdaDataBase("BLUDB")
 
 Otherwise, it is possible to connect with your Db2 credentials:
 
->>> idadb = IdaDataBase(dsn="DASHDB", uid="<UID>", pwd="<PWD>")
+>>> idadb = IdaDataBase(dsn="BLUDB", uid="<UID>", pwd="<PWD>")
 
 Using ODBC platforms other than Windows may require additional configuration.
 
 JDBC Connection
 ---------------
 
-The JDBC Connection is based on a Java Virtual Machine, so it is available on every machine that can run Java. In ibmdbpy, users can choose to use JDBC to connect to a remote Db2 instance using JDBC. To be able to use JDBC to connect, you must install the ``JayDeBeApi`` package, set as an optional dependency:
+The JDBC Connection is based on a Java Virtual Machine, so it is available on every machine that can run Java. In ibmdbpy, users can choose to use JDBC to connect to a remote Db2 database using JDBC. To be able to use JDBC to connect, you must install the ``JayDeBeApi`` package, set as an optional dependency:
 
 	pip install jaydebeapi
 
@@ -47,7 +47,7 @@ __ http://www-01.ibm.com/support/docview.wss?uid=swg21363866
 
 You need to put the ‘db2jcc.jar’ or ‘db2jcc4.jar’ file in the ibmdbpy site-package folder. When ibmdbpy runs, it checks whether one of those files exists in its installation folder and uses it to establish the connection.
 
-The connection is done using the JDBC URL string. For a Db2 Warehouse on Cloud instance, the JDBC URL string can be found on the Db2 Connection Information page.
+The connection is done using the JDBC URL string. For a Db2 Warehouse on Cloud database, the JDBC URL string can be found on the Db2 Connection Information page.
 
 >>> jdbc = 'jdbc:db2://<HOST>:<PORT>/<DBNAME>:user=<UID>;password=<PWD>'
 >>> IdaDataBase(jdbc)
@@ -67,7 +67,7 @@ Autocommit
 By default, the connection is opened in autocommit mode, which means all operations are committed automatically.
 This behavior can be changed by setting the ``autocommit`` option to ``False`` or by using the ``set_autocommit`` function.
 
->>> idadb = IdaDataBase("DASHDB", autocommit=False)
+>>> idadb = IdaDataBase("BLUDB", autocommit=False)
 
 Alternatively
 
@@ -79,7 +79,7 @@ Verbosity
 
 The verbose mode automatically prints all SQL-communication between ibmdbpy and Db2, which can be very useful for debugging or understanding how ibmdbpy works. By default, this is activated, but can be turned down by setting the ``verbose`` option  to ``False`` or by using the ``set_verbose`` function.
 
->>> idadb = IdaDataBase("DASHDB", verbose=False)
+>>> idadb = IdaDataBase("BLUDB", verbose=False)
 
 Alternatively
 
@@ -99,7 +99,7 @@ Close the connection
 To ensure expected behaviors, IdaDataBase instances need to be closed. Closing the IdaDataBase is equivalent to closing the connection: once the connection is closed, it is not possible to use the IdaDataBase instance and any IdaDataFrame instances that were opened on this connection anymore.
 
 >>> idadb.close()
-'A SQL-Handle for database DASHDB was closed'
+'A SQL-Handle for database BLUDB was closed'
 
 If the autocommit mode is activated, then all changes in the IdaDataFrame and others will be commited, otherwise they will be discarded (rollback).
 
@@ -491,10 +491,10 @@ The results are fetched and formatted into the corresponding data structure, for
 
 The following scenario illustrates how ibmdbpy works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance with the name DASHDB) via ODBC:
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 database with the name BLUDB) via ODBC:
 
     >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
-    >>> idadb = IdaDataBase('DASHDB')
+    >>> idadb = IdaDataBase('BLUDB')
 
 We can create an IDA geo data frame that points to a sample table:
 
@@ -573,7 +573,7 @@ Upload a DataFrame
 It is possible to upload a local Pandas DataFrame to a Db2 instance. A few data sets are also included in ibmdbpy. For example, to upload the data set iris, issue the following command:
 
 >>> from ibmdbpy.sampledata.iris import iris
->>> idadb = IdaDataBase('DASHDB')
+>>> idadb = IdaDataBase('BLUDB')
 >>> idadb.as_idadataframe(iris, 'IRIS')
 <ibmdbpy.frame.IdaDataFrame at 0x9ee2d30>
 
@@ -604,7 +604,7 @@ Explore the Database
 
 To get a list of existing tables in the database, use the ``IdaDataBase.show_tables()`` function.
 
->>> idadb = IdaDataBase('DASHDB')
+>>> idadb = IdaDataBase('BLUDB')
 >>> idadb.show_tables()
      TABSCHEMA           TABNAME       OWNER TYPE
 0    DASHXXXXXX            SWISS  DASHXXXXXX    T

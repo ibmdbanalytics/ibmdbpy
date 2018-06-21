@@ -25,7 +25,7 @@ import pandas
 import pytest
 import six
 
-from ibmdbpy import IdaDataBase
+from ibmdbpy import IdaDataBase, IdaDataFrame
 from ibmdbpy.exceptions import IdaDataBaseError
 
 class Test_ConnectToDB(object):
@@ -101,6 +101,28 @@ class Test_UploadDataFrame(object):
         assert(ida.shape == df.shape)
         idadb.drop_table("TEST_AS_IDADF_18729493954_23849590")
 
+    # test schema support
+    def test_idadb_as_idadataframe_with_schema(self, idadb, df):
+        ida = idadb.as_idadataframe(df, "DUMMY.TEST_AS_IDADF_18729493954_23849590", clear_existing = True)
+        assert(all(ida.columns == df.columns))
+        assert(list(ida.index) == list(df.index))
+        assert(ida.shape == df.shape)
+        idadb.drop_table("DUMMY.TEST_AS_IDADF_18729493954_23849590")
+
+    # test if the columns function returns the correct values
+    # if two tables exist with the same name but different schema
+    def test_idadb_as_idadataframe_same_tablename(self, idadb, df):
+        ida11 = idadb.as_idadataframe(df, "TEST_AS_IDADF_18729493954_23849590", clear_existing = True)
+        ida21 = idadb.as_idadataframe(df, "DUMMY.TEST_AS_IDADF_18729493954_23849590", clear_existing = True)
+        assert(all(ida11.columns == df.columns))
+        assert(all(ida21.columns == df.columns))
+        ida12 = IdaDataFrame(idadb, "TEST_AS_IDADF_18729493954_23849590")
+        ida22 = IdaDataFrame(idadb, "DUMMY.TEST_AS_IDADF_18729493954_23849590")
+        assert(all(ida12.columns == df.columns))
+        assert(all(ida22.columns == df.columns))
+        idadb.drop_table("TEST_AS_IDADF_18729493954_23849590")
+        idadb.drop_table("DUMMY.TEST_AS_IDADF_18729493954_23849590")
+
     def test_idadb_ida_query(self, idadb, idadf):
         query = "SELECT * FROM %s FETCH FIRST 5 ROWS ONLY"%idadf.name
         df = idadb.ida_query(query)
@@ -118,5 +140,6 @@ class Test_UploadDataFrame(object):
         query = "SELECT * FROM %s FETCH FIRST 5 ROWS ONLY"%idadf.name
         downloaded_df = idadb.ida_scalar_query(query)
         assert(isinstance(downloaded_df,six.string_types)|isinstance(downloaded_df,Number))
+
 
     ################# MORE TEST TO DO HERE

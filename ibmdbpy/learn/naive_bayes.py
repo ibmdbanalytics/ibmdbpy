@@ -35,7 +35,7 @@ class NaiveBayes(object):
     on reality. Therefore, they are considered naive.
 
     The NaiveBayes class provides an interface for using the NAIVEBAYES
-    and PREDICT_NAIVEBAYES IDAX methods of dashDB/DB2.
+    and PREDICT_NAIVEBAYES IDAX methods of Db2 Warehouse.
     """
 
     def __init__(self, modelname = None, disc = None, bins = None):

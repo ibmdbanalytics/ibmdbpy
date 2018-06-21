@@ -70,7 +70,7 @@ def aggregate_idadf(idadf, method, other, swap = False):
     Notes
     -----
     It is not possible to create aggregations between columns that are stored 
-    in different dashDB/DB2 tables.
+    in different Db2 Warehouse tables.
 
     """
     def swap_manager(left, right, swap = False):

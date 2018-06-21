@@ -61,14 +61,14 @@ from ibmdbpy.internals import idadf_state
 
 class IdaDataFrame(object):
     """
-    An IdaDataFrame object is a reference to a table in a remote instance of 
-    dashDB/DB2. IDA stands for In-DataBase Analytics. IdaDataFrame copies the 
+    An IdaDataFrame object is a reference to a table in a remote Db2 Warehouse
+    database. IDA stands for In-DataBase Analytics. IdaDataFrame copies the
     Pandas interface for DataFrame objects to ensure intuitive interaction for 
     end-users.
 
     Examples
     --------
-    >>> idadb = IdaDataBase('DASHDB') # See documentation for IdaDataBase
+    >>> idadb = IdaDataBase('BLUDB') # See documentation for IdaDataBase
     >>> ida_iris = IdaDataFrame(idadb, 'IRIS')
     >>> ida_iris.cov()
                       sepal_length  sepal_width  petal_length  petal_width
@@ -137,7 +137,7 @@ class IdaDataFrame(object):
 
         Examples
         --------
-        >>> idadb = IdaDataBase('DASHDB')
+        >>> idadb = IdaDataBase('BLUDB')
         >>> ida_iris = IdaDataFrame(idadb, "IRIS")
         """
         #TODO: Implement equality comparision between two IdaDataFrames
@@ -213,7 +213,7 @@ class IdaDataFrame(object):
     def indexer(self):
         """
         The indexer attribute refers to the name of a column that should be 
-        used to index the table. This makes sense because dashDB is a 
+        used to index the table. This makes sense because Db2 Warehouse is a
         column-based database, so row IDs do not make sense and are not 
         deterministic. As a consequence, the only way to address a particular 
         row is to refer to it by its index. If no indexer is provided, ibmdbpy 
@@ -1272,10 +1272,10 @@ class IdaDataFrame(object):
         Notes
         -----
         If columns is set to None and axis to 0, this undoes all sorting the 
-        IdaDataFrame and returns the original sorting in the dashDB/DB2 
+        IdaDataFrame and returns the original sorting in the Db2 Warehouse
         database.
 
-        No actual changes are made in dashDB/DB2, only the querying changes. 
+        No actual changes are made in Db2 Warehouse, only the querying changes.
         Everything is registered in an InternalState object. Changes can be 
         observed by using  head and tail function.
         """
@@ -1847,7 +1847,7 @@ class IdaDataFrame(object):
     # TODO : cumsum, cummean, cummcountm cummax, cumprod
 
 ###############################################################################
-### Save current IdaDataFrame to dashDB as a table
+### Save current IdaDataFrame to Db2 Warehouse as a table
 ###############################################################################
 
     # TODO: Should this function be in IdaDataBase ?
@@ -2067,8 +2067,11 @@ class IdaDataFrame(object):
         tablename = self.internal_state.current_state
         if self._idadb._con_type == 'odbc':
             if '.' in tablename:
+                schema = tablename.split('.')[-2]
                 tablename = tablename.split('.')[-1]
-            columns = self._idadb._con.cursor().columns(table=tablename)
+            else:
+                schema = self._idadb.current_schema
+            columns = self._idadb._con.cursor().columns(table=tablename, schema=schema)
             columnlist = [column[3] for column in columns]
             return Index(columnlist)
         elif self._idadb._con_type == 'jdbc':
@@ -2169,7 +2172,7 @@ class IdaDataFrame(object):
 
 
 ###############################################################################
-### DashDB/DB2) to pandas type mapping
+### DB2 Warehouse to pandas type mapping
 ###############################################################################
 
     def _table_def(self, factor_threshold=None):

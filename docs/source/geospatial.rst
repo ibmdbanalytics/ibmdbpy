@@ -40,10 +40,10 @@ The results are fetched and formatted into the corresponding data structure, for
 The following scenario illustrates how ibmdbpy works.
 
 Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a
-database (in this case, a Db2 instance with the name DASHDB) via ODBC:
+database (in this case, a Db2 database with the name BLUDB) via ODBC:
 
     >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
-    >>> idadb = IdaDataBase('DASHDB')
+    >>> idadb = IdaDataBase('BLUDB')
 
 We can create an IDA geo data frame that points to a sample table:
 

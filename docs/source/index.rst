@@ -37,10 +37,10 @@ The ibmdbpy project translates Pandas-like syntax into SQL and uses a middleware
 
 The following scenario illustrates how ibmdbpy works.
 
-Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance with the name DASHDB) via ODBC:
+Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a database (in this case, a Db2 instance with the name BLUDB) via ODBC:
 
 >>> from ibmdbpy import IdaDataBase, IdaDataFrame
->>> idadb = IdaDataBase('DASHDB')
+>>> idadb = IdaDataBase('BLUDB')
 
 A few sample data sets are included in ibmdbpy for you to experiment. First, we can load the IRIS table into this database instance.
 
@@ -87,7 +87,7 @@ The following scenario illustrates how spatial functions work.
 We can create an IDA geo data frame that points to a sample table:
 
 >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
->>> idadb = IdaDataBase('DASHDB')
+>>> idadb = IdaDataBase('BLUDB')
 >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
 
 Note that to create an IdaGeoDataframe using the IdaDataFrame object, we need to specify our previously opened IdaDataBase object, because it holds the connection.

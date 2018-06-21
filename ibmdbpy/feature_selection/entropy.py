@@ -85,7 +85,7 @@ def entropy(idadf, target=None, mode="normal", execute=True, ignore_indexer=True
         # Output
         if len(columns) > 1:
             result = pd.Series(entropy_dict)
-            result.sort(ascending = False) 
+            result.sort_values(ascending = False)
         else:
             result = entropy_dict[columns[0]]
         return result
@@ -154,7 +154,7 @@ def entropy_stats(idadf, target=None, mode="normal", execute = True, ignore_inde
         # Output
         if len(columns) > 1:
             result = pd.Series(entropy_dict)
-            result.sort(ascending = False) 
+            result.sort_values(ascending = False)
         else:
             result = entropy_dict[columns[0]]
         return result

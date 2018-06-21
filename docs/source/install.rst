@@ -33,7 +33,7 @@ These statements run the test::
 	> cd tests
 	> py.test
 
-By default, pytest assumes that a database named "DASHDB" is reachable via an ODBC connection and that its credentials are stored in your ODBC settings. This may be not the case for most users, so several options are avaiable:
+By default, pytest assumes that a database named "BLUDB" is reachable via an ODBC connection and that its credentials are stored in your ODBC settings. This may be not the case for most users, so several options are avaiable:
 
 	* ``--dsn`` : Data Source Name
 	* ``--uid``, ``--pwd`` : Database login and password
