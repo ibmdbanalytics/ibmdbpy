@@ -9,7 +9,7 @@ TraceLibrary  =
 
 [BLUMIX]
 Driver      = /tmp/dsdriver/lib/libdb2o.so 
-Description = DB2 Warehouse connection
+Description = Db2 Warehouse connection
 DATABASE    = BLUDB
 HOSTNAME    = DASHDBHOST
 PORT        = 50001
