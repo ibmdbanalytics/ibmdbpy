@@ -61,7 +61,7 @@ classifiers = [
       ]
 
 setup(name='ibmdbpy',
-      version='0.1.4.post3',
+      version='0.1.5',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       extras_require={

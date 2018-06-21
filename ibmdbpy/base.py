@@ -1781,8 +1781,7 @@ class IdaDataBase(object):
             column_string = column_string[:-1]
 
         if '.' in tablename:
-            schema = tablename.split('.')[-2]
-            tablename2 = tablename.split('.')[-1]
+            schema, tablename2 = tablename.split('.')
         else:
             schema = self.current_schema
             tablename2 = tablename
