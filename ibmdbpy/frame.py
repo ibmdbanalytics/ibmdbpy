@@ -59,6 +59,7 @@ from ibmdbpy.internals import InternalState
 from ibmdbpy.exceptions import IdaDataFrameError
 from ibmdbpy.internals import idadf_state
 
+
 class IdaDataFrame(object):
     """
     An IdaDataFrame object is a reference to a table in a remote Db2 Warehouse
@@ -2090,25 +2091,19 @@ class IdaDataFrame(object):
         Index containing a list of the row names in self.
         """
 
+        rows = self.shape[0]
+
         # Prevent user from loading an index that is too big
         if not force:
             threshold = 10000
-            if self.shape[0] > threshold:
+            if rows > threshold:
                 print("WARNING : the index has %s elements." %self.shape[0])
                 question = "Do you want to download it in memory ?"
                 display_yes = ibmdbpy.utils.query_yes_no(question)
                 if not display_yes:
                     return
 
-        # (ROW_NUMBER() OVER())-1 is because ROWID starts with 1 instead of 0
-        df = self.ida_query("SELECT ((ROW_NUMBER() OVER())-1) AS ROWNUMBER FROM %s"
-                            %self._name)
-        
-        # Fix a bug in the jpype interface, where the element of the series 
-        # actually are of type jpype._jclass.java.lang.Long
-        if "jpype" in str(type(df[0])):
-            return Index(map(lambda x: int(x.toString()),df))
-        return Index(df)
+        return Index(np.arange(0, rows))
 
     def _get_shape(self):
         """
