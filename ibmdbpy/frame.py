@@ -2101,7 +2101,7 @@ class IdaDataFrame(object):
                 question = "Do you want to download it in memory ?"
                 display_yes = ibmdbpy.utils.query_yes_no(question)
                 if not display_yes:
-                    return
+                    return None
 
         return Index(np.arange(0, rows))
 
