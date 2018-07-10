@@ -42,7 +42,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
-from pandas.core.index import Index
+from pandas.core.index import Index, RangeIndex
 
 from lazy import lazy
 import six
@@ -2093,17 +2093,7 @@ class IdaDataFrame(object):
 
         rows = self.shape[0]
 
-        # Prevent user from loading an index that is too big
-        if not force:
-            threshold = 10000
-            if rows > threshold:
-                print("WARNING : the index has %s elements." %self.shape[0])
-                question = "Do you want to download it in memory ?"
-                display_yes = ibmdbpy.utils.query_yes_no(question)
-                if not display_yes:
-                    return None
-
-        return Index(np.arange(0, rows))
+        return RangeIndex(0, rows, 1)
 
     def _get_shape(self):
         """
