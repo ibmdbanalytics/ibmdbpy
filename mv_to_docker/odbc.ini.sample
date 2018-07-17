@@ -9,8 +9,9 @@ TraceLibrary  =
 
 [BLUMIX]
 Driver      = /tmp/dsdriver/lib/libdb2o.so 
-Description = DashDB connection
+Description = Db2 Warehouse connection
 DATABASE    = BLUDB
 HOSTNAME    = DASHDBHOST
-PORT        = 50000
+PORT        = 50001
 PROTOCOL    = TCPIP
+SECURITY    = SSL

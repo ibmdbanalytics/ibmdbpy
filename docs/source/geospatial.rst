@@ -16,7 +16,7 @@ boundary of an area; for example, the boundary of a land parcel or flood plain, 
 Each spatial data item is an instance of a spatial data type. These types,together with the other spatial data types,
 are structured types that belong to a single hierarchy ST_Geometry.
 
-The python wrappers for spatial functions which DB2 currently supports make the querying process much simpler
+The python wrappers for spatial functions which Db2 currently supports make the querying process much simpler
 for the users. These functions are broadly classified into two categories that have a single input and a double
 input respectively. The single input functions work on a single IdaGeoDataFrame with one spatial column,
 whereas the double input functions can either work on a single IdaGeoDataFrame with two spatial columns or two
@@ -40,12 +40,12 @@ The results are fetched and formatted into the corresponding data structure, for
 The following scenario illustrates how ibmdbpy works.
 
 Assuming that all ODBC connection parameters are correctly set, issue the following statements to connect to a
-database (in this case, a dashDB instance named DASHDB) via ODBC:
+database (in this case, a Db2 database with the name BLUDB) via ODBC:
 
     >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
-    >>> idadb = IdaDataBase('DASHDB')
+    >>> idadb = IdaDataBase('BLUDB')
 
-We can create an IDA geo data frame that points to a sample table in dashDB:
+We can create an IDA geo data frame that points to a sample table:
 
     >>> idadf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY')
 

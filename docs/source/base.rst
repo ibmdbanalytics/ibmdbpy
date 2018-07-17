@@ -3,8 +3,8 @@
 IdaDataBase
 ***********
 
-Connect to dashDB/DB2
-=====================
+Connect to Db2
+==============
 
 .. currentmodule:: ibmdbpy.base
 

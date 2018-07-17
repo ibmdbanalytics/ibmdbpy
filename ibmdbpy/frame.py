@@ -42,7 +42,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
-from pandas.core.index import Index
+from pandas.core.index import Index, RangeIndex
 
 from lazy import lazy
 import six
@@ -59,16 +59,17 @@ from ibmdbpy.internals import InternalState
 from ibmdbpy.exceptions import IdaDataFrameError
 from ibmdbpy.internals import idadf_state
 
+
 class IdaDataFrame(object):
     """
-    An IdaDataFrame object is a reference to a table in a remote instance of
-    dashDB/DB2. IDA stands for In-DataBase Analytics. IdaDataFrame copies the
+    An IdaDataFrame object is a reference to a table in a remote Db2 Warehouse
+    database. IDA stands for In-DataBase Analytics. IdaDataFrame copies the
     Pandas interface for DataFrame objects to ensure intuitive interaction for
     end-users.
 
     Examples
     --------
-    >>> idadb = IdaDataBase('DASHDB') # See documentation for IdaDataBase
+    >>> idadb = IdaDataBase('BLUDB') # See documentation for IdaDataBase
     >>> ida_iris = IdaDataFrame(idadb, 'IRIS')
     >>> ida_iris.cov()
                       sepal_length  sepal_width  petal_length  petal_width
@@ -137,7 +138,7 @@ class IdaDataFrame(object):
 
         Examples
         --------
-        >>> idadb = IdaDataBase('DASHDB')
+        >>> idadb = IdaDataBase('BLUDB')
         >>> ida_iris = IdaDataFrame(idadb, "IRIS")
         """
         #TODO: Implement equality comparision between two IdaDataFrames
@@ -213,7 +214,7 @@ class IdaDataFrame(object):
     def indexer(self):
         """
         The indexer attribute refers to the name of a column that should be
-        used to index the table. This makes sense because dashDB is a
+        used to index the table. This makes sense because Db2 Warehouse is a
         column-based database, so row IDs do not make sense and are not
         deterministic. As a consequence, the only way to address a particular
         row is to refer to it by its index. If no indexer is provided, ibmdbpy
@@ -1272,10 +1273,10 @@ class IdaDataFrame(object):
         Notes
         -----
         If columns is set to None and axis to 0, this undoes all sorting the
-        IdaDataFrame and returns the original sorting in the dashDB/DB2
+        IdaDataFrame and returns the original sorting in the Db2 Warehouse
         database.
 
-        No actual changes are made in dashDB/DB2, only the querying changes.
+        No actual changes are made in Db2 Warehouse, only the querying changes.
         Everything is registered in an InternalState object. Changes can be
         observed by using  head and tail function.
         """
@@ -1847,7 +1848,7 @@ class IdaDataFrame(object):
     # TODO : cumsum, cummean, cummcountm cummax, cumprod
 
 ###############################################################################
-### Save current IdaDataFrame to dashDB as a table
+### Save current IdaDataFrame to Db2 Warehouse as a table
 ###############################################################################
 
     # TODO: Should this function be in IdaDataBase ?
@@ -2067,8 +2068,11 @@ class IdaDataFrame(object):
         tablename = self.internal_state.current_state
         if self._idadb._con_type == 'odbc':
             if '.' in tablename:
+                schema = tablename.split('.')[-2]
                 tablename = tablename.split('.')[-1]
-            columns = self._idadb._con.cursor().columns(table=tablename)
+            else:
+                schema = self._idadb.current_schema
+            columns = self._idadb._con.cursor().columns(table=tablename, schema=schema)
             columnlist = [column[3] for column in columns]
             return Index(columnlist)
         elif self._idadb._con_type == 'jdbc':
@@ -2087,25 +2091,9 @@ class IdaDataFrame(object):
         Index containing a list of the row names in self.
         """
 
-        # Prevent user from loading an index that is too big
-        if not force:
-            threshold = 10000
-            if self.shape[0] > threshold:
-                print("WARNING : the index has %s elements." %self.shape[0])
-                question = "Do you want to download it in memory ?"
-                display_yes = ibmdbpy.utils.query_yes_no(question)
-                if not display_yes:
-                    return
+        rows = self.shape[0]
 
-        # (ROW_NUMBER() OVER())-1 is because ROWID starts with 1 instead of 0
-        df = self.ida_query("SELECT ((ROW_NUMBER() OVER())-1) AS ROWNUMBER FROM %s"
-                            %self._name)
-
-        # Fix a bug in the jpype interface, where the element of the series
-        # actually are of type jpype._jclass.java.lang.Long
-        if "jpype" in str(type(df[0])):
-            return Index(map(lambda x: int(x.toString()),df))
-        return Index(df)
+        return RangeIndex(0, rows, 1)
 
     def _get_shape(self):
         """
@@ -2169,7 +2157,7 @@ class IdaDataFrame(object):
 
 
 ###############################################################################
-### DashDB/DB2) to pandas type mapping
+### DB2 Warehouse to pandas type mapping
 ###############################################################################
 
     def _table_def(self, factor_threshold=None):

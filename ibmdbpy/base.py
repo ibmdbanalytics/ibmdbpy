@@ -13,7 +13,7 @@
 ###############################################################################
 
 """
-An IdaDataBase instance represents a reference to a remote dashDB/DB2 instance,
+An IdaDataBase instance represents a reference to a remote Db2 Warehouse database
 maintaining attributes and methods for administration of the database.
 """
 
@@ -52,8 +52,8 @@ from ibmdbpy.exceptions import IdaDataBaseError, PrimaryKeyError
 
 class IdaDataBase(object):
     """
-    An IdaDataBase instance represents a reference to a remote dashDB/DB2 
-    instance. This is an abstraction layer for the remote connection. The 
+    An IdaDataBase instance represents a reference to a remote Db2 Warehouse
+    database. This is an abstraction layer for the remote connection. The
     IdaDataBase interface provides several functions that enable basic database 
     administration in pythonic syntax.
 
@@ -135,12 +135,12 @@ class IdaDataBase(object):
 
         ODBC connection, userID and password are stored in ODBC settings:
 
-        >>> IdaDataBase(dsn="DASHDB") # ODBC Connection
+        >>> IdaDataBase(dsn="BLUDB") # ODBC Connection
         <ibmdbpy.base.IdaDataBase at 0x9bec860>
 
         ODBC connection, userID and password are not stored in ODBC settings:
 
-        >>> IdaDataBase(dsn="DASHDB", uid="<UID>", pwd="<PWD>")
+        >>> IdaDataBase(dsn="BLUDB", uid="<UID>", pwd="<PWD>")
         <ibmdbpy.base.IdaDataBase at 0x9bec860>
         
         JDBC connection, full JDBC string:
@@ -280,10 +280,13 @@ class IdaDataBase(object):
                     if verbose: print("Found it at %s! Trying to connect..."%jarpath)
                        
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
-           
-            self._connection_string = [jdbc_url, uid, pwd]
+
+            if jaydebeapi.__version__.startswith('0'):
+                self._connection_string = [jdbc_url, uid, pwd]
+            else:
+                self._connection_string = jdbc_url + ':user={};password={};'.format(uid, pwd)
             
-            driver_not_found = ("HELP: The JDBC driver for IBM dashDB/DB2 could "+
+            driver_not_found = ("HELP: The JDBC driver for IBM Db2 could "+
             "not be found. Please download the latest JDBC Driver at the "+
             "following address: 'http://www-01.ibm.com/support/docview.wss?uid=swg21363866' "+
             "and put the file 'db2jcc.jar' or 'db2jcc4.jar' in the CLASSPATH variable "+
@@ -401,7 +404,7 @@ class IdaDataBase(object):
         
         data = self._upper_columns(data)
 
-        # DASHDB FIX: schema "SAMPLES" and "GOSALES" saved with an extra blank,
+        # Db2 Warehouse FIX: schema "SAMPLES" and "GOSALES" saved with an extra blank,
         # By doing so, we delete the extra blank.
         # Note that this works because all cells are of type string.
 
@@ -999,7 +1002,7 @@ class IdaDataBase(object):
 
         try:
             self._prepare_and_execute("CALL IDAX.DROP_MODEL('model=" + model + "')")
-        except:
+        except Exception as e:
             try:
                 flag = self.exists_table(modelname)
             except TypeError:
@@ -1009,7 +1012,8 @@ class IdaDataBase(object):
                 if flag:
                     # It is a table so make it raise by calling exists_view
                     self.exists_view(modelname)
-            raise ValueError(modelname + " does not exists in database")
+            value_error = ValueError(modelname + " does not exists in database")
+            six.raise_from(value_error, e)
         else:
             tables = self.show_tables()
             if not tables.empty:
@@ -1021,7 +1025,7 @@ class IdaDataBase(object):
     @timed
     def rename(self, idadf, newname):
         """
-        Rename a table referenced by an IdaDataFrame in dashDB/DB2.
+        Rename a table referenced by an IdaDataFrame in Db2 Warehouse.
 
         Parameters
         ----------
@@ -1373,7 +1377,7 @@ class IdaDataBase(object):
                 percentage = int(i / split_into * 100)
                 print("Uploaded: " + str(percentage) + "%... ", end="\r")
                 try:
-                    self._insert_into_database(chunk, idadf.tablename, silent=True)
+                    self._insert_into_database(chunk, idadf.schema, idadf.tablename, silent=True)
                 except:
                     raise
             print("Uploaded: %s/%s... "%(split_into,split_into), end="")
@@ -1381,7 +1385,7 @@ class IdaDataBase(object):
         else:
             print("Uploading %s rows (maxnrow was set to %s)"%(df.shape[0], maxnrow))
             try:
-                self._insert_into_database(df, idadf.tablename, silent=True)
+                self._insert_into_database(df, idadf.schema, idadf.tablename, silent=True)
             except:
                 raise
 
@@ -1495,7 +1499,7 @@ class IdaDataBase(object):
 
     def _exists(self, objectname, typelist):
         """
-        Check if an object of a certain type exists in dashDB/DB2.
+        Check if an object of a certain type exists in Db2 Warehouse.
 
         Notes
         -----
@@ -1779,15 +1783,22 @@ class IdaDataBase(object):
         if column_string[-1] == ',':
             column_string = column_string[:-1]
 
-        create_table = "CREATE TABLE \"%s\" (%s)" % (tablename, column_string)
+        if '.' in tablename:
+            schema, tablename2 = tablename.split('.')
+        else:
+            schema = self.current_schema
+            tablename2 = tablename
+
+        create_table = "CREATE TABLE \"%s\".\"%s\" (%s)" % (schema, tablename2, column_string)
+
         self._prepare_and_execute(create_table, autocommit=False)
 
         # Save new table in cache
         if hasattr(self, "cache_show_tables"):
-            record = (self.current_schema, tablename, self.current_schema, 'T')
+            record = (schema, tablename2, self.current_schema, 'T')
             self.cache_show_tables.loc[len(self.cache_show_tables)] = np.array(record)
 
-        return tablename
+        return "\"%s\".\"%s\"" % (schema, tablename2)
 
     def _create_view(self, idadf, viewname = None):
         """
@@ -1873,7 +1884,7 @@ class IdaDataBase(object):
     
         return viewname
 
-    def _insert_into_database(self, dataframe, tablename, silent=True):
+    def _insert_into_database(self, dataframe, schema, tablename, silent=True):
         """
         Populate an existing table with data from a dataframe.
 
@@ -1882,6 +1893,8 @@ class IdaDataBase(object):
         dataframe: DataFrame
             Data to be inserted into an existing table, contained in a Pandas 
             DataFrame. It is assumed that the structure matches.
+        schema: str
+            Schema of the table in which the data is inserted.
         tablename: str
             Name of the table in which the data is inserted.
         silent : bool, default: True
@@ -1890,6 +1903,8 @@ class IdaDataBase(object):
 
         """
         # TODO : Handle more datatypes
+        if schema is None or schema.strip() == '':
+            schema = self.current_schema
         tablename = ibmdbpy.utils.check_tablename(tablename)
         column_string = '\"%s\"' % '\", \"'.join([str(x).strip() for x in dataframe.columns])
         row_string = ''
@@ -1933,7 +1948,7 @@ class IdaDataBase(object):
         if row_string[0] == '(':
             row_string = row_string[1:]
 
-        query = ("INSERT INTO \"%s\" (%s) VALUES (%s)" % (tablename, column_string, row_string))
+        query = ("INSERT INTO \"%s\".\"%s\" (%s) VALUES (%s)" % (schema, tablename, column_string, row_string))
 
         #print(query)
         # TODO: Good idea : create a savepoint before creating the table
@@ -1999,7 +2014,7 @@ class IdaDataBase(object):
 
     def _call_stored_procedure(self, sp_name, **kwargs):
         """
-        Call a specific stored procedure from DashDB/DB2 and return its result.
+        Call a specific stored procedure from Db2 Warehouse and return its result.
 
         Parameters
         ----------

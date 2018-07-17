@@ -23,6 +23,7 @@ import pandas
 import pytest
 import six
 from ibmdbpy.learn import KMeans
+from flaky import flaky
 
 class Test_DataBaseExploration(object):
 
@@ -89,6 +90,7 @@ class Test_DataBaseExploration(object):
             idadb.drop_model(kmeans.modelname)
         except : pass
 
+    @flaky
     def test_idadb_exists_model_negative(self, idadb):
         if idadb.exists_model("MODEL_58979457385"):
             idadb.drop_model("MODEL_58979457385")

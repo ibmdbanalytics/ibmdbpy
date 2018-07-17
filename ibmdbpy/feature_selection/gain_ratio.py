@@ -117,7 +117,7 @@ def gain_ratio(idadf, target = None, features = None, symmetry=True, ignore_inde
             result = result.iloc[0,0]
         else:
             result = result[result.columns[0]].copy()
-            result.sort(ascending = True) 
+            result.sort_values(ascending = True)
     else:
         result = result.fillna(1)
             

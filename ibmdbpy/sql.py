@@ -137,7 +137,7 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
     strings need to be manually extracted. 
 
     The retrieval is done row by row due to progressiveStreaming feature of 
-    DB2/DashDB which closes a CLOB handle as soon as the cursor moves to 
+    Db2 Warehouse which closes a CLOB handle as soon as the cursor moves to
     the next row.
     
     Efforts to disable the progressiveStreaming feature where done but had
