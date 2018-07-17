@@ -1667,12 +1667,12 @@ class IdaDataFrame(object):
     @idadf_state
     def std(self):
         """
-        Compute the standart deviation for all numeric columns of self.
+        Compute the standard deviation for all numeric columns of self.
 
         Returns
         -------
         std: Series
-            The index consists of the columns of self and the values are the standart deviation.
+            The index consists of the columns of self and the values are the standard deviation.
         """
         from ibmdbpy.statistics import std
         return std(idadf=self)
