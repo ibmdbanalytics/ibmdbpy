@@ -62,7 +62,7 @@ class Test_OpenDataFrameObject(object):
 
     def test_idadf_attr_index(self, idadf, df):
         # Ok, but what do we do if too big ?
-        assert type(idadf.index) in [pandas.core.index.Int64Index,pandas.core.index.Index] # Not sure here
+        assert type(idadf.index) in [pandas.Int64Index, pandas.Index, pandas.RangeIndex]  # Not sure here
         assert list(idadf.index) == list(df.index)
 
     def test_idadf_attr_columns(self, idadf, df):
