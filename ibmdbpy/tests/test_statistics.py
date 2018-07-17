@@ -41,6 +41,18 @@ class Test_PrivateStatisticsMethods(object):
         assert isinstance(_numeric_stats(idadf, "min", columns), numpy.ndarray)
         assert isinstance(_numeric_stats(idadf, "max", columns), numpy.ndarray)
 
+    def test_idadf_numeric_stats_one_column(self, idadf):
+        data = idadf._table_def() # We necessarly have to put the test under this condition
+        allcolumns = list(data.loc[data['VALTYPE'] == "NUMERIC"].index)
+        columns = [allcolumns[0]]
+        assert isinstance(_numeric_stats(idadf, "count", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "mean", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "median", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "std", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "var", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "min", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "max", columns), numpy.ndarray)
+
     def test_idadf_numeric_stats_accuracy(self, idadf):
         pass
 
