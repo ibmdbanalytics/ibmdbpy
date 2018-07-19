@@ -53,8 +53,8 @@ def _numeric_stats(idadf, stat, columns):
 
     Returns
     -------
-    Tuple
-        One value for each column.
+    Tuple or float64
+        One value for each column. For a one column input a float64 value is returned except for median
 
     Notes
     -----
