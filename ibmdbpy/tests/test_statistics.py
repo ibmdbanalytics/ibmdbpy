@@ -27,6 +27,7 @@ import pandas
 import pytest
 
 from ibmdbpy.statistics import _numeric_stats , _get_percentiles, _get_number_of_nas, _count_level, _count_level_groupby
+from ibmdbpy import IdaDataFrame as IDADF
 
 class Test_PrivateStatisticsMethods(object):
 
@@ -52,6 +53,29 @@ class Test_PrivateStatisticsMethods(object):
         assert isinstance(_numeric_stats(idadf, "var", columns), numpy.ndarray)
         assert isinstance(_numeric_stats(idadf, "min", columns), numpy.ndarray)
         assert isinstance(_numeric_stats(idadf, "max", columns), numpy.ndarray)
+
+    @pytest.mark.parametrize("f",
+                             [IDADF.describe,
+                              IDADF.cov,
+                              IDADF.corr,
+                              IDADF.quantile,
+                              IDADF.mad,
+                              IDADF.min,
+                              IDADF.max,
+                              IDADF.count,
+                              IDADF.count_distinct,
+                              IDADF.std,
+                              IDADF.var,
+                              IDADF.mean,
+                              IDADF.sum,
+                              IDADF.median,
+                             ])
+    def test_idadf_statistics_one_column(self, idadf, f):
+        table_def = idadf._table_def()
+        numeric_column = table_def[table_def["VALTYPE"] == "NUMERIC"].index.tolist()[:1]
+        single_column_dataframe = idadf[numeric_column]
+        f(single_column_dataframe)
+
 
     def test_idadf_numeric_stats_accuracy(self, idadf):
         pass
