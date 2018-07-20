@@ -42,17 +42,15 @@ class Test_PrivateStatisticsMethods(object):
         assert isinstance(_numeric_stats(idadf, "min", columns), numpy.ndarray)
         assert isinstance(_numeric_stats(idadf, "max", columns), numpy.ndarray)
 
-    def test_idadf_numeric_stats_one_column(self, idadf):
-        data = idadf._table_def() # We necessarly have to put the test under this condition
-        allcolumns = list(data.loc[data['VALTYPE'] == "NUMERIC"].index)
-        columns = [allcolumns[0]]
-        assert isinstance(_numeric_stats(idadf, "count", columns), numpy.float64)
-        assert isinstance(_numeric_stats(idadf, "mean", columns), numpy.float64)
-        assert isinstance(_numeric_stats(idadf, "median", columns), numpy.ndarray)
-        assert isinstance(_numeric_stats(idadf, "std", columns), numpy.float64)
-        assert isinstance(_numeric_stats(idadf, "var", columns), numpy.float64)
-        assert isinstance(_numeric_stats(idadf, "min", columns), numpy.float64)
-        assert isinstance(_numeric_stats(idadf, "max", columns), numpy.float64)
+    def test_idadf_onecolumn_numeric_numeric_stats_one_column(self, idadf_onecolumn_numeric):
+        column = idadf_onecolumn_numeric.columns.tolist()
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "count", column), numpy.float64)
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "mean", column), numpy.float64)
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "median", column), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "std", column), numpy.float64)
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "var", column), numpy.float64)
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "min", column), numpy.float64)
+        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "max", column), numpy.float64)
 
     @pytest.mark.parametrize("f",
                              [IDADF.describe,
@@ -70,12 +68,8 @@ class Test_PrivateStatisticsMethods(object):
                               IDADF.sum,
                               IDADF.median,
                              ])
-    def test_idadf_statistics_one_column(self, idadf, f):
-        table_def = idadf._table_def()
-        numeric_column = table_def[table_def["VALTYPE"] == "NUMERIC"].index.tolist()[:1]
-        single_column_dataframe = idadf[numeric_column]
-        f(single_column_dataframe)
-
+    def test_idadf_statistics_one_column(self, idadf_onecolumn_numeric, f):
+        f(idadf_onecolumn_numeric)
 
     def test_idadf_numeric_stats_accuracy(self, idadf):
         pass

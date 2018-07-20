@@ -192,6 +192,20 @@ def idadf(request, idadb):
     return idadf
 
 @pytest.fixture(scope="session")
+def idadf_onecolumn_numeric(idadf):
+    """
+
+    IdaDataFrame fixture with a single numeric column to be used for the whole
+    testing session.
+    Shall not be used during the testing procedure by destructive and
+    semi-destructive functions.
+    """
+    table_def = idadf._table_def()
+    numeric_column = table_def[table_def["VALTYPE"] == "NUMERIC"].index.tolist()[:1]
+    single_column_dataframe = idadf[numeric_column]
+    return single_column_dataframe
+
+@pytest.fixture(scope="session")
 def idadf_indexer(request, idadb, idadf):
     """
     IdaDataFrame fixture with indexer defined to be used for the whole testing session.
