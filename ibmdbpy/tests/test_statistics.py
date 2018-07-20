@@ -52,25 +52,6 @@ class Test_PrivateStatisticsMethods(object):
         assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "min", column), numpy.float64)
         assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "max", column), numpy.float64)
 
-    @pytest.mark.parametrize("f",
-                             [IDADF.describe,
-                              IDADF.cov,
-                              IDADF.corr,
-                              IDADF.quantile,
-                              IDADF.mad,
-                              IDADF.min,
-                              IDADF.max,
-                              IDADF.count,
-                              IDADF.count_distinct,
-                              IDADF.std,
-                              IDADF.var,
-                              IDADF.mean,
-                              IDADF.sum,
-                              IDADF.median,
-                             ])
-    def test_idadf_statistics_one_column(self, idadf_onecolumn_numeric, f):
-        f(idadf_onecolumn_numeric)
-
     def test_idadf_numeric_stats_accuracy(self, idadf):
         pass
 
@@ -203,3 +184,22 @@ class Test_DescriptiveStatistics(object):
 
     def test_idadf_median(self, idadf, df):
         assert str(idadf.median()) == str(df.median())
+
+    @pytest.mark.parametrize("f",
+                             [IDADF.describe,
+                              IDADF.cov,
+                              IDADF.corr,
+                              IDADF.quantile,
+                              IDADF.mad,
+                              IDADF.min,
+                              IDADF.max,
+                              IDADF.count,
+                              IDADF.count_distinct,
+                              IDADF.std,
+                              IDADF.var,
+                              IDADF.mean,
+                              IDADF.sum,
+                              IDADF.median,
+                             ])
+    def test_idadf_statistics_one_column(self, idadf_onecolumn_numeric, f):
+        f(idadf_onecolumn_numeric)
