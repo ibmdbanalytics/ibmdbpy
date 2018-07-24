@@ -46,13 +46,13 @@ class Test_PrivateStatisticsMethods(object):
         data = idadf._table_def() # We necessarly have to put the test under this condition
         allcolumns = list(data.loc[data['VALTYPE'] == "NUMERIC"].index)
         columns = [allcolumns[0]]
-        assert isinstance(_numeric_stats(idadf, "count", columns), numpy.ndarray)
-        assert isinstance(_numeric_stats(idadf, "mean", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "count", columns), numpy.float64)
+        assert isinstance(_numeric_stats(idadf, "mean", columns), numpy.float64)
         assert isinstance(_numeric_stats(idadf, "median", columns), numpy.ndarray)
-        assert isinstance(_numeric_stats(idadf, "std", columns), numpy.ndarray)
-        assert isinstance(_numeric_stats(idadf, "var", columns), numpy.ndarray)
-        assert isinstance(_numeric_stats(idadf, "min", columns), numpy.ndarray)
-        assert isinstance(_numeric_stats(idadf, "max", columns), numpy.ndarray)
+        assert isinstance(_numeric_stats(idadf, "std", columns), numpy.float64)
+        assert isinstance(_numeric_stats(idadf, "var", columns), numpy.float64)
+        assert isinstance(_numeric_stats(idadf, "min", columns), numpy.float64)
+        assert isinstance(_numeric_stats(idadf, "max", columns), numpy.float64)
 
     @pytest.mark.parametrize("f",
                              [IDADF.describe,
