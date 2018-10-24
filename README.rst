@@ -14,7 +14,7 @@ The project is still at an early stage and many of its features are still in dev
 
 The latest version of ibmdbpy is available on the `Python Package Index`_ and Github_.
 
-__ https://pypi.python.org/pypi/ibmdbpy
+.. _Python Package Index: https://pypi.python.org/pypi/ibmdbpy
 
 .. _Github: https://github.com/ibmdbanalytics/ibmdbpy
 
