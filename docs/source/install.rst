@@ -86,7 +86,7 @@ Package structure
 	    ├── filtering.py
 	    ├── frame.py
 	    ├── geoFrame.py
-        ├── geoSeries.py
+	    ├── geoSeries.py
 	    ├── indexing.py
 	    ├── internals.py
 	    ├── series.py
@@ -94,9 +94,6 @@ Package structure
 	    ├── statistics.py
 	    ├── internals.py
 	    ├── utils.py
-	    ├── benchmark
-	    │   ├── __init__.py
-	    │   ├── benchmark.py
 	    ├── learn
 	    │   ├── __init__.py
 	    │   ├── association_rules.py
@@ -105,5 +102,5 @@ Package structure
 	    ├── sampledata
 	    │   ├── ...
 	    └── tests
-	    	├── conftest.py
+	        ├── conftest.py
 	        └── ...

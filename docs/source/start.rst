@@ -514,56 +514,6 @@ Now let us compute the area of the counties in the GEO_COUNTY table:
 
 To learn how to use other geospatial functions, refer to the detailed documentation.
 
-Benchmarking
-------------
-
-A performance testing framework is available for ibmdbpy, which simultaneously tests the execution time of the same line of code for the in-database and in-memory version on a same growing data set. This framework is useful for profiling and for showing the advantage of ibmdbpy over traditional in-memory implementation.
-
-The following example shows how to use it and what type of result it can produce:
-
->>> from ibmdbpy.benchmark import Benchmark
->>> benchmark = Benchmark(idadf, "Covariance matrix", "cov()")
-
->>> benchmark.run()
-*** Initializing benchmark to 1K, with command cov() ***
-Uploading 1000 rows (maxnrow was set to 1333)
-*** Benchmarking with 1000 rows ***
-Length of DataFrame : 1000              Length of IdaDataFrame : 1000
-Runtime in-Memory : 0.0012              Runtime in-Database : 0.165
-*** Incrementing for next round ***
-Uploading 1000 rows (maxnrow was set to 1333)
-*** Benchmarking with 2000 rows ***
-Length of DataFrame : 2000              Length of IdaDataFrame : 2000
-Runtime in-Memory : 0.001               Runtime in-Database : 0.1287
-*** Incrementing for next round ***
-DataFrame will be splitted into 2 chunks. (1333 rows per chunk)
-Uploaded: 2/2... [DONE]
-*** Benchmarking with 4000 rows ***
-Length of DataFrame : 4000              Length of IdaDataFrame : 4000
-Runtime in-Memory : 0.0012              Runtime in-Database : 0.1252
-*** Incrementing for next round ***
-DataFrame will be splitted into 4 chunks. (1333 rows per chunk)
-Uploaded: 4/4... [DONE]
-*** Benchmarking with 8000 rows ***
-Length of DataFrame : 8000              Length of IdaDataFrame : 8000
-Runtime in-Memory : 0.0012              Runtime in-Database : 0.1574
-*** Incrementing for next round ***
-DataFrame will be splitted into 7 chunks. (1333 rows per chunk)
-Uploaded: 7/7... [DONE]
-...
-
-If the benchmark gets interrupted (for example, by a lost connection lost or a shortage of memory, it is possible to resume it by using ``Benchmark.resume()``. If the connection was lost, you might have to reconnect to the IdaDataBase (``IdaDataBase.reconnect()``).
-
->>> benchmark.resume()
-...
-
-When the benchmark terminates, or runs long enough and stops (either because of an error or a KeyBoard Interrupt), it is possible to create an interactive plot with ``Bokeh`` using the ``Benchmark.visualize()`` method. Plots are stored in the project repository, where the source lives.
-
->>> benchmark.visualize()
-...
-
-Note that the result of a benchmark depends on how many cores and how much RAM are available in the Db2 instance.
-
 Database administration
 =======================
 
