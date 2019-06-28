@@ -1,5 +1,6 @@
 future==0.16.0
 JayDeBeApi==0.2.0
+JPype1==0.6.3
 lazy==1.2
 numpy==1.11.2
 pandas==0.19.2
