@@ -65,7 +65,7 @@ setup(name='ibmdbpy',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       extras_require={
-        'jdbc':['jaydebeapi'],
+        'jdbc':['jaydebeapi', 'JPype1==0.6.3'],
         'test':['pytest', 'flaky==3.4.0'],
         'doc':['sphinx']
       },
