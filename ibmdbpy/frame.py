@@ -1874,8 +1874,9 @@ class IdaDataFrame(object):
             if not display_yes:
                 return
             tempname = self._idadb._get_valid_tablename()
-            self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tempname, tablename))
-            self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tempname, tablename))
+            #self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tempname, tablename))
+            #self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tempname, tablename))
+            self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tempname, tablename))
             try:
                 self._idadb.drop_table(tablename)
             except:
@@ -1903,8 +1904,9 @@ class IdaDataFrame(object):
 
         name = self.internal_state.current_state
 
-        self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tablename, name))
-        self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tablename, name))
+        #self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tablename, name))
+        #self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tablename, name))
+        self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tempname, tablename))
 
         # Reset the cache
         self._idadb._reset_attributes("cache_show_tables")
