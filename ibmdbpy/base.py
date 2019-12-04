@@ -188,12 +188,6 @@ class IdaDataBase(object):
 
         if self._con_type == 'jdbc':
 
-            # deprecate this and throw error, this is very old version at this point.
-            # now we can just focus on building a single parameter string.
-            if (jaydebeapi.__version__.startswith('0')):
-                message = ("You jaydebeapi module is deprecated.  Please install version 1.x or higher.")
-                raise IdaDataBaseError(message)    
-
             # remove trailing ":" or ";" or spaces on dsn, we will replace.
             dsn = dsn.rstrip(';: ')
             # find parameters on dsn; if any exist, there will be an equals sign.
@@ -296,6 +290,11 @@ class IdaDataBase(object):
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
 
             if jaydebeapi.__version__.startswith('0'):
+                # deprecate this and throw error, this is very old version at this point.
+                # now we can just focus on building a single parameter string.
+                message = ("You jaydebeapi module is deprecated.  Please install version 1.x or higher.")
+                raise IdaDataBaseError(message)
+            
                 self._connection_string = [jdbc_url, uid, pwd]
             else:
                 #self._connection_string = jdbc_url + ':user={};password={};'.format(uid, pwd)
