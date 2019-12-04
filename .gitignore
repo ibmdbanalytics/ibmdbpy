@@ -20,3 +20,6 @@ __pycache__
 *.pyo
 *.tmp*
 *.bak
+
+### VSCode
+*.code-workspace
