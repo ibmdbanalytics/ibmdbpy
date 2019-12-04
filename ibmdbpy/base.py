@@ -187,24 +187,38 @@ class IdaDataBase(object):
                 raise IdaDataBaseError(e.value[1])
 
         if self._con_type == 'jdbc':
-            # Sanity check
-            if ('user=' in dsn)&('password=' in dsn):
-                if (uid != '') | (pwd != ''):
-                    message = ("Ambiguous definition of userID or password: " +
-                               "Cannot be defined in  uid and pwd parameters "+
-                               "and in jdbc_url_string at the same time.")
-                    raise IdaDataBaseError(message)
 
-                # Parsing the jdbc url string
-                jdbc_url = dsn.split(":user=")[0]
-                arguments = dsn.split(":")[-1].split(';')
-                uid = arguments[0].split('user=')[-1]
-                pwd = arguments[1].split('password=')[-1]
-            else:
+            # deprecate this and throw error, this is very old version at this point.
+            # now we can just focus on building a single parameter string.
+            if (jaydebeapi.__version__.startswith('0')):
+                message = ("You jaydebeapi module is deprecated.  Please install version 1.x or higher.")
+                raise IdaDataBaseError(message)    
+
+            # remove trailing ":" or ";" or spaces on dsn, we will replace.
+            dsn = dsn.rstrip(';: ')
+            # find parameters on dsn; if any exist, there will be an equals sign.
+            ix = dsn.find("=")
+            # if no parameters exist, then this is the complete dsn
+            if (ix < 0):
+                # confirm uid and pwd args are present, do NOT allow blank password
                 if (uid == '') | (pwd == ''):
                     message = ("Missing credentials to connect via JDBC.")
                     raise IdaDataBaseError(message)
-                jdbc_url = dsn
+                # add uid, pwd parameters.
+                dsn = dsn + ':user={};password={};'.format(uid, pwd)
+            else:
+                # if we know there is at least one parameter; we can assume there exists a ":" before the parameter
+                # portion of the string in a correctly formatted dsn.  Therefore, just check for the existence of 
+                # the uid and pwd and add if they are missing.  If they are on the string, IGNORE these arguments
+                # and keep the string as-is.
+                if not ('user=' in dsn):
+                    dsn = dsn + ';user=' + uid
+                if not ('password=' in dsn):
+                    dsn = dsn + ';password=' + pwd
+                # add trailing ";" to dsn.
+                dsn = dsn + ';'
+
+            jdbc_url = dsn
 
             try:
                 import jaydebeapi
@@ -284,7 +298,8 @@ class IdaDataBase(object):
             if jaydebeapi.__version__.startswith('0'):
                 self._connection_string = [jdbc_url, uid, pwd]
             else:
-                self._connection_string = jdbc_url + ':user={};password={};'.format(uid, pwd)
+                #self._connection_string = jdbc_url + ':user={};password={};'.format(uid, pwd)
+                self._connection_string = jdbc_url
             
             driver_not_found = ("HELP: The JDBC driver for IBM Db2 could "+
             "not be found. Please download the latest JDBC Driver at the "+
