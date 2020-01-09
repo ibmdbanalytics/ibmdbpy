@@ -1012,29 +1012,43 @@ class IdaGeoDataFrame(IdaDataFrame):
         -------
         IdaGeoDataFrame
         """
-        ida1 = self  # For code clearness
+        ida1 = self
+        
+        # Check if allowed data type
         if not (ida1.dtypes.TYPENAME[0] in valid_types_ida1 or
                         valid_types_ida1[0] == 'ST_GEOMETRY'):
             raise TypeError("Column " + ida1.column +
                             " has incompatible type.")
         if not (ida2.dtypes.TYPENAME[0] in valid_types_ida2 or
                         valid_types_ida2[0] == 'ST_GEOMETRY'):
-            raise TypeError("Column " + ida1.column +
+            raise TypeError("Column " + ida2.column +
                             " has incompatible type.")
 
         # Get the definitions of the columns, which will be the arguments for
         # the DB2GSE function
-        column1_for_db2gse = ida1.internal_state.columndict[self.geometry.column]
+        column1_for_db2gse = ida1.internal_state.columndict[ida1.geometry.column] 
         if column1_for_db2gse[0] == '\"' and column1_for_db2gse[-1] == '\"':
             column1_for_db2gse = column1_for_db2gse[1:-1]
-        column2_for_db2gse = ida2.internal_state.columndict[self.geometry.column]
+        column2_for_db2gse = ida2.internal_state.columndict[ida2.geometry.column] 
         if column2_for_db2gse[0] == '\"' and column2_for_db2gse[-1] == '\"':
             column2_for_db2gse = column2_for_db2gse[1:-1]
-
+        
+        ### added : check if eligible column names ###
+        # in order to fix error occuring when geometry column defined as function(other_column)
+        # geometry columns must have been explicitly defined and have an eligible alias
+        print("column1_for_db2gse: "+column1_for_db2gse)
+        print("column2_for_db2gse: "+column2_for_db2gse)
+        if "(" in column1_for_db2gse or "ST_" in column1_for_db2gse:
+            print("A function pattern was detected in column1_for_db2gse. Please provide the alias of the first geometry column.")
+            column1_for_db2gse = str(input("ALIAS_1: "))
+        if "(" in column2_for_db2gse or "ST_" in column2_for_db2gse:
+            print("A function pattern was detected in column2_for_db2gse. Please provide the alias of the second geometry column.")
+            column2_for_db2gse = str(input("ALIAS_2: "))
+        ### end ### 
 
         arguments_for_db2gse_function = []
         arguments_for_db2gse_function.append('IDA1.' + column1_for_db2gse)
-        arguments_for_db2gse_function.append('IDA2.' + column1_for_db2gse)
+        arguments_for_db2gse_function.append('IDA2.' + column2_for_db2gse)
         if additional_args is not None:
             for arg in additional_args:
                 arguments_for_db2gse_function.append(arg)
@@ -1047,7 +1061,7 @@ class IdaGeoDataFrame(IdaDataFrame):
             message = (ida1 + "has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         if hasattr(ida2, '_indexer') and ida2._indexer is not None:
-            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' % (ida1.indexer))
+            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' % (ida2.indexer))
         else:
             message = (ida2 + "has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
@@ -1058,8 +1072,8 @@ class IdaGeoDataFrame(IdaDataFrame):
             ')'
         )
         select_columns.append('%s AS \"RESULT\"' % (result_column))
-        select_statement = 'SELECT ' + ','.join(select_columns) + ' '
-
+        select_statement = 'SELECT ' + ','.join(select_columns) + ' '        
+        
         # FROM clause
         from_clause = (
             'FROM ' +
@@ -1069,8 +1083,7 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         # Create a view
         view_creation_query = '(' + select_statement + from_clause + ')'
-        viewname = self._idadb._create_view_from_expression(
-            view_creation_query)
+        viewname = self._idadb._create_view_from_expression(view_creation_query)
 
         idageodf = ibmdbpy.IdaGeoDataFrame(self._idadb, viewname,indexer= 'INDEXERIDA1')
         return idageodf

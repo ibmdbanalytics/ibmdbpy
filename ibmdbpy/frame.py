@@ -1874,8 +1874,6 @@ class IdaDataFrame(object):
             if not display_yes:
                 return
             tempname = self._idadb._get_valid_tablename()
-            #self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tempname, tablename))
-            #self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tempname, tablename))
             self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tempname, tablename))
             try:
                 self._idadb.drop_table(tablename)
@@ -1904,9 +1902,7 @@ class IdaDataFrame(object):
 
         name = self.internal_state.current_state
 
-        #self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tablename, name))
-        #self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tablename, name))
-        self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tempname, tablename))
+        self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tablename, name))
 
         # Reset the cache
         self._idadb._reset_attributes("cache_show_tables")
@@ -2318,3 +2314,55 @@ class IdaDataFrame(object):
         check_numeric_columns(self)
         if isinstance(other, ibmdbpy.IdaSeries)|isinstance(other, IdaDataFrame):
             check_numeric_columns(other)
+
+###############################################################################
+### New functionalities for IdaDataFrames
+###############################################################################
+    def delete_na(self, columns, union = True):
+        """
+        if union is set to True modifies the Db2 table by deleting the rows which contain a NaN value in at least one of the cited columns;
+        if union is set to False, then if all the columns must contain a null value for a row to be deleted.
+        columns must be a list of eligible column names
+        """
+        if len(columns)<1:
+            raise IdaDataFrameError("You must specify the columns as a list of eligible names")
+        
+        tablename = self.tablename
+        query = 'DELETE FROM %s WHERE "%s" IS NULL'%(tablename, columns[0])
+        
+        if len(columns)==1:
+            self.ida_query(query)
+            
+        else:
+            if union == True:
+                for i in range(1,len(columns)):
+                    query = query + ' OR "%s" IS NULL'%columns[i]
+            if union == False:
+                for i in range(1, len(columns)):
+                    query = query + 'AND "%s" IS NULL'%columns[i]
+            self.ida_query(query)
+            
+    def filter_na(self, tempview, columns, union=True):
+        """
+        creates a temporary view under the given name tempview with filtered rows on criterion 
+        column is null; union set to True means that one null cited column is enough not to be selected;
+        union set to False means that all cited columns must have null value for the row not to be selected.
+        
+        Notes : necessitates tests/conditions relative to views + warning if tempview name already used.
+
+        """
+        
+    def add_index(self, colname = 'ID'):
+        """
+        add an index column to the IdaDataFrame
+        
+        ? create a new column with automatic fillig or insert a pre-filled column to the existing column
+        create or alter table?
+        """
+    
+    def mapping(self, column, dic):
+        """
+        for the selected column, update the values according to the dictionary oldVal:newVal
+        """
+            
+        
