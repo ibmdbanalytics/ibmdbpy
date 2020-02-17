@@ -40,10 +40,10 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     
     Note on sample data used for the examples:
     ------
-    Sample datasets available out of the box in Db2 Warehouse: GEO_TORNADO, GEO_COUNTY
+    Sample datasets available out of the box in Db2 Warehouse: GEO_TORNADO, GEO_COUNTY tables
     Sample datasets which you can obtain yourself: SAMPLE_POLYGONS, SAMPLE_LINES,
-    SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS. See dedicated SQL script.
-    You just need to copy this script into Db2 "RUN SQL" console to obtain these tables.
+    SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS. See dedicated SQL script (ibmdbpy/sampledata/sql_script).
+    You just need to copy this script into Db2 "RUN SQL" console to obtain these sample tables.
     
     Examples:
     ------
@@ -299,27 +299,30 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
     def convex_hull(self):
         """
+        
+        Note: theory
+        ---------
+        The convex hull of a shape, also called convex envelope or convex closure, is the smallest convex set that contains it. 
+        For example, if you have a bounded subset of points in the Euclidean space, the convex hull may be visualized as 
+        the shape enclosed by an elastic band stretched around the outside points of the subset. 
+        If vertices of the geometry do not form a convex, convexhull returns a null.
+        
         Valid types for the column in the calling IdaGeoSeries:
         ST_Geometry or one of its subtypes.
 
-        Returns an IdaGeoSeries of geometries which are the convex hull of each
-        of the geometries in the calling IdaGeoSeries.
-
-        The resulting geometry is represented in the spatial reference system
-        of the given geometry.
-
-        If possible, the specific type of the returned geometry will be
-        ST_Point, ST_LineString, or ST_Polygon. For example, the boundary of a
-        polygon with no holes is a single linestring, represented as
-        ST_LineString. The boundary of a polygon with one or more holes
-        consists of multiple linestrings, represented as ST_MultiLineString.
-
-        For None geometries the output is None.
-        For empty geometries the output is None.
-
+        Note on the input type
+        ---------
+        If possible, the specific type of the returned geometry will be ST_Point, ST_LineString, or ST_Polygon. 
+        The convex hull of a convex polygon with no holes is a single linestring, represented as ST_LineString. 
+        The convex hull of a non convex polygon does not exit. 
+        
         Returns
         -------
-        IdaGeoSeries.
+        IdaGeoSeries. Returns an IdaGeoSeries containing geometries which are the convex hull of each
+        of the geometries in the calling IdaGeoSeries.
+        The resulting geometry is represented in the spatial reference system
+        of the given geometry.
+        For None geometries, for empty geometries and for non convex geometries the output is None.
 
         References
         ----------
@@ -544,8 +547,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # sample to create in Db2, geometry column with data type ST_LineString
-        # use this sample data for testing:
+        Sample to create in Db2, geometry column with data type ST_LineString
+        Use this sample data for testing:
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
         >>> sample_lines['end_point'] = sample_lines.end_point()
         >>> sample_lines.head()
@@ -588,8 +591,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # sample to create in Db2, geometry column with data type ST_LineString
-        # use this sample data for testing:
+        Sample to create in Db2, geometry column with data type ST_LineString
+        Use this sample data for testing:
+        
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
         >>> sample_lines["mid_point"] = sample_lines.mid_point()
         >>> sample_lines.head()
@@ -625,9 +629,11 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # sample to create in Db2, geometry column with data type ST_LineString
+        Sample to create in Db2, geometry column with data type ST_LineString
+        
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
         >>> sample_lines.start_point().head()
+        
         0    POINT (850.000000 250.000000)
         1    POINT (90.000000 90.000000)
         Name: DB2GSE.ST_STARTPOINT(GEOMETRY), dtype: object        
@@ -730,6 +736,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         Name: DB2GSE.ST_GEOMETRYTYPE(SHAPE), dtype: object
         
         See boundary method
+        
         >>> counties["boundary"].geometry_type().head(3)
         0    "DB2GSE  "."ST_LINESTRING"
         1    "DB2GSE  "."ST_LINESTRING"
@@ -737,6 +744,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         Name: DB2GSE.ST_GEOMETRYTYPE(DB2GSE.ST_BOUNDARY(SHAPE)), dtype: object
 
         See centroid method
+        
         >>> counties["centroid"].geometry_type().head(3) 
         0    "DB2GSE  "."ST_POINT"
         1    "DB2GSE  "."ST_POINT"
@@ -1041,11 +1049,13 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         4    1
         Name: DB2GSE.ST_NUMGEOMETRIES(SHAPE), dtype: int64
         
-        # use sample data created in Db2 with SQL script, data type ST_MultiLineString
+        Use sample data created in Db2 with SQL script, data type ST_MultiLineString
+        
         >>> sample_mlines = IdaGeoDataFrame(idadb, "SAMPLE_MLINES", indexer = "ID", geometry = "GEOMETRY")
         >>> print(sample_mlines.geometry.dtypes)
                             TYPENAME
         GEOMETRY  ST_MULTILINESTRING
+        
         >>> sample_mlines.num_geometries().head()
         0    3
         Name: DB2GSE.ST_NUMGEOMETRIES(GEOMETRY), dtype: int64        
@@ -1076,7 +1086,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POLYGONS, obtained with SQL script
+        Use sample table SAMPLE_POLYGONS, obtained with SQL script
+        
         >>> sample_polygons["int_ring"] = sample_polygons.num_interior_ring()
         >>> sample_polygons[["GEOMETRY", "int_ring"]].head()        
         	GEOMETRY 	                                       int_ring
@@ -1109,7 +1120,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample data created in Db2 with SQL script, data type ST_MultiLineString
+        Use sample data created in Db2 with SQL script, data type ST_MultiLineString
+        
         >>> sample_mlines = IdaGeoDataFrame(idadb, "SAMPLE_MLINES", indexer = "ID", geometry = "GEOMETRY")       
         >>> sample_mlines.num_line_strings().head()
         0    3
@@ -1140,7 +1152,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_GEOMETRIES, obtained with SQL script
+        Use sample table SAMPLE_GEOMETRIES, obtained with SQL script
+        
         >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["num_points"] = sample_geometries.num_points()
         >>> sample_geometries[["GEOMETRY", "num_points"]].head()
@@ -1256,7 +1269,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
         >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
         >>> sample_points["is_3d"] = sample_points.is_3d()
         >>> sample_points[["LOC", "is_3d"]].head()
@@ -1292,7 +1305,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
+        
         >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
         >>> sample_points["is_M"]=sample_points.is_measured()
         >>> sample_points.head()
@@ -1332,7 +1346,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
+        
         >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
         >>> sample_points.is_valid().head()
         0    1
@@ -1368,10 +1383,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # Max M, X, Y and Z        
-        sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
-        # use sample table SAMPLE_POINTS, obtained with SQL script
-        >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
+        Max M, X, Y and Z        
+        >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["max_X"] = sample_geometries.max_x()
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
@@ -1408,10 +1421,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # Max M, X, Y and Z        
-        sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
-        # use sample table SAMPLE_POINTS, obtained with SQL script
-        >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
+        Max M, X, Y and Z        
+        
+        >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["max_X"] = sample_geometries.max_x()
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
@@ -1448,10 +1460,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # Max M, X, Y and Z        
-        sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
-        # use sample table SAMPLE_POINTS, obtained with SQL script
-        >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
+        Max M, X, Y and Z        
+        
+        >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["max_X"] = sample_geometries.max_x()
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
@@ -1489,10 +1500,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # Max M, X, Y and Z        
-        sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
-        # use sample table SAMPLE_POINTS, obtained with SQL script
-        >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
+        Max M, X, Y and Z        
+        
+        >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["max_X"] = sample_geometries.max_x()
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()
         >>> sample_geometries["max_Z"] = sample_geometries.max_z()
@@ -1530,8 +1540,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # Min M, X, Y and Z   
-        # use sample table SAMPLE_GEOMETRIES, obtained with SQL script
+        Min M, X, Y and Z   
+        Use sample table SAMPLE_GEOMETRIES, obtained with SQL script
+        
         >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["min_X"] = sample_geometries.min_x()
         >>> sample_geometries["min_Y"] = sample_geometries.min_y()
@@ -1642,8 +1653,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # Min M, X, Y and Z   
-        # use sample table SAMPLE_GEOMETRIES, obtained with SQL script
+        Min M, X, Y and Z   
+        Use sample table SAMPLE_GEOMETRIES, obtained with SQL script
+        
         >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["min_X"] = sample_geometries.min_x()
         >>> sample_geometries["min_Y"] = sample_geometries.min_y()
@@ -1682,7 +1694,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
+        
         >>> sample_points_extractor = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID")
         >>> sample_points_extractor.set_geometry("LOC")
         >>> sample_points_extractor["X"] = sample_points_extractor.x()
@@ -1722,7 +1735,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
+        
         >>> sample_points_extractor = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID")
         >>> sample_points_extractor.set_geometry("LOC")
         >>> sample_points_extractor["X"] = sample_points_extractor.x()
@@ -1763,7 +1777,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
+        
         >>> sample_points_extractor = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID")
         >>> sample_points_extractor.set_geometry("LOC")
         >>> sample_points_extractor["X"] = sample_points_extractor.x()
@@ -1804,7 +1819,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_POINTS, obtained with SQL script
+        Use sample table SAMPLE_POINTS, obtained with SQL script
+        
         >>> sample_points_extractor = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "ID")
         >>> sample_points_extractor.set_geometry("LOC")
         >>> sample_points_extractor["X"] = sample_points_extractor.x()
@@ -1851,7 +1867,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        # use sample table SAMPLE_LINES, obtained with SQL script
+        Use sample table SAMPLE_LINES, obtained with SQL script
+        
         >>> samplelines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_lines.is_closed().head()
         0    0
@@ -1926,11 +1943,11 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         >>> counties = IdaGeoDataFrame(idadb,'SAMPLES.GEO_COUNTY',indexer='OBJECTID')
         >>> counties.set_geometry('SHAPE')
         >>>counties["boundary"] = counties.boundary()
-        
         >>> counties["is_simple"] = counties.is_simple()
         >>> filtered_counties = counties[counties['is_simple'] == 0]
         >>> filtered_counties.shape
         (0, 25)
+        
         >>> counties["is_simple"] = counties['boundary'].is_simple()
         >>> filtered_counties = counties[counties['is_simple'] == 0]
         >>> filtered_counties.shape
