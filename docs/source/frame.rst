@@ -97,6 +97,8 @@ Filtering
 Feature Engineering
 -------------------
 
+.. automethod:: IdaDataFrame.delete_na 
+
 .. automethod:: IdaDataFrame.__setitem__
 
 .. automethod:: ibmdbpy.aggregation.aggregate_idadf
@@ -168,6 +170,10 @@ ida_query
 ida_scalar_query
 ----------------
 .. automethod:: IdaDataFrame.ida_scalar_query
+
+set_indexer
+----------------
+.. automethod:: IdaDataFrame.set_indexer
 
 
 Data Exploration

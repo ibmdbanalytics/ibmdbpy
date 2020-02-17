@@ -21,7 +21,7 @@ __ https://pypi.python.org/pypi/ibmdbpy
 How ibmdbpy works
 -----------------
 
-The ibmdbpy project translates Pandas-like syntax into SQL and uses a middleware API (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution. The results are fetched and formatted into the corresponding data structure, for example, a Pandas.Dataframe or a Pandas.Series.
+The ibmdbpy project translates Pandas-like syntax into SQL and uses a middleware API (pypyodbc/JayDeBeApi) to send it to an ODBC or JDBC-connected database for execution. After fetching the results, printing them will look similar to printing a pandas.DataFrame or a pandas.Series. Ibmdbpy essential abstractions are IdaDataFrames, similar to Pandas.DataFrames, and IdaSeries, similar to Pandas.Series.Ibmdbpy also provides you with tools dedicated to geospatial data: you will use IdaGeoDataFrames which can be compared to the GeoDataFrames from GeoPandas, the geospatial extension of Pandas. 
 
 The following scenario illustrates how ibmdbpy works.
 
@@ -36,7 +36,7 @@ A few sample data sets are included in ibmdbpy for you to experiment. We can fir
 >>> idadb.as_idadataframe(iris, "IRIS")
 <ibmdbpy.frame.IdaDataFrame at 0x7ad77f0>
 
-Next, we can create an IDA data frame that points to the table we just uploaded. Let’s use that one:
+Next, we can create an IDA data frame (IDA stands for IBM Data Analytics?) that points to the table we just uploaded. Let’s use that one:
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 
@@ -69,9 +69,9 @@ Et voilà !
 How the geospatial functions work
 ---------------------------------
 
-The ibmdbpy package provides a Python interface to the in-database geospatial functions of IBM Db2 Spatial Extender. It identifies the geometry column for spatial tables and lets you perform spatial queries based upon this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
+The ibmdbpy package provides a Python interface to the in-database geospatial functions of IBM Db2 Spatial Extender (db2gse). It identifies the geometry column for spatial tables and lets you perform spatial queries based upon this column. The results are fetched and formatted into the corresponding data structure, for example, an IdaGeoDataframe.
 
-The following scenario illustrates how spatial functions work by creating an IDA geo data frame that points to a sample table in Db2:
+The following scenario illustrates how spatial functions work by creating an IDA geospatial data frame that points to a sample table in Db2:
 
 >>> from ibmdbpy import IdaDataBase, IdaGeoDataFrame
 >>> idadb = IdaDataBase('BLUDB')
@@ -90,7 +90,7 @@ Now let us compute the area of the counties in the GEO_COUNTY table. The result 
     5           Randolph     MULTIPOLYGON (((-91.2589262966 36.2578866492, ...  0.170844
 
 
-In the background, ibmdbpy looks for geometry columns in the table and builds an SQL request that returns the area of each geometry.
+In the background, ibmdbpy looks for the column defined as **geometry** in the table and builds an SQL request that returns the area of each ST_MULTIPOLYGON object (a multipolygon is a collection of polygons).
 Here is the SQL request that was executed for this example::
 
    SELECT t.*,db2gse.ST_Area(t.SHAPE) as area
@@ -125,6 +125,7 @@ Here is the list of the persons who contributed to the project, in the chronolog
 - Avipsa Roy (geospatial extension)
 - Nicole Schoen (core)
 - Toni Bollinger (core)
+- Eva Feillet (core, geospatial extension, documentation)
 
 How to contribute
 =================
@@ -133,4 +134,4 @@ You want to contribute? That's great! There are many things you can do.
 
 If you are a member of the ibmdbanalytics group, you can create branchs and merge them to master. Otherwise, you can fork the project and do a pull request. You are very welcome to contribute to the code and to the documentation. 
 
-There are many ways to contribute. If you found bugs and have improvement ideas or need some new specific features, please open a ticket! We do care about it. 
+There are many ways to contribute. If you find bugs and have improvement ideas or need some new specific features, please open a ticket! We do care about it. 
