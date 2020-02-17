@@ -430,15 +430,17 @@ class IdaGeoDataFrame(IdaDataFrame):
         2            1840         4.868971
         2            109          16.387094
         """
-        additional_args = []
+        add_args = None
         if unit is not None:
             unit = self._check_linear_unit(unit)  # Can raise exceptions
-            additional_args.append(unit)
+            add_args = []
+            add_args.append(unit)
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_DISTANCE',
             valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            valid_types_ida2=['ST_GEOMETRY'],
+            additional_args = add_args)
 
     def crosses(self, ida2):
         """

@@ -767,7 +767,7 @@ class IdaDataBase(object):
     def ida_scalar_query(self, query, silent=False, autocommit = False):
         """
         Prepare and execute a query and return only the first element as a 
-        string. If nothing is returned from the SQL query, an error occur.
+        string. If nothing is returned from the SQL query, an error occurs.
 
         Parameters
         ----------
@@ -816,7 +816,7 @@ class IdaDataBase(object):
         tablename : str, optional
             Name to be given to the table created in the database. If not 
             given, a valid tablename is generated (for example, DATA_FRAME_X 
-            where X a random number).
+            where X is a random number).
         clear_existing : bool
             If set to True, a table will be replaced when a table with the same 
             name already exists  in the database.
@@ -899,7 +899,7 @@ class IdaDataBase(object):
         self._autocommit()
 
         if primary_key:
-            idadf.indexer = primary_key
+            idadf._indexer = primary_key 
         return idadf
         
     ###########################################################################
@@ -1089,7 +1089,7 @@ class IdaDataBase(object):
         If column argument is set to None, a random column is generated which 
         can take values for 1 to ncat.
         Used for benchmark purpose. 
-        Note: This method is deprecated. Can be probably be removed without impact 
+        Note: This method is deprecated. Can probably be removed without impact 
         """
         if column is not None:
             if column not in idadf.columns:
@@ -1344,7 +1344,7 @@ class IdaDataBase(object):
         # SANITY CHECK : maxnrow
         if maxnrow is None:
             # Note : 8000 is an empirical maximum number of cells
-            maxnrow = int(8000 / len(df.columns))
+            maxnrow = int(100000 / len(df.columns))
         else:
             if not isinstance(maxnrow, six.integer_types):
                 raise TypeError("maxnrow is not an integer")

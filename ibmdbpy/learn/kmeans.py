@@ -91,21 +91,15 @@ class KMeans(object):
 
         Attributes
         ----------
-        centers
-            TODO
+        centers: table containing the coordinates of each cluster center;
 
-        cluster_centers_
-            TODO
+        cluster_centers_: coordinates of each cluster center, as list;
 
-        withinss
-            TODO
+        withinss: Within cluster sum of squares, by cluster, as a list;
 
-        size_clusters
-            TODO
+        size_clusters: number of items in each cluster, as list;
 
-        inertia_
-            TODO
-
+        inertia_: float, total inertia of the system, defined as the sum of each cluster's within cluster sum of squares.
 
         Returns
         -------

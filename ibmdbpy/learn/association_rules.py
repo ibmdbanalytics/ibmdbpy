@@ -49,25 +49,79 @@ class AssociationRules(object):
             The name of the Association Rules model that is built. If the 
             parameter corresponds to an existing model in the database, it 
             will be replaced during the fitting step.
+        
         minsupport : float or integer, optional
             The minimum fraction (0.0 - 1.0) or the minimum number (above 1) of
             transactions that must contain a pattern to be considered as frequent.
             Default: system-determined
             Range: >0.0 and <1.0 for a minimum fraction
                    >1 for a minimum number of transactions.
+        
         maxlen : int, optional, >=2, default: 5
             The maximum length of a pattern or a rule, that is,
             the maximum number of items per pattern or rule.
+        
         maxheadlen : int, optional, >= 1 and <maxlen, default: 1
             The maximum length of a rule head, that is, the maximum number of
             items that might belong to the item set on the right side of a rule.
             Increasing this value might significantly increase the number of detected rules.
+        
         minconf : float, optional, >=0.0 and <= 1, default: 0.5
             The minimum confidence that a rule must achieve to be kept in the model of the pattern.
             
         Attributes
         ----------
-        TODO
+        
+        _idadf : Gets set at fit step. Input table, IdaDataFrame the model will be fit on;
+        
+        _idadb : Gets set at fit step. IdaDataBase holding the connection to Db2;
+        
+        _transaction_id: Gets set at fit step. The column of the input table which identifies the transaction IDs;
+        
+        _item_id: Gets set at fit step. The column of the input table which identifies the item IDs, items are exchanged during transactions;
+        
+        nametable: Gets set at fit step. The name of the optional table which contains a mapping between the items from the input table and the item names. 
+            This attribute is set through the nametable option of the fit method.
+            This table must contain at least two columns, where
+            * The first column has the same name as the column that is
+            contained in the item parameter of the input table
+            * The second column has the same name as the name that is
+            defined in the namecol parameter
+        
+        namecol : Gets set at fit step. The name of the optional column which contains item names as defined in the nametable attribute. 
+            This attribute is set through the fit method and cannot be specified of the nametable parameter of fit is not specified.
+        
+        outtable: Gets set at predict step, name of the optional output table in which the mapping between the input 
+            sequences and the associated rules or patterns is written. If the parameter corresponds to an existing table in the database, 
+            it is replaced.
+        
+        type: Gets set at predict step. Type : str, optional, default : "rules". The type of information that is written in the output table. 
+            The following values are possible: ‘rules’ and ‘patterns’;
+        
+        limit: Gets set at predict step int, optional, >=1, default: 1
+            The maximum number of rules or patterns that is written in the 
+            output table for each input sequence.;
+        
+        sort: Gets set at predict step, str or list, optional
+            A list of keywords that indicates the order in which the rules or 
+            patterns are written in the output table. The order of the list is 
+            descending. The items are separated by semicolons. The following 
+            values are possible: ‘support’, ‘confidence’, ‘lift’, and ‘length’. 
+            The ‘confidence’ value can only be specified if the type parameter 
+            is ‘rules’. If the type parameter is ‘rules’, the default is: 
+            support;confidence;length.  If the type parameter is ‘patterns’, 
+            the default is: support;lift;length. ;
+        
+        modelname: see parameters;
+        
+        minsupport: see parameters;
+        
+        maxlen: see parameters;
+        
+        maxheadlen: see parameters;
+        
+        minconf: see parameters;            
+
 
         Returns
         -------
@@ -448,7 +502,7 @@ class AssociationRules(object):
         self.fit(idadf, transaction_id, item_id,  nametable, namecol, verbose)
         return self.predict(idadf, outtable, transaction_id, item_id, type, limit, sort)
 
-    def describe(self):
+    def describe(self, detail = False):
         """
         Return a description of Association Rules Model.
         """
@@ -457,11 +511,14 @@ class AssociationRules(object):
         else:
             try:
                 # Not sure it is useful
-                res = self._idadb._call_stored_procedure("IDAX.PRINT_MODEL ", model = self.modelname)
-                self._retrieve_AssociationRules_Model(self.modelname, verbose=True)
+                #res = self._idadb._call_stored_procedure("IDAX.PRINT_MODEL ", model = self.modelname)
+                res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                if detail:
+                    self._retrieve_AssociationRules_Model(self.modelname, verbose=True)
             except:
                 raise
             else:
+                print('Summary of the rules')
                 print(res)
             return
 
@@ -478,7 +535,7 @@ class AssociationRules(object):
         ----------
         modelname : str
             The name of the model that is retrieved.
-        verbose : bol, default: False
+        verbose : bool, default: False
             Verbosity mode.
 
         Notes
@@ -502,7 +559,7 @@ class AssociationRules(object):
 
         assocpatterns_stats = self._idadb.ida_query('SELECT * FROM "' +
         self._idadb.current_schema + '"."' + modelname + '_ASSOCPATTERNS_STATISTICS"')
-        assocpatterns_stats = ["ITEMSETID" , "LENGTH" , "COUNT"  , "SUPPORT" , "LIFT"  ,"PRUNED"]
+        assocpatterns_stats.columns = ["ITEMSETID" , "LENGTH" , "COUNT"  , "SUPPORT" , "LIFT"  ,"PRUNED"]
         assocpatterns_stats.columns = [x.upper() for x in assocpatterns_stats.columns]
 
         assocrules = self._idadb.ida_query('SELECT * FROM "' +
@@ -518,14 +575,18 @@ class AssociationRules(object):
         if verbose is True:
             print("assocpatterns")
             print(assocpatterns)
+            print(" ")
 
             print("assocpatterns_stats")
             print(assocpatterns_stats)
+            print(" ")
 
             print("assocrules")
             print(assocrules)
+            print(" ")
 
             print("items")
             print(items)
+            print(" ")
 
         return
