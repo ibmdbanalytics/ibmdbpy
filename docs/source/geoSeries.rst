@@ -62,11 +62,11 @@ Envelope
 
 End Point
 ---------
-..automethod:: IdaGeoSeries.end_point
+.. automethod:: IdaGeoSeries.end_point
 
 Exterior Ring
 -------------
-..automethod:: IdaGeoSeries.exterior_ring
+.. automethod:: IdaGeoSeries.exterior_ring
 
 Generalize
 ----------
@@ -170,7 +170,7 @@ perimeter
 
 Start Point
 -----------
-..automethod:: IdageoSeries.start_point
+.. automethod:: IdageoSeries.start_point
 
 SR ID
 -----
