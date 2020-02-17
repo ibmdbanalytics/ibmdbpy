@@ -111,16 +111,6 @@ class AssociationRules(object):
             is ‘rules’. If the type parameter is ‘rules’, the default is: 
             support;confidence;length.  If the type parameter is ‘patterns’, 
             the default is: support;lift;length. ;
-        
-        modelname: see parameters;
-        
-        minsupport: see parameters;
-        
-        maxlen: see parameters;
-        
-        maxheadlen: see parameters;
-        
-        minconf: see parameters;            
 
 
         Returns
