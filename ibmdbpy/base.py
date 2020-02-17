@@ -1160,13 +1160,13 @@ class IdaDataBase(object):
         Arguments
         ---------
         idadf : IdaDataFrame
-            IdaDataFrame object ot which a column id will be added
+            IdaDataFrame object to which an ID column will be added
         column_id : str
-            Name of the column id to add
+            Name of the ID column to add
         destructive : bool
             If set to True, the column will be added phisically in the database.
             This can take time. If set to False, the column will be added virtually
-            in a view and a new IdaDataFrame is returned
+            in a view and a new IdaDataFrame is returned.
 
         Raises
         ------
@@ -1177,16 +1177,11 @@ class IdaDataBase(object):
 
         Notes
         -----
-            The non-destructive creation of column IDs is not reliable, because 
-            row IDs are recalculated on the fly in a non-deterministic way. The 
-            only reliable way is to create it destructively, but the row IDs 
-            will be created at random. This could be highly improved in the 
-            future. An idea is to create ID columns in a non-destructive way 
-            and base them on the sorting of a set of columns, defined by the 
-            user, or all columns if no column combination results in unique 
-            identifiers.
-            
-            This method is DEPRECATED. 
+            The non-destructive creation of column IDs is not reliable, because row IDs are recalculated on the fly in a non-deterministic 
+            way each time a new view is produced. On the contrary, creating them destructively id est physically is reliable but can take time. 
+            If no sorting has been done whatsoever before, row IDs will be created at random.
+            Improvement idea: create ID columns in a non-destructive way and base them on the sorting of a set of columns, 
+            defined by the user, or all columns if no column combination results in unique identifiers.
         """
         if isinstance(idadf, ibmdbpy.IdaSeries):
             raise TypeError("Adding column ID is not supported for IdaSeries")

@@ -438,7 +438,15 @@ class NaiveBayes(object):
 
     def describe(self, detail = False):
         """
+        Parameters
+        -------
+        detail: bool, optional. False by default. 
+        
+        Returns
+        ------
         Return a description of Naives Bayes.
+        If False, only the a priori probabilities of each class are returned, 
+        displayed in table format. If True, then intermediary tables are shown.
         """
         if self._idadb is None:
             return self.get_params

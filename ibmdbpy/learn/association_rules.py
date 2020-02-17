@@ -494,7 +494,15 @@ class AssociationRules(object):
 
     def describe(self, detail = False):
         """
-        Return a description of Association Rules Model.
+        Parameters
+        ------
+        detail: bool, optional. False by default.
+        
+        Returns
+        -----
+        Returns a description of Association Rules Model. If detail is set to False, then
+        only a table with the summary of the rules is displayed, if detail is set to True,
+        then thenintermediary tables are shown too.
         """
         if self._idadb is None:
             return self.get_params

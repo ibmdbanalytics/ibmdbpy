@@ -230,7 +230,16 @@ class IdaDataFrame(object):
     #### added ####
     def set_indexer(self, value):
         """
-        Convenience function to define an indexer on an existing dataframe
+        Parameters
+        -------
+        Value: string, eligible column name
+        
+        Note
+        -------
+        Convenience function: if no indexer has been defined for the IdaDataFrame, 
+        or the indexer must be changed, sets the indexer attribute to ne the column 
+        with name value. This column must preexist in the IdaDataFrame, 
+        this method does not generate an indexer column from scratch.
         """        
         return IdaDataFrame(self._idadb, self.tablename, indexer = value)
     #### end added ####
