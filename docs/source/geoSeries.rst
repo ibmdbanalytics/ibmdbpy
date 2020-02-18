@@ -28,10 +28,14 @@ Geospatial Methods which return an IdaGeoSeries
 Once the geometry property of the IdaGeoDataFrame is set, the geospatial methods of IdaGeoSeries can be accessed
 with the IdaGeoDataFrame object. Currently the following methods are supported. 
 
-Preliminary note on valid unit names
------
+Note on valid unit names
+-------------------------------------
 Here is the comprehensive list of the allowed unit names which can be given to the `unit`` option of the methods listed below:
 'FOOT', 'LINK', 'MILE', 'METER', 'METRE', 'FATHOM', 'US FOOT', 'KILOMETER', 'KILOMETRE', 'INDIAN FOOT', 'INDIAN YARD', 'LINK (SEARS', 'STATUTE MILE', 'YARD (SEARS)', 'CHAIN (SEARS)', "CLARKE'S FOOT", "CLARKE'S LINK", "CLARKE'S YARD", 'LINK (BENOIT)', 'NAUTICAL MILE', 'YARD (INDIAN)', 'CHAIN (BENOIT)', "CLARKE'S CHAIN", 'US SURVEY FOOT', 'US SURVEY LINK', 'US SURVEY MILE', 'GOLD COAST FOOT', 'US SURVEY CHAIN', 'GERMAN LEGAL METRE', 'INDIAN FOOT (1937)', 'INDIAN FOOT (1962)', 'INDIAN FOOT (1975)', 'INDIAN YARD (1937)', 'INDIAN YARD (1962)', 'INDIAN YARD (1975)', 'BIN WIDTH 25 METRES', 'BRITISH FOOT (1865)', 'FOOT (INTERNATIONAL)', 'BIN WIDTH 12.5 METRES', 'BIN WIDTH 37.5 METRES', 'BIN WIDTH 6.25 METRES', 'BIN WIDTH 3.125 METRES', 'MODIFIED AMERICAN FOOT', 'BRITISH FOOT (SEARS 1922)', 'BRITISH LINK (SEARS 1922)', 'BRITISH YARD (SEARS 1922)', 'BRITISH CHAIN (SEARS 1922)', 'BIN WIDTH 165 US SURVEY FEET', 'BIN WIDTH 330 US SURVEY FEET', 'BRITISH FOOT (BENOIT 1895 A)', 'BRITISH FOOT (BENOIT 1895 B)', 'BRITISH LINK (BENOIT 1895 A)', 'BRITISH LINK (BENOIT 1895 B)', 'BRITISH YARD (BENOIT 1895 A)', 'BRITISH YARD (BENOIT 1895 B)', 'BIN WIDTH 82.5 US SURVEY FEET', 'BRITISH CHAIN (BENOIT 1895 A)', 'BRITISH CHAIN (BENOIT 1895 B)'
+
+Note on sample data
+--------------------
+For each of the methods documented here we have provided examples in form of sample code. The data used for these examples is either available out of the box in Db2 ( SAMPLES.GEO_TORNADO and SAMPLES.GEO_COUNTY) or can be obtained by running an SQL script provided in the package (ibmdbpy.sampledata). You will also find this script on ibmdbpy dedicated repository on [GitHub](https://github.com/ibmdbanalytics/ibmdbpy/blob/ibmdbpy_eva/ibmdbpy/sampledata/sql_script). 
 
 Area
 ----
