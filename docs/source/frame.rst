@@ -171,10 +171,6 @@ ida_scalar_query
 ----------------
 .. automethod:: IdaDataFrame.ida_scalar_query
 
-set_indexer
-----------------
-.. automethod:: IdaDataFrame.set_indexer
-
 
 Data Exploration
 ================
