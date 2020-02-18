@@ -2372,11 +2372,11 @@ class IdaDataFrame(object):
             
             if len(columns)>1:
                 if logic == "any":
-                    for i in range(1,len(columns)):
-                        query = query + ' OR "%s" IS NULL'%columns[i]
+                    for col in columns[1:]:
+                        query = query + ' OR "%s" IS NULL'%col
                 if logic == "all":
-                    for i in range(1, len(columns)):
-                        query = query + ' AND "%s" IS NULL'%columns[i]                        
+                    for col in columns[1:]:
+                        query = query + ' AND "%s" IS NULL'%col                        
             idadb.ida_query(query)
 
         else:            
@@ -2386,11 +2386,11 @@ class IdaDataFrame(object):
             
             if len(columns)>1:
                 if logic == "any":
-                    for i in range(1,len(columns)):
-                        query = query + ' AND "%s" IS NOT NULL'%columns[i]
+                    for col in columns[1:]:
+                        query = query + ' AND "%s" IS NOT NULL'%col
                 if logic == "all":
-                    for i in range(1, len(columns)):
-                        query = query + ' OR "%s" IS NOT NULL'%columns[i]                                               
+                    for col in columns[1:]:
+                        query = query + ' OR "%s" IS NOT NULL'%col                                               
             # Create view with this select statement
             viewname = idadb._get_valid_tablename(prefix="VIEW_")
             self._prepare_and_execute("CREATE VIEW " + viewname + " AS "+ query)
