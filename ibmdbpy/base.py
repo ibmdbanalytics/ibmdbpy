@@ -899,7 +899,7 @@ class IdaDataBase(object):
         self._autocommit()
 
         if primary_key:
-            idadf._indexer = primary_key 
+            idadf._indexer=primary_key
         return idadf
         
     ###########################################################################
@@ -1338,7 +1338,8 @@ class IdaDataBase(object):
         """
         # SANITY CHECK : maxnrow
         if maxnrow is None:
-            # Note : 8000 is an empirical maximum number of cells
+            # Note : previously, int(8000 / len(df.columns)) was an empirical value for the maximum number of cells
+            # new empirical best performing value is int(100000 / len(df.columns))
             maxnrow = int(100000 / len(df.columns))
         else:
             if not isinstance(maxnrow, six.integer_types):

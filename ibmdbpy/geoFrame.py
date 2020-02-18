@@ -1049,43 +1049,43 @@ class IdaGeoDataFrame(IdaDataFrame):
         ### end ### 
 
         arguments_for_db2gse_function = []
-        arguments_for_db2gse_function.append('IDA1.' + column1_for_db2gse)
-        arguments_for_db2gse_function.append('IDA2.' + column2_for_db2gse)
+        arguments_for_db2gse_function.append('IDA1.'+column1_for_db2gse)
+        arguments_for_db2gse_function.append('IDA2.'+column2_for_db2gse)
         if additional_args is not None:
             for arg in additional_args:
                 arguments_for_db2gse_function.append(arg)
 
         # SELECT statement
-        select_columns = []
+        select_columns=[]
         if hasattr(ida1, '_indexer') and ida1._indexer is not None:
-            select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' % (ida1.indexer))
+            select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' %(ida1.indexer))
         else:
-            message = (ida1 + "has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida1+"has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         if hasattr(ida2, '_indexer') and ida2._indexer is not None:
-            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' % (ida2.indexer))
+            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' %(ida2.indexer))
         else:
-            message = (ida2 + "has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida2+"has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         result_column = (
-            db2gse_function +
-            '(' +
-            ','.join(map(str, arguments_for_db2gse_function)) +
+            db2gse_function+
+            '('+
+            ','.join(map(str, arguments_for_db2gse_function))+
             ')'
         )
-        select_columns.append('%s AS \"RESULT\"' % (result_column))
-        select_statement = 'SELECT ' + ','.join(select_columns) + ' '        
+        select_columns.append('%s AS \"RESULT\"' %(result_column))
+        select_statement = 'SELECT '+','.join(select_columns)+' '        
         
         # FROM clause
-        from_clause = (
-            'FROM ' +
-            ida1.name + ' AS IDA1, ' +
-            ida2.name + ' AS IDA2 '
+        from_clause=(
+            'FROM '+
+            ida1.name+' AS IDA1, '+
+            ida2.name+' AS IDA2 '
         )
 
         # Create a view
-        view_creation_query = '(' + select_statement + from_clause + ')'
-        viewname = self._idadb._create_view_from_expression(view_creation_query)
+        view_creation_query='('+select_statement+from_clause+')'
+        viewname=self._idadb._create_view_from_expression(view_creation_query)
 
-        idageodf = ibmdbpy.IdaGeoDataFrame(self._idadb, viewname,indexer= 'INDEXERIDA1')
+        idageodf=ibmdbpy.IdaGeoDataFrame(self._idadb, viewname,indexer='INDEXERIDA1')
         return idageodf

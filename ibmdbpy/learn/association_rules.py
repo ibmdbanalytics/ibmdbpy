@@ -71,15 +71,7 @@ class AssociationRules(object):
             
         Attributes
         ----------
-        
-        _idadf : Gets set at fit step. Input table, IdaDataFrame the model will be fit on;
-        
-        _idadb : Gets set at fit step. IdaDataBase holding the connection to Db2;
-        
-        _transaction_id: Gets set at fit step. The column of the input table which identifies the transaction IDs;
-        
-        _item_id: Gets set at fit step. The column of the input table which identifies the item IDs, items are exchanged during transactions;
-        
+               
         nametable: Gets set at fit step. The name of the optional table which contains a mapping between the items from the input table and the item names. 
             This attribute is set through the nametable option of the fit method.
             This table must contain at least two columns, where
@@ -508,8 +500,6 @@ class AssociationRules(object):
             return self.get_params
         else:
             try:
-                # Not sure it is useful
-                #res = self._idadb._call_stored_procedure("IDAX.PRINT_MODEL ", model = self.modelname)
                 res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
                 if detail:
                     self._retrieve_AssociationRules_Model(self.modelname, verbose=True)
