@@ -179,7 +179,7 @@ perimeter
 
 Start Point
 -----------
-.. automethod:: IdageoSeries.start_point
+.. automethod:: IdaGeoSeries.start_point
 
 SR ID
 -----

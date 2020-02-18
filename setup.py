@@ -67,7 +67,7 @@ setup(name='ibmdbpy',
       extras_require={
         'jdbc':['jaydebeapi', 'JPype1==0.6.3'],
         'test':['pytest', 'flaky==3.4.0'],
-        'doc':['sphinx']
+        'doc':['sphinx', 'ipython', 'numpydoc', 'sphinx_rtd_theme']
       },
       description='A Pandas-like SQL-wrapper for in-database analytics with IBM Db2 Warehouse.',
       long_description=longdesc,
