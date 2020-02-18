@@ -1034,23 +1034,16 @@ class IdaGeoDataFrame(IdaDataFrame):
         column2_for_db2gse = ida2.internal_state.columndict[ida2.geometry.column] 
         if column2_for_db2gse[0] == '\"' and column2_for_db2gse[-1] == '\"':
             column2_for_db2gse = column2_for_db2gse[1:-1]
-        
-        ### added : check if eligible column names ###
-        # in order to fix error occuring when geometry column defined as function(other_column)
-        # geometry columns must have been explicitly defined and have an eligible alias
-        print("column1_for_db2gse: "+column1_for_db2gse)
-        print("column2_for_db2gse: "+column2_for_db2gse)
-        if "(" in column1_for_db2gse or "ST_" in column1_for_db2gse:
-            print("A function pattern was detected in column1_for_db2gse. Please provide the alias of the first geometry column.")
-            column1_for_db2gse = str(input("ALIAS_1: "))
-        if "(" in column2_for_db2gse or "ST_" in column2_for_db2gse:
-            print("A function pattern was detected in column2_for_db2gse. Please provide the alias of the second geometry column.")
-            column2_for_db2gse = str(input("ALIAS_2: "))
-        ### end ### 
 
         arguments_for_db2gse_function = []
-        arguments_for_db2gse_function.append('IDA1.'+column1_for_db2gse)
-        arguments_for_db2gse_function.append('IDA2.'+column2_for_db2gse)
+        if 'IDA1' or 'DB2GSE' in column1_for_db2gse:
+            arguments_for_db2gse_function.append(column1_for_db2gse) 
+        else:
+            arguments_for_db2gse_function.append('IDA1.'+column1_for_db2gse)
+        if 'IDA2' or 'DB2GSE' in column2_for_db2gse:
+            arguments_for_db2gse_function.append(column2_for_db2gse)
+        else:
+            arguments_for_db2gse_function.append('IDA2.'+column2_for_db2gse)
         if additional_args is not None:
             for arg in additional_args:
                 arguments_for_db2gse_function.append(arg)
