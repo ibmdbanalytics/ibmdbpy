@@ -225,24 +225,7 @@ class IdaDataFrame(object):
         if hasattr(self, "_indexer"):
             return self._indexer
         else:
-            None
-
-    
-    def set_indexer(self, value):
-        """
-        Parameters
-        -------
-        Value: string, eligible column name
-        
-        Note
-        -------
-        Convenience function: if no indexer has been defined for the IdaDataFrame, 
-        or the indexer must be changed, sets the indexer attribute to ne the column 
-        with name value. This column must preexist in the IdaDataFrame, 
-        this method does not generate an indexer column from scratch.
-        """        
-        return IdaDataFrame(self._idadb, self.tablename, indexer = value)
-    
+            None    
 
         
     @indexer.setter
