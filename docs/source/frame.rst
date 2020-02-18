@@ -78,6 +78,8 @@ Selection and Projection are also possible using the ``ibmdbpy.Loc`` object stor
 Filtering
 ---------
 
+.. automethod:: IdaDataFrame.delete_na 
+
 .. autoclass:: ibmdbpy.filtering.FilterQuery
 	:members:
 
@@ -96,8 +98,6 @@ Filtering
 
 Feature Engineering
 -------------------
-
-.. automethod:: IdaDataFrame.delete_na 
 
 .. automethod:: IdaDataFrame.__setitem__
 
@@ -170,10 +170,6 @@ ida_query
 ida_scalar_query
 ----------------
 .. automethod:: IdaDataFrame.ida_scalar_query
-
-set_indexer
-----------------
-.. automethod:: IdaDataFrame.set_indexer
 
 
 Data Exploration
