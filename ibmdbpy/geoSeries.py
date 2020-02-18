@@ -42,7 +42,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     ------
     Sample datasets available out of the box in Db2 Warehouse: GEO_TORNADO, GEO_COUNTY tables
     Sample datasets which you can obtain yourself: SAMPLE_POLYGONS, SAMPLE_LINES,
-    SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS. See dedicated SQL script (ibmdbpy/sampledata/sql_script).
+    SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS. --> See dedicated SQL script on 
+    https://github.com/ibmdbanalytics/ibmdbpy/blob/ibmdbpy_eva/ibmdbpy/sampledata/sql_script. 
     You just need to copy this script into Db2 "RUN SQL" console to obtain these sample tables.
     
     Examples:
