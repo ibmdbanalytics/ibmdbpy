@@ -30,7 +30,7 @@ Create from an IdaDataFrame
 
 Get the geometry attribute
 --------------------------
-.. automethod:: IdaGeoDataFrame.geometry
+.. autoattribute:: IdaGeoDataFrame.geometry
 
 Geospatial Methods that return an IdaGeoDataFrame
 =================================================
@@ -91,6 +91,3 @@ Union
 Within
 ------
 .. automethod:: IdaGeoDataFrame.within
-
-
-
