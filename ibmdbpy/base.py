@@ -1178,7 +1178,7 @@ class IdaDataBase(object):
         Notes
         -----
             The non-destructive creation of column IDs is not reliable, because row IDs are recalculated on the fly in a non-deterministic 
-            way each time a new view is produced. On the contrary, creating them destructively id est physically is reliable but can take time. 
+            way each time a new view is produced. On the contrary, creating them destructively i.e physically is reliable but can take time. 
             If no sorting has been done whatsoever before, row IDs will be created at random.
             Improvement idea: create ID columns in a non-destructive way and base them on the sorting of a set of columns, 
             defined by the user, or all columns if no column combination results in unique identifiers.
@@ -1313,7 +1313,7 @@ class IdaDataBase(object):
         the same structure (same column names and datatypes). Optionally, the 
         DataFrame to be added can be splitted into several chunks. This 
         improves performance and prevents SQL overflows. By default, chunks are 
-        limited to 8000 cells.
+        limited to 100.000 cells.
 
         Parameters
         ----------
@@ -1338,8 +1338,8 @@ class IdaDataBase(object):
         """
         # SANITY CHECK : maxnrow
         if maxnrow is None:
-            # Note : previously, int(8000 / len(df.columns)) was an empirical value for the maximum number of cells
-            # new empirical best performing value is int(100000 / len(df.columns))
+            # Note : it has been measured on a big dataset (>1 million rows) that int(100000 / len(df.columns)) 
+            # performs better than the previous empirical value int(8000 / len(df.columns)) 
             maxnrow = int(100000 / len(df.columns))
         else:
             if not isinstance(maxnrow, six.integer_types):
