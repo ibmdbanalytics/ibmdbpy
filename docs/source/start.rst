@@ -241,7 +241,7 @@ This selects all even rows in the ``sepal_length`` column:
 
 >>> idadf_new = idadf.loc[::2][['ID', 'sepal_length']]
 
-Given that an ID column is provided to the data set and declared as an indexer, the selection operates on its ID column. In that case, an ID column has been added to the data set. This column contains unique integers to identify the rows. In the example below we add an ID column and set it as indexer. Default name for the new column is "ID".
+Given that an ID column is provided to the data set and declared as an indexer, the selection operates on its ID column. In that case, an ID column has been added to the data set. This column contains unique integers to identify the rows. In the example below we add an ID column and set it as indexer. The default name for this new column is "ID".
 
 >>> idadf = IdaDataFrame(idadb, "IRIS")
 >>> idadb.add_column_id()
