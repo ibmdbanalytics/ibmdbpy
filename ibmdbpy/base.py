@@ -991,7 +991,7 @@ class IdaDataBase(object):
         >>> idadb.drop_model("NO_MODEL")
         TypeError : NO_MODEL exists in schema '?' but of type '?'
         >>> idadb.drop_model("NOT_EXISTING")
-        ValueError : NOT_EXISTING does not exists in database
+        ValueError : NOT_EXISTING does not exist in database
 
         Notes
         -----
@@ -1012,7 +1012,7 @@ class IdaDataBase(object):
                 if flag:
                     # It is a table so make it raise by calling exists_view
                     self.exists_view(modelname)
-            value_error = ValueError(modelname + " does not exists in database")
+            value_error = ValueError(modelname + " does not exist in database")
             six.raise_from(value_error, e)
         else:
             tables = self.show_tables()
@@ -1543,7 +1543,7 @@ class IdaDataBase(object):
                 else:
                     return False
 
-        raise ValueError("%s does not exists in database"%(objectname))
+        raise ValueError("%s does not exist in database"%(objectname))
 
     def _drop(self, objectname, object_type = "T"):
         """
@@ -1569,13 +1569,13 @@ class IdaDataBase(object):
         except Exception as e:
             if self._con_type == "odbc":
                 if e.value[0] == "42S02":
-                    raise ValueError(e.value[1])  # does not exists
+                    raise ValueError(e.value[1])  # does not exist
                 if e.value[0] == "42809":
                     raise TypeError(e.value[1])  # object is not of expected type
             else:
                 sql_code = int(str(e.args[0]).split("SQLCODE=")[-1].split(",")[0])
                 if sql_code == -204:
-                    raise ValueError("Object does not exists")
+                    raise ValueError("Object does not exist.")
                 elif sql_code == -159:
                     raise TypeError("Object is not of expected type")
                 else:
