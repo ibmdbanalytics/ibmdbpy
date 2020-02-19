@@ -329,7 +329,7 @@ class NaiveBayes(object):
         return
 
     def predict(self, idadf, column_id=None, outtable=None, outtableProb=None,
-                mestimation = False):
+                mestimation=False):
         """
         Use the Naive Bayes predict stored procedure to apply a Naive Bayes model
         to generate classification predictions for a data set.
@@ -426,8 +426,8 @@ class NaiveBayes(object):
         return self.labels_
 
     def fit_predict(self, idadf, column_id="ID", incolumn=None, coldeftype=None,
-                    coldefrole=None, colprepertiesTable=None, outtable = None,
-                    outtableProb = None, mestimation = False, verbose=False):
+                    coldefrole=None, colprepertiesTable=None, outtable=None,
+                    outtableProb=None, mestimation=False, verbose=False):
         """
         Convenience function for fitting the model and using it to make 
         predictions about the same dataset. See to fit and predict 
@@ -436,7 +436,7 @@ class NaiveBayes(object):
         self.fit(idadf, column_id, incolumn, coldeftype, coldefrole, colprepertiesTable, verbose)
         return self.predict(idadf, column_id, outtable, outtableProb, mestimation)
 
-    def describe(self, detail = False):
+    def describe(self, detail=False):
         """
         Parameters
         -------
@@ -460,7 +460,7 @@ class NaiveBayes(object):
             return res
 
 
-    def _retrieve_NaiveBayes_Model(self, modelname, verbose = False):
+    def _retrieve_NaiveBayes_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The Naive 
         Bayes IDAX function stores its result in 2 tables:

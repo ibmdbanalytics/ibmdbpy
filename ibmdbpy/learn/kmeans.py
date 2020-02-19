@@ -45,8 +45,8 @@ class KMeans(object):
     The KMeans class provides an interface for using the KMEANS
     and PREDICT_KMEANS IDAX methods of Db2 Warehouse.
     """
-    def __init__(self, n_clusters=3, modelname = None, max_iter = 5, distance = "euclidean",
-                 random_state = 12345, idbased = False, statistics = None):
+    def __init__(self, n_clusters=3, modelname=None, max_iter=5, distance="euclidean",
+                 random_state=12345, idbased=False, statistics=None):
         """ 
         Constructor for K-means clustering.
 
@@ -301,7 +301,7 @@ class KMeans(object):
 
         return
 
-    def predict(self, idadf, column_id=None, outtable = None):
+    def predict(self, idadf, column_id=None, outtable=None):
         """
         Apply the K-means clustering model to new data.
 
@@ -374,7 +374,7 @@ class KMeans(object):
         return self.labels_
 
     def fit_predict(self, idadf, column_id="ID", incolumn=None, coldeftype=None,
-                    coldefrole=None, colPropertiesTable=None, outtable = None,
+                    coldefrole=None, colPropertiesTable=None, outtable=None,
                     verbose=False):
         """
         Convenience function for fitting the model and using it to make 
@@ -407,7 +407,7 @@ class KMeans(object):
                 raise
             return
 
-    def _retrieve_KMeans_Model(self, modelname, verbose = False):
+    def _retrieve_KMeans_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The KMEANS 
         IDAX function stores its result in 4 tables:

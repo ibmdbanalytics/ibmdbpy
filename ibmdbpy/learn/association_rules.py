@@ -485,7 +485,7 @@ class AssociationRules(object):
         self.fit(idadf, transaction_id, item_id,  nametable, namecol, verbose)
         return self.predict(idadf, outtable, transaction_id, item_id, type, limit, sort)
 
-    def describe(self, detail = False):
+    def describe(self, detail=False):
         """
         Parameters
         ------
@@ -511,7 +511,7 @@ class AssociationRules(object):
                 print(res)
             return
 
-    def _retrieve_AssociationRules_Model(self, modelname, verbose = False):
+    def _retrieve_AssociationRules_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The 
         Association Rules IDAX function stores its result in 4 tables:
