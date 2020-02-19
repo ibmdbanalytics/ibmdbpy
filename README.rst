@@ -36,7 +36,7 @@ A few sample data sets are included in ibmdbpy for you to experiment. We can fir
 >>> idadb.as_idadataframe(iris, "IRIS")
 <ibmdbpy.frame.IdaDataFrame at 0x7ad77f0>
 
-Next, we can create an IDA data frame (IDA stands for IBM Data Analytics?) that points to the table we just uploaded. Let’s use that one:
+Next, we can create an IDA data frame (IDA stands for In Database Analytics) that points to the table we just uploaded. Let’s use this one:
 
 >>> idadf = IdaDataFrame(idadb, 'IRIS')
 

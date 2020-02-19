@@ -35,7 +35,7 @@ Here is the comprehensive list of the allowed unit names which can be given to t
 
 Note on sample data
 --------------------
-For each of the methods documented here we have provided examples in form of sample code. The data used for these examples is either available out of the box in Db2 ( SAMPLES.GEO_TORNADO and SAMPLES.GEO_COUNTY) or can be obtained by running an SQL script provided in the package (ibmdbpy.sampledata). You will also find this script on ibmdbpy dedicated repository on [GitHub](https://github.com/ibmdbanalytics/ibmdbpy/blob/ibmdbpy_eva/ibmdbpy/sampledata/sql_script). 
+For each of the methods documented here we have provided examples in form of sample code. The data used for these examples is either available out of the box in Db2 ( SAMPLES.GEO_TORNADO and SAMPLES.GEO_COUNTY) or can be obtained by running an SQL script provided in the package (ibmdbpy.sampledata). You will also find this script on ibmdbpy dedicated repository on `GitHub <https://github.com/ibmdbanalytics/ibmdbpy/blob/ibmdbpy_eva/ibmdbpy/sampledata/sql_script>`_.   
 
 Area
 ----
