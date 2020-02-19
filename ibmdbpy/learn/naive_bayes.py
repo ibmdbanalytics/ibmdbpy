@@ -300,8 +300,8 @@ class NaiveBayes(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
             idadf._idadb._call_stored_procedure("IDAX.NAIVEBAYES ",
@@ -404,8 +404,8 @@ class NaiveBayes(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
             idadf._idadb._call_stored_procedure("IDAX.PREDICT_NAIVEBAYES ",

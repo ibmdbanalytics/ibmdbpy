@@ -261,8 +261,8 @@ class KMeans(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state # deprecated, hange to idadf.name
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
             # TODO: outtable is optional but this does not match with the doc
@@ -354,8 +354,8 @@ class KMeans(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
             
         try:
             idadf._idadb._call_stored_procedure("IDAX.PREDICT_KMEANS ",
