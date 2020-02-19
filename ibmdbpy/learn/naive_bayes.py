@@ -76,7 +76,62 @@ class NaiveBayes(object):
             
         Attributes
         ----------
-        TODO
+        
+        _idadf: Get set at fit step, IdaDataFrame used as input to fit the model;
+        
+        _idadb: Get set at fit step, IdaDataBase object holding the connection to Db2;
+        
+        _column_id: Get set at fit step, name of the column of the input table which identifies the transaction or class ID.;
+        
+        target: Get set at fit step; str
+            The column of the input table that represents the class
+        
+        incolumn: Get set at fit step; str, optional
+            The columns of the input table that have specific properties,
+            which are separated by a semi-colon (;). Each column is succeeded
+            by one or more of the following properties:
+                * By type nominal (':nom') or by type continuous (':cont'). By default, numerical types are continuous, and all other types are nominal.
+                * By role ':id', ':target', ':input', or ':ignore'.
+        
+        coldeftype: Get set at fit step; str, optional
+            The default type of the input table columns.
+            The following values are allowed: 'nom' and 'cont'.
+            If the parameter is not specified, numeric columns are continuous,
+            and all other columns are nominal.
+        
+        coldefrole: Get set at fit step; str, optional
+            The default role of the input table columns.
+            The following values are allowed: 'input' and 'ignore'.
+            If the parameter is not specified, all columns are input columns.
+        
+        colpropertiestable: Get set at fit step; str, optional
+            The input table where the properties of the columns of the input table are stored.
+            If this parameter is not specified, the column properties of the input table
+            column properties are detected automatically.
+        
+        outable: Get set at predict step; str, optional
+            The name of the output table where the predictions are stored. If
+            this parameter is not specified, it is generated automatically. If
+            the parameter corresponds to an existing table in the database, it
+            will be replaced.
+        
+        outtableProb: Get set at predict step; str, optional
+            The output table where the probabilities for each of the classes are stored.
+            If this parameter is not specified, the table is not created. If
+            the parameter corresponds to an existing table in the database, it
+            will be replaced.
+        
+        mestimation: Get set at predict step; flag, default: False
+            A flag that indicates the use of m-estimation for probabilities.
+            This kind of estimation might be slower than other ones, but it
+            might produce better results for small or unbalanced data sets.
+        
+        modelname: see parameters;
+        
+        disc: see parameters;
+        
+        bins: see parameters;
+        
 
         Returns
         -------
@@ -245,8 +300,8 @@ class NaiveBayes(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
             idadf._idadb._call_stored_procedure("IDAX.NAIVEBAYES ",
@@ -274,7 +329,7 @@ class NaiveBayes(object):
         return
 
     def predict(self, idadf, column_id=None, outtable=None, outtableProb=None,
-                mestimation = False):
+                mestimation=False):
         """
         Use the Naive Bayes predict stored procedure to apply a Naive Bayes model
         to generate classification predictions for a data set.
@@ -349,8 +404,8 @@ class NaiveBayes(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
             idadf._idadb._call_stored_procedure("IDAX.PREDICT_NAIVEBAYES ",
@@ -371,8 +426,8 @@ class NaiveBayes(object):
         return self.labels_
 
     def fit_predict(self, idadf, column_id="ID", incolumn=None, coldeftype=None,
-                    coldefrole=None, colprepertiesTable=None, outtable = None,
-                    outtableProb = None, mestimation = False, verbose=False):
+                    coldefrole=None, colprepertiesTable=None, outtable=None,
+                    outtableProb=None, mestimation=False, verbose=False):
         """
         Convenience function for fitting the model and using it to make 
         predictions about the same dataset. See to fit and predict 
@@ -381,20 +436,31 @@ class NaiveBayes(object):
         self.fit(idadf, column_id, incolumn, coldeftype, coldefrole, colprepertiesTable, verbose)
         return self.predict(idadf, column_id, outtable, outtableProb, mestimation)
 
-    def describe(self):
+    def describe(self, detail=False):
         """
+        Parameters
+        -------
+        detail: bool, optional. False by default. 
+        
+        Returns
+        ------
         Return a description of Naives Bayes.
+        If False, only the a priori probabilities of each class are returned, 
+        displayed in table format. If True, then intermediary tables are shown.
         """
         if self._idadb is None:
             return self.get_params
         else:
             try:
-                self._retrieve_NaiveBayes_Model(self.modelname, verbose=True)
+                res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                if detail:
+                    self._retrieve_NaiveBayes_Model(self.modelname, verbose=True)
             except:
                 raise
+            return res
 
 
-    def _retrieve_NaiveBayes_Model(self, modelname, verbose = False):
+    def _retrieve_NaiveBayes_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The Naive 
         Bayes IDAX function stores its result in 2 tables:

@@ -77,14 +77,14 @@ Alternatively
 Verbosity
 ---------
 
-The verbose mode automatically prints all SQL-communication between ibmdbpy and Db2, which can be very useful for debugging or understanding how ibmdbpy works. By default, this is activated, but can be turned down by setting the ``verbose`` option  to ``False`` or by using the ``set_verbose`` function.
+The verbose mode automatically prints all SQL-communication between ibmdbpy and Db2, which can be very useful for debugging or understanding how ibmdbpy works. By default, this is not activated, but it can be turned up as a debugging help by setting the ``verbose`` option to True or by using the ``set_verbose`` function.
 
->>> idadb = IdaDataBase("BLUDB", verbose=False)
+>>> idadb = IdaDataBase("BLUDB", verbose=True)
 
 Alternatively
 
 >>> from ibmdbpy.utils import set_verbose
->>> set_verbose(False)
+>>> set_verbose(True)
 
 Conventions
 -----------
@@ -158,7 +158,7 @@ Index(['sepal_length', 'sepal_width', 'petal_length', 'petal_width',
        'species'],
       dtype='object')
 
->>> idadf.dtype
+>>> idadf.dtypes
              TYPENAME
 sepal_length   DOUBLE
 sepal_width    DOUBLE
@@ -239,12 +239,14 @@ Name: sepal_length, dtype: float64
 
 This selects all even rows in the ``sepal_length`` column:
 
->>> idadf_new = idadf.loc[::2,'sepal_length']
+>>> idadf_new = idadf.loc[::2][['ID', 'sepal_length']]
 
-Given that an ID column is provided to the data set and declared as an indexer, the selection operates on its ID column. In that case, an ID column has been added to the data set. This column contains unique integers to identify the rows.
+Given that an ID column is provided to the data set and declared as an indexer, the selection operates on its ID column. In that case, an ID column has been added to the data set. This column contains unique integers to identify the rows. In the example below we add an ID column and set it as indexer. The default name for this new column is "ID".
 
->>> idadf = IdaDataFrame(idadb, "IRIS", indexer = "ID")
->>> idadf_new = idadf.loc[::2,['ID', 'sepal_length']]
+>>> idadf = IdaDataFrame(idadb, "IRIS")
+>>> idadb.add_column_id()
+>>> idadb.set_indexer('ID')
+>>> idadf_new = idadf.loc[::2][['ID', 'sepal_length']]
 >>> idadf_new.head(10)
    ID  sepal_length
 0   0           5.1
@@ -452,7 +454,7 @@ Ibmdbpy provides a wrapper for several machine learning algorithms that are deve
 
 The following example uses K-means:
 
->>> idadf = IdaDataBase(idadb, 'IRIS', indexer="ID")
+>>> idadf = IdaDataFrame(idadb, 'IRIS', indexer="ID")
 # In-DataBase Kmeans needs an indexer to identify each row
 
 >>> from ibmdbpy.learn import KMeans
@@ -504,7 +506,7 @@ Note that to create an IDA geo data frame using the IdaDataFrame object, we need
 
 Now let us compute the area of the counties in the GEO_COUNTY table:
 
-    >>> idadf['area'] = idadf.area(colx = 'SHAPE')
+    >>> idadf['area'] = idadf['SHAPE'].area()
          	OBJECTID 	NAME 	        SHAPE 	                                                 area
          	1 	        Wilbarger 	MULTIPOLYGON (((-99.4756582604 33.8340108094, ... 	0.247254
          	2 	        Austin 	        MULTIPOLYGON (((-96.6219873342 30.0442882117, ... 	0.162639

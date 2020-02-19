@@ -43,7 +43,7 @@ class FilterQuery(object):
 
     Examples
     --------
-    >>> idadf[['sepal_length', 'petal_width'] < 5
+    >>> idadf[['sepal_length', 'petal_width'] < 5]
     >>> <ibmdbpy.filtering.FilterQuery at 0xa65ba90>
     >>> _.wherestr
     '("sepal_length" < 5 AND "petal_width" < 5)'

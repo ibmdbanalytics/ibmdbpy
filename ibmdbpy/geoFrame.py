@@ -430,15 +430,17 @@ class IdaGeoDataFrame(IdaDataFrame):
         2            1840         4.868971
         2            109          16.387094
         """
-        additional_args = []
+        add_args = None
         if unit is not None:
             unit = self._check_linear_unit(unit)  # Can raise exceptions
-            additional_args.append(unit)
+            add_args = []
+            add_args.append(unit)
         return self._binary_operation_handler(
             ida2,
             db2gse_function='DB2GSE.ST_DISTANCE',
             valid_types_ida1=['ST_GEOMETRY'],
-            valid_types_ida2=['ST_GEOMETRY'])
+            valid_types_ida2=['ST_GEOMETRY'],
+            additional_args = add_args)
 
     def crosses(self, ida2):
         """
@@ -1012,65 +1014,71 @@ class IdaGeoDataFrame(IdaDataFrame):
         -------
         IdaGeoDataFrame
         """
-        ida1 = self  # For code clearness
+        ida1 = self
+        
+        # Check if allowed data type
         if not (ida1.dtypes.TYPENAME[0] in valid_types_ida1 or
                         valid_types_ida1[0] == 'ST_GEOMETRY'):
             raise TypeError("Column " + ida1.column +
                             " has incompatible type.")
         if not (ida2.dtypes.TYPENAME[0] in valid_types_ida2 or
                         valid_types_ida2[0] == 'ST_GEOMETRY'):
-            raise TypeError("Column " + ida1.column +
+            raise TypeError("Column " + ida2.column +
                             " has incompatible type.")
 
         # Get the definitions of the columns, which will be the arguments for
         # the DB2GSE function
-        column1_for_db2gse = ida1.internal_state.columndict[self.geometry.column]
+        column1_for_db2gse = ida1.internal_state.columndict[ida1.geometry.column] 
         if column1_for_db2gse[0] == '\"' and column1_for_db2gse[-1] == '\"':
             column1_for_db2gse = column1_for_db2gse[1:-1]
-        column2_for_db2gse = ida2.internal_state.columndict[self.geometry.column]
+        column2_for_db2gse = ida2.internal_state.columndict[ida2.geometry.column] 
         if column2_for_db2gse[0] == '\"' and column2_for_db2gse[-1] == '\"':
             column2_for_db2gse = column2_for_db2gse[1:-1]
 
-
         arguments_for_db2gse_function = []
-        arguments_for_db2gse_function.append('IDA1.' + column1_for_db2gse)
-        arguments_for_db2gse_function.append('IDA2.' + column1_for_db2gse)
+        if 'IDA1' or 'DB2GSE' in column1_for_db2gse:
+            arguments_for_db2gse_function.append(column1_for_db2gse) 
+        else:
+            arguments_for_db2gse_function.append('IDA1.'+column1_for_db2gse)
+        if 'IDA2' or 'DB2GSE' in column2_for_db2gse:
+            arguments_for_db2gse_function.append(column2_for_db2gse)
+        else:
+            arguments_for_db2gse_function.append('IDA2.'+column2_for_db2gse)
         if additional_args is not None:
             for arg in additional_args:
                 arguments_for_db2gse_function.append(arg)
 
         # SELECT statement
-        select_columns = []
+        select_columns=[]
         if hasattr(ida1, '_indexer') and ida1._indexer is not None:
-            select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' % (ida1.indexer))
+            select_columns.append('IDA1.\"%s\" AS \"INDEXERIDA1\"' %(ida1.indexer))
         else:
-            message = (ida1 + "has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida1+"has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         if hasattr(ida2, '_indexer') and ida2._indexer is not None:
-            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' % (ida1.indexer))
+            select_columns.append('IDA2.\"%s\" AS \"INDEXERIDA2\"' %(ida2.indexer))
         else:
-            message = (ida2 + "has no indexer defined. Please assign index column with set_indexer and retry.")
+            message = (ida2+"has no indexer defined. Please assign index column with set_indexer and retry.")
             raise IdaGeoDataFrameError(message)
         result_column = (
-            db2gse_function +
-            '(' +
-            ','.join(map(str, arguments_for_db2gse_function)) +
+            db2gse_function+
+            '('+
+            ','.join(map(str, arguments_for_db2gse_function))+
             ')'
         )
-        select_columns.append('%s AS \"RESULT\"' % (result_column))
-        select_statement = 'SELECT ' + ','.join(select_columns) + ' '
-
+        select_columns.append('%s AS \"RESULT\"' %(result_column))
+        select_statement = 'SELECT '+','.join(select_columns)+' '        
+        
         # FROM clause
-        from_clause = (
-            'FROM ' +
-            ida1.name + ' AS IDA1, ' +
-            ida2.name + ' AS IDA2 '
+        from_clause=(
+            'FROM '+
+            ida1.name+' AS IDA1, '+
+            ida2.name+' AS IDA2 '
         )
 
         # Create a view
-        view_creation_query = '(' + select_statement + from_clause + ')'
-        viewname = self._idadb._create_view_from_expression(
-            view_creation_query)
+        view_creation_query='('+select_statement+from_clause+')'
+        viewname=self._idadb._create_view_from_expression(view_creation_query)
 
-        idageodf = ibmdbpy.IdaGeoDataFrame(self._idadb, viewname,indexer= 'INDEXERIDA1')
+        idageodf=ibmdbpy.IdaGeoDataFrame(self._idadb, viewname,indexer='INDEXERIDA1')
         return idageodf

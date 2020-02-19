@@ -45,8 +45,8 @@ class KMeans(object):
     The KMeans class provides an interface for using the KMEANS
     and PREDICT_KMEANS IDAX methods of Db2 Warehouse.
     """
-    def __init__(self, n_clusters=3, modelname = None, max_iter = 5, distance = "euclidean",
-                 random_state = 12345, idbased = False, statistics = None):
+    def __init__(self, n_clusters=3, modelname=None, max_iter=5, distance="euclidean",
+                 random_state=12345, idbased=False, statistics=None):
         """ 
         Constructor for K-means clustering.
 
@@ -91,21 +91,15 @@ class KMeans(object):
 
         Attributes
         ----------
-        centers
-            TODO
+        centers: table containing the coordinates of each cluster center;
 
-        cluster_centers_
-            TODO
+        cluster_centers_: coordinates of each cluster center, as list;
 
-        withinss
-            TODO
+        withinss: Within cluster sum of squares, by cluster, as a list;
 
-        size_clusters
-            TODO
+        size_clusters: number of items in each cluster, as list;
 
-        inertia_
-            TODO
-
+        inertia_: float, total inertia of the system, defined as the sum of each cluster's within cluster sum of squares.
 
         Returns
         -------
@@ -267,8 +261,8 @@ class KMeans(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state # deprecated, hange to idadf.name
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
             # TODO: outtable is optional but this does not match with the doc
@@ -307,7 +301,7 @@ class KMeans(object):
 
         return
 
-    def predict(self, idadf, column_id=None, outtable = None):
+    def predict(self, idadf, column_id=None, outtable=None):
         """
         Apply the K-means clustering model to new data.
 
@@ -360,8 +354,8 @@ class KMeans(object):
         idadf.internal_state._create_view()
         tmp_view_name = idadf.internal_state.current_state
         
-        if "." in tmp_view_name:
-            tmp_view_name = tmp_view_name.split('.')[-1]
+        #if "." in tmp_view_name:
+            #tmp_view_name = tmp_view_name.split('.')[-1]
             
         try:
             idadf._idadb._call_stored_procedure("IDAX.PREDICT_KMEANS ",
@@ -380,7 +374,7 @@ class KMeans(object):
         return self.labels_
 
     def fit_predict(self, idadf, column_id="ID", incolumn=None, coldeftype=None,
-                    coldefrole=None, colPropertiesTable=None, outtable = None,
+                    coldefrole=None, colPropertiesTable=None, outtable=None,
                     verbose=False):
         """
         Convenience function for fitting the model and using it to make 
@@ -413,7 +407,7 @@ class KMeans(object):
                 raise
             return
 
-    def _retrieve_KMeans_Model(self, modelname, verbose = False):
+    def _retrieve_KMeans_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The KMEANS 
         IDAX function stores its result in 4 tables:

@@ -767,7 +767,7 @@ class IdaDataBase(object):
     def ida_scalar_query(self, query, silent=False, autocommit = False):
         """
         Prepare and execute a query and return only the first element as a 
-        string. If nothing is returned from the SQL query, an error occur.
+        string. If nothing is returned from the SQL query, an error occurs.
 
         Parameters
         ----------
@@ -816,7 +816,7 @@ class IdaDataBase(object):
         tablename : str, optional
             Name to be given to the table created in the database. If not 
             given, a valid tablename is generated (for example, DATA_FRAME_X 
-            where X a random number).
+            where X is a random number).
         clear_existing : bool
             If set to True, a table will be replaced when a table with the same 
             name already exists  in the database.
@@ -899,7 +899,7 @@ class IdaDataBase(object):
         self._autocommit()
 
         if primary_key:
-            idadf.indexer = primary_key
+            idadf._indexer=primary_key
         return idadf
         
     ###########################################################################
@@ -991,7 +991,7 @@ class IdaDataBase(object):
         >>> idadb.drop_model("NO_MODEL")
         TypeError : NO_MODEL exists in schema '?' but of type '?'
         >>> idadb.drop_model("NOT_EXISTING")
-        ValueError : NOT_EXISTING does not exists in database
+        ValueError : NOT_EXISTING does not exist in database
 
         Notes
         -----
@@ -1012,7 +1012,7 @@ class IdaDataBase(object):
                 if flag:
                     # It is a table so make it raise by calling exists_view
                     self.exists_view(modelname)
-            value_error = ValueError(modelname + " does not exists in database")
+            value_error = ValueError(modelname + " does not exist in database")
             six.raise_from(value_error, e)
         else:
             tables = self.show_tables()
@@ -1089,7 +1089,7 @@ class IdaDataBase(object):
         If column argument is set to None, a random column is generated which 
         can take values for 1 to ncat.
         Used for benchmark purpose. 
-        Note: This method is deprecated. Can be probably be removed without impact 
+        Note: This method is deprecated. Can probably be removed without impact 
         """
         if column is not None:
             if column not in idadf.columns:
@@ -1160,13 +1160,13 @@ class IdaDataBase(object):
         Arguments
         ---------
         idadf : IdaDataFrame
-            IdaDataFrame object ot which a column id will be added
+            IdaDataFrame object to which an ID column will be added
         column_id : str
-            Name of the column id to add
+            Name of the ID column to add
         destructive : bool
             If set to True, the column will be added phisically in the database.
             This can take time. If set to False, the column will be added virtually
-            in a view and a new IdaDataFrame is returned
+            in a view and a new IdaDataFrame is returned.
 
         Raises
         ------
@@ -1177,16 +1177,11 @@ class IdaDataBase(object):
 
         Notes
         -----
-            The non-destructive creation of column IDs is not reliable, because 
-            row IDs are recalculated on the fly in a non-deterministic way. The 
-            only reliable way is to create it destructively, but the row IDs 
-            will be created at random. This could be highly improved in the 
-            future. An idea is to create ID columns in a non-destructive way 
-            and base them on the sorting of a set of columns, defined by the 
-            user, or all columns if no column combination results in unique 
-            identifiers.
-            
-            This method is DEPRECATED. 
+            The non-destructive creation of column IDs is not reliable, because row IDs are recalculated on the fly in a non-deterministic 
+            way each time a new view is produced. On the contrary, creating them destructively i.e physically is reliable but can take time. 
+            If no sorting has been done whatsoever before, row IDs will be created at random.
+            Improvement idea: create ID columns in a non-destructive way and base them on the sorting of a set of columns, 
+            defined by the user, or all columns if no column combination results in unique identifiers.
         """
         if isinstance(idadf, ibmdbpy.IdaSeries):
             raise TypeError("Adding column ID is not supported for IdaSeries")
@@ -1318,7 +1313,7 @@ class IdaDataBase(object):
         the same structure (same column names and datatypes). Optionally, the 
         DataFrame to be added can be splitted into several chunks. This 
         improves performance and prevents SQL overflows. By default, chunks are 
-        limited to 8000 cells.
+        limited to 100.000 cells.
 
         Parameters
         ----------
@@ -1343,8 +1338,9 @@ class IdaDataBase(object):
         """
         # SANITY CHECK : maxnrow
         if maxnrow is None:
-            # Note : 8000 is an empirical maximum number of cells
-            maxnrow = int(8000 / len(df.columns))
+            # Note : it has been measured on a big dataset (>1 million rows) that int(100000 / len(df.columns)) 
+            # performs better than the previous empirical value int(8000 / len(df.columns)) 
+            maxnrow = int(100000 / len(df.columns))
         else:
             if not isinstance(maxnrow, six.integer_types):
                 raise TypeError("maxnrow is not an integer")
@@ -1547,7 +1543,7 @@ class IdaDataBase(object):
                 else:
                     return False
 
-        raise ValueError("%s does not exists in database"%(objectname))
+        raise ValueError("%s does not exist in database"%(objectname))
 
     def _drop(self, objectname, object_type = "T"):
         """
@@ -1573,13 +1569,13 @@ class IdaDataBase(object):
         except Exception as e:
             if self._con_type == "odbc":
                 if e.value[0] == "42S02":
-                    raise ValueError(e.value[1])  # does not exists
+                    raise ValueError(e.value[1])  # does not exist
                 if e.value[0] == "42809":
                     raise TypeError(e.value[1])  # object is not of expected type
             else:
                 sql_code = int(str(e.args[0]).split("SQLCODE=")[-1].split(",")[0])
                 if sql_code == -204:
-                    raise ValueError("Object does not exists")
+                    raise ValueError("Object does not exist.")
                 elif sql_code == -159:
                     raise TypeError("Object is not of expected type")
                 else:

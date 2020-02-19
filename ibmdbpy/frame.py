@@ -225,8 +225,9 @@ class IdaDataFrame(object):
         if hasattr(self, "_indexer"):
             return self._indexer
         else:
-            None
+            None    
 
+        
     @indexer.setter
     def indexer(self, value):
         """
@@ -1874,8 +1875,7 @@ class IdaDataFrame(object):
             if not display_yes:
                 return
             tempname = self._idadb._get_valid_tablename()
-            self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tempname, tablename))
-            self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tempname, tablename))
+            self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tempname, tablename))
             try:
                 self._idadb.drop_table(tablename)
             except:
@@ -1903,8 +1903,7 @@ class IdaDataFrame(object):
 
         name = self.internal_state.current_state
 
-        self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tablename, name))
-        self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tablename, name))
+        self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tablename, name))
 
         # Reset the cache
         self._idadb._reset_attributes("cache_show_tables")
@@ -2316,3 +2315,98 @@ class IdaDataFrame(object):
         check_numeric_columns(self)
         if isinstance(other, ibmdbpy.IdaSeries)|isinstance(other, IdaDataFrame):
             check_numeric_columns(other)
+
+    
+    def delete_na(self, columns, logic="any", inplace=False):
+        """
+        Filter rows containing NULL values. Can be done in a destructive way (rows are deleted in the physical table)
+        or in a non destructive way (a new IdaDataFrame is defined, original table and IdaDataFrame are preserved). 
+        
+        Parameters
+        -----------
+        columns : list of strings
+            list of eligible column names
+        logic : str, optional
+            "any" by default. 
+            If logic is set to "any" then all rows which contain a NaN value in any 
+            (id est at least one) of the cited columns is deleted, this is a union condition;
+            if logic is set to "all", then only rows containing null values in all the fields are deleted, this is an intersection condition.         
+        inplace : bool, optional 
+            False by default. 
+            If True, then the underlying table is physically modified,
+            if False, then the original objects remain unaffected, a copy of the IdaDataFrame is made and modified. 
+        
+        Returns
+        --------
+        If inplace is True, the original table is modified and the IdaDataFrame will be modified accordingly. No return.
+        If inplace is False, a new IdaDataFrame is returned, the original table is not affected. This new IdaDataFrame points to a 
+        new table which has been created according to the user defined criterions on columns.
+        
+        Examples
+        --------
+        >>> idadf.delete_na(["COL_1", "COL_2"], inplace = True)
+        >>> #each row of the original table is physically deleted if there is a NULL value in one of the listed columns
+        >>> new_idadf = idadf.delete_na(["COL_1", "COL_2"], logic = 'all')
+        >>> # a new IdaDataFrame is created, rows will be selected only if all the listed columns have a NULL value.
+        """
+        
+        # Check if list columns is not empty
+        if len(columns)<1:
+            raise IdaDataFrameError("You must specify the columns as a list of eligible names")
+        # Check if column names are eligible
+        for column_name in columns:
+            if not isinstance(column_name, six.string_types):
+                raise TypeError("%s is not of string type"%(column_name))
+            if column_name not in self.columns:
+                raise ValueError("%s refers to a columns that doesn't exists in self"%(column_name))
+        
+        idadb = self._idadb
+        
+        if inplace == True:
+            # Explain
+            print("The table %s will be physically modified." %self.tablename)
+            print("Any IdaDataFrame pointing this table might be modified accordingly.")
+            # Write DELETE query on original table
+            tablename = self.tablename
+            query = 'DELETE FROM %s WHERE "%s" IS NULL'%(tablename, columns[0])
+            
+            if len(columns)>1:
+                if logic == "any":
+                    for col in columns[1:]:
+                        query = query + ' OR "%s" IS NULL'%col
+                if logic == "all":
+                    for col in columns[1:]:
+                        query = query + ' AND "%s" IS NULL'%col                        
+            idadb.ida_query(query)
+
+        else:            
+            # SELECT statement on the original table to create a view
+            tablename0 = self.tablename 
+            query = 'SELECT * FROM %s WHERE "%s" IS NOT NULL'%(tablename0, columns[0])
+            
+            if len(columns)>1:
+                if logic == "any":
+                    for col in columns[1:]:
+                        query = query + ' AND "%s" IS NOT NULL'%col
+                if logic == "all":
+                    for col in columns[1:]:
+                        query = query + ' OR "%s" IS NOT NULL'%col                                               
+            # Create view with this select statement
+            viewname = idadb._get_valid_tablename(prefix="VIEW_")
+            self._prepare_and_execute("CREATE VIEW " + viewname + " AS "+ query)
+            # Initiate the modified table under a random name
+            tablename = idadb._get_valid_tablename(prefix="DATA_FRAME_")
+            idadb._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s) WITH DATA"%(tablename,viewname))
+            print('A new table with filtered rows is available under the name %s.' %tablename)
+            print('The newly created IdaDataFrame refers to this new table.')
+            # Drop the view 
+            idadb.drop_view(viewname)            
+            # Define a new IdaDataFrame pointing to the new table
+            idadf = IdaDataFrame(idadb, tablename, indexer = self.indexer)
+            return idadf
+    
+            
+
+
+            
+        
