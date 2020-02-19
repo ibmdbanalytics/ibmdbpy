@@ -39,7 +39,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     It has geospatial methods based on Db2 Warehouse Spatial Extender (DB2GSE).
     
     Note on sample data used for the examples:
-    ------
+    ------------------------------------------
     Sample datasets available out of the box in Db2 Warehouse: GEO_TORNADO, GEO_COUNTY tables
     Sample datasets which you can obtain yourself: SAMPLE_POLYGONS, SAMPLE_LINES,
     SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS. --> See dedicated SQL script on 
@@ -47,7 +47,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     You just need to copy this script into Db2 "RUN SQL" console to obtain these sample tables.
     
     Examples:
-    ------
+    ---------
     >>> idageodf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer='OBJECTID', geometry = "SHAPE")
     >>> idageoseries = idageodf["SHAPE"]
     >>> idageoseries.dtypes
@@ -212,8 +212,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         IdaGeoSeries.
 
         See also
-        --------
-        linear_units : list of valid units.
+        ---------
+        Note on valid units (documentation). 
+        Reference: linear_units, provides this information as a list of strings.
 
         Notes
         -----
@@ -302,7 +303,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         """
         
         Note: theory
-        ---------
+        -------------
         The convex hull of a shape, also called convex envelope or convex closure, is the smallest convex set that contains it. 
         For example, if you have a bounded subset of points in the Euclidean space, the convex hull may be visualized as 
         the shape enclosed by an elastic band stretched around the outside points of the subset. 
@@ -312,7 +313,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         ST_Geometry or one of its subtypes.
 
         Note on the input type
-        ---------
+        -----------------------
         If possible, the specific type of the returned geometry will be ST_Point, ST_LineString, or ST_Polygon. 
         The convex hull of a convex polygon with no holes is a single linestring, represented as ST_LineString. 
         The convex hull of a non convex polygon does not exit. 
@@ -789,7 +790,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         --------
-        linear_units : list of valid units.
+        Note on valid units(documentation). 
+        Reference: linear_units, provides this information as a list of strings.
 
         Notes
         -----
@@ -909,7 +911,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         --------
-        linear_units : list of valid units.
+        Note on valid units (documentation). 
+        Reference: linear_units, provides this information as a list of strings.
 
         Notes
         -----
@@ -978,7 +981,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         --------
-        linear_units : list of valid units.
+        Note on valid units (documentation). 
+        Reference: linear_units, provides this information as a list of strings.
 
         Notes
         -----
