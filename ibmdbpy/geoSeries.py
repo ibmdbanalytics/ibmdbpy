@@ -1969,6 +1969,13 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
     @lazy
     def linear_units(self):
+        """
+        Returns:
+        --------
+        list of str
+            The list of all allowed linear units that can be passed as option to geospatial methods.
+        """
+            
         units = self.ida_query(
             'SELECT UNIT_NAME FROM DB2GSE.ST_UNITS_OF_MEASURE WHERE '
             'UNIT_TYPE= \'LINEAR\' ORDER BY LENGTH(UNIT_NAME), UNIT_NAME')
