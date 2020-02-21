@@ -213,8 +213,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         ---------
-        Note on valid units (documentation). 
-        Reference: linear_units, provides this information as a list of strings.
+        linear_units
 
         Notes
         -----
@@ -790,8 +789,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         --------
-        Note on valid units(documentation). 
-        Reference: linear_units, provides this information as a list of strings.
+        linear_units
 
         Notes
         -----
@@ -911,8 +909,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         --------
-        Note on valid units (documentation). 
-        Reference: linear_units, provides this information as a list of strings.
+        linear_units
 
         Notes
         -----
@@ -981,9 +978,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         See also
         --------
-        Note on valid units (documentation). 
-        Reference: linear_units, provides this information as a list of strings.
-
+        linear_units
+        
         Notes
         -----
         Restrictions on unit conversions: An error (SQLSTATE 38SU4) is returned
