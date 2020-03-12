@@ -460,7 +460,7 @@ class AssociationRules(object):
             raise
         finally:
             idadf.internal_state._delete_view()
-            idadf._cursor.commit()
+            idadf.commit()
 
         self.labels_ = ibmdbpy.IdaDataFrame(idadf._idadb, outtable)
         return self.labels_
@@ -541,23 +541,19 @@ class AssociationRules(object):
         # In case the implementation of the IDA method changes, this may break
         # But still would not be difficult to fix 
 
-        assocpatterns = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_ASSOCPATTERNS"')
+        assocpatterns = self._idadb.ida_query('SELECT * FROM ' + modelname + '_ASSOCPATTERNS')
         assocpatterns.columns = ["ITEMSETID","ITEMID"]
         assocpatterns.columns = [x.upper() for x in assocpatterns.columns]
 
-        assocpatterns_stats = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_ASSOCPATTERNS_STATISTICS"')
+        assocpatterns_stats = self._idadb.ida_query('SELECT * FROM ' + modelname + '_ASSOCPATTERNS_STATISTICS')
         assocpatterns_stats.columns = ["ITEMSETID" , "LENGTH" , "COUNT"  , "SUPPORT" , "LIFT"  ,"PRUNED"]
         assocpatterns_stats.columns = [x.upper() for x in assocpatterns_stats.columns]
 
-        assocrules = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_ASSOCRULES"')
+        assocrules = self._idadb.ida_query('SELECT * FROM ' + modelname + '_ASSOCRULES')
         assocrules.columns = ["RULEID", "ITEMSETID", "BODYID", "HEADID", "CONFIDENCE", "PRUNED"]
         assocrules.columns = [x.upper() for x in assocrules.columns]
 
-        items = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_ITEMS"')
+        items = self._idadb.ida_query('SELECT * FROM ' + modelname + '_ITEMS')
         items.columns = ["ITEMID","ITEM","ITEMNAME","COUNT","SUPPORT"]
         items.columns = [x.upper() for x in items.columns]
 
