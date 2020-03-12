@@ -565,22 +565,29 @@ class IdaDataBase(object):
         """
         modelname = ibmdbpy.utils.check_tablename(modelname)
         if '.' in modelname:
+            modelschema = modelname.split('.')[0]
             modelname = modelname.split('.')[-1]
+        else:
+            modelschema = self.current_schema
 
-        data = self.show_models()
+        # check if schema exists to avoid exception thrown by idax.list_models
+        schemaquery = "select count(*) from syscat.schemata where schemaname = '" + modelschema + "'"
+        schemaexists = self.ida_scalar_query(schemaquery) >= 1
+        if not schemaexists:
+          return False
+
+        data = self.ida_query("call idax.list_models('schema=%s, where=MODELNAME=''%s''')" % (modelschema, modelname))
 
         if not data.empty:
-            if modelname in data['MODELNAME'].values:
-                return True
+            return True
 
         tablelist = self.show_tables(show_all=True)
+        tablelist= tablelist[(tablelist['TABSCHEMA']==modelschema) & (tablelist['TABNAME']==modelname)]
         if len(tablelist):
-            if modelname in tablelist['TABNAME'].values:
-                tabletype = tablelist[tablelist['TABNAME'] == modelname]['TYPE'].values[0]
-                raise TypeError("%s exists but is not a model (of type '%s')"
-                                %(modelname, tabletype))
-            else:
-                return False
+             tabletype = tablelist['TYPE'].values[0]
+             raise TypeError("%s.%s exists, but is not a model (of type '%s')"
+                  %(modelschema, modelname, tabletype))
+
         else:
             return False
 
@@ -998,10 +1005,9 @@ class IdaDataBase(object):
             This operation cannot be undone if autocommit mode is activated.
 
         """
-        model = "\"" + self.current_schema + "\".\"" + modelname + "\""
 
         try:
-            self._prepare_and_execute("CALL IDAX.DROP_MODEL('model=" + model + "')")
+            self._prepare_and_execute("CALL IDAX.DROP_MODEL('model=" + modelname + "')")
         except Exception as e:
             try:
                 flag = self.exists_table(modelname)
@@ -2029,7 +2035,7 @@ class IdaDataBase(object):
                 tmp.append("%s=%s" % (key, tmp_view_name))
                 views.append(tmp_view_name)
             elif isinstance(value, six.string_types) and all([x != " " for x in value]):
-                if key == "intable":
+                if key in ("intable", 'model', 'outtable', 'nametable', 'colPropertiesTable'):
                     tmp.append("%s=%s"% (key, value))  # no " in the case it is a table name
                 else:
                     tmp.append("%s=\"%s\"" % (key, value))
