@@ -240,4 +240,34 @@ class Test_IdaGeoSeries(object):
                 db2gse_function = 'DB2GSE.ST_AGEOSPATIALFUNCTION',
                 valid_types = ['ST_POINT'])
 
-    
+    def test_idageoseries_area_km(self, idageodf_county):
+        idageodf = idageodf_county
+        idageodf.set_geometry('SHAPE')
+        idageodf['AREA_KM'] = idageodf.area(unit='KILOMETER')
+        max_area_km = idageodf['AREA_KM'].max()
+        assert(int(max_area_km)== 52073)
+
+    def test_idageoseries_area_km_lc(self, idageodf_county_view):
+        idageodf = idageodf_county_view
+        idageodf.set_geometry('shape')
+        idageodf['area_km'] = idageodf.area(unit='kilometer')
+        max_area_km = idageodf['area_km'].max()
+        assert(int(max_area_km)== 52073)
+
+    def test_idageoseries_area_km_mbr(self, idageodf_county):
+        idageodf = idageodf_county
+        idageodf.set_geometry('SHAPE')
+        idageodf['MBR'] = idageodf.mbr()
+        idageodf.set_geometry('MBR')
+        idageodf['AREA_KM_MBR'] = idageodf.area(unit='KILOMETER')
+        max_area_km_mbr = idageodf['AREA_KM_MBR'].max()
+        assert(int(max_area_km_mbr) == 100246)
+
+    def test_idageoseries_area_km_mbr_lc(self, idageodf_county_view):
+        idageodf = idageodf_county_view
+        idageodf.set_geometry('shape')
+        idageodf['mbr'] = idageodf.mbr()
+        idageodf.set_geometry('mbr')
+        idageodf['area_km_mbr'] = idageodf.area(unit='kilometer')
+        max_area_km_mbr = idageodf['area_km_mbr'].max()
+        assert(int(max_area_km_mbr) == 100246)

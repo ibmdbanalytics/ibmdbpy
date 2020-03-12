@@ -47,9 +47,10 @@ class Test_DataBaseExploration(object):
             assert (list(df.columns) == ['MODELSCHEMA', 'MODELNAME', 'OWNER', 'CREATED', 'STATE',
                                          'MININGFUNCTION', 'ALGORITHM', 'USERCATEGORY'])
 
-    def test_idadb_exists_table_or_view_positive(self, idadb, idadf, idaview):
+    def test_idadb_exists_table_or_view_positive(self, idadb, idadf, idaview, idageodf_county_view):
         assert(idadb.exists_table_or_view(idadf.name) == 1)
         assert(idadb.exists_table_or_view(idaview.name) == 1)
+        assert(idadb.exists_table_or_view(idageodf_county_view.name) == 1)
 
     def test_idadb_exists_table_or_view_negative(self, idadb):
         assert(idadb.exists_table_or_view("NOT_EXISTING_DATA_FRAME_130530496_4860385960") == 0)
@@ -90,11 +91,26 @@ class Test_DataBaseExploration(object):
             idadb.drop_model(kmeans.modelname)
         except : pass
 
+    def test_idadb_exists_model_with_schema_positive(self, idadb, idadf_tmp):
+        idadb.add_column_id(idadf_tmp, destructive=True)
+        # Create a simple KMEANS model
+        kmeans = KMeans(n_clusters=3, modelname="MYSCHEMA.MODEL_58979457385")
+        kmeans.fit(idadf_tmp)
+        assert(idadb.exists_model("MYSCHEMA.MODEL_58979457385") == 1)
+        try :
+            idadb.drop_model(kmeans.modelname)
+        except : pass
+
     @flaky
     def test_idadb_exists_model_negative(self, idadb):
         if idadb.exists_model("MODEL_58979457385"):
             idadb.drop_model("MODEL_58979457385")
         assert(idadb.exists_model("MODEL_58979457385") == 0)
+
+    def test_idadb_exists_model_with_schema_negative(self, idadb):
+        if idadb.exists_model("SCHEMA_58979457385.MODEL_58979457385"):
+            idadb.drop_model("SCHEMA_58979457385.MODEL_58979457385")
+        assert(idadb.exists_model("SCHEMA_58979457385.MODEL_58979457385") == 0)
 
     def test_idadb_exists_model_error(self, idadb, idadf):
         with pytest.raises(TypeError):
@@ -143,7 +159,7 @@ class Test_DataBaseExploration(object):
     def test_idadb_is_model_negative(self, idadb, idadf, idaview):
         assert(idadb.is_model(idadf.name) == 0)
         assert(idadb.is_model(idaview.name) == 0)
-    #    assert(idadb.is_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
+        assert(idadb.is_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
 
     def test_idadb_is_model_error(self, idadb):
         with pytest.raises(ValueError):
