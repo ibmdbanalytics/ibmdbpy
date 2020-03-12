@@ -198,3 +198,70 @@ class Test_IdaGeoDataFrame(object):
                 idageodf_county,
                 db2gse_function='DB2GSE.ST_AGEOSPATIALFUNCTION',
                 valid_types=['ST_POINT'])
+
+    def test_idageodf_max_distance(self, idageodf_county):
+         idageodf = idageodf_county
+         idageodf.set_geometry('SHAPE')
+         ida1 = idageodf[idageodf['NAME'] == 'Austin']
+         ida2 = idageodf[idageodf['NAME'] == 'Kent']
+         res = ida1.distance(ida2, 'KILOMETER')
+         max_dist = res['RESULT'].max()
+         assert(int(max_dist) == 2531)
+
+    def test_idageodf_max_distance_lc(self, idageodf_county_view):
+         idageodf = idageodf_county_view
+         idageodf.set_geometry('shape')
+         ida1 = idageodf[idageodf['name'] == 'Austin']
+         ida2 = idageodf[idageodf['name'] == 'Kent']
+         res = ida1.distance(ida2, 'kilometer')
+         max_dist = res['RESULT'].max()
+         assert(int(max_dist) == 2531)
+
+
+    def test_idageodf_max_distance_mbr(self, idageodf_county):
+         idageodf = idageodf_county
+         idageodf.set_geometry('SHAPE')
+         idageodf['MBR'] = idageodf.mbr()
+         idageodf.set_geometry('MBR')
+         ida1 = idageodf[idageodf['NAME'] == 'Austin']
+         ida2 = idageodf[idageodf['NAME'] == 'Kent']
+         res = ida1.distance(ida2, 'KILOMETER')
+         max_dist_mbr = res['RESULT'].max()
+         assert(int(max_dist_mbr) == 2519)
+
+    def test_idageodf_max_distance_mbr_lc(self, idageodf_county_view):
+         idageodf = idageodf_county_view
+         idageodf.set_geometry('shape')
+         idageodf['mbr'] = idageodf.mbr()
+         idageodf.set_geometry('mbr')
+         ida1 = idageodf[idageodf['name'] == 'Austin']
+         ida2 = idageodf[idageodf['name'] == 'Kent']
+         res = ida1.distance(ida2, 'kilometer')
+         max_dist_mbr = res['RESULT'].max()
+         assert(int(max_dist_mbr) == 2519)
+
+    def test_idageodf_max_area_union(self, idageodf_county):
+         idageodf = idageodf_county
+         idageodf.set_geometry('SHAPE')
+         idageodf['MBR'] = idageodf.mbr()
+         idageodf.set_geometry('MBR')
+         ida1 = idageodf[idageodf['NAME'] == 'Austin']
+         ida2 = idageodf[idageodf['NAME'] == 'Kent']
+         ida12_union = ida1.union(ida2)
+         ida12_union.set_geometry('RESULT')
+         ida12_union['MBR_UNION_AREA'] = ida12_union.area('KILOMETER')
+         max_area_union = ida12_union['MBR_UNION_AREA'].max()
+         assert(int(max_area_union) == 6596)
+
+    def test_idageodf_max_area_union_lc(self, idageodf_county_view):
+         idageodf = idageodf_county_view
+         idageodf.set_geometry('shape')
+         idageodf['mbr'] = idageodf.mbr()
+         idageodf.set_geometry('mbr')
+         ida1 = idageodf[idageodf['name'] == 'Austin']
+         ida2 = idageodf[idageodf['name'] == 'Kent']
+         ida12_union = ida1.union(ida2)
+         ida12_union.set_geometry('RESULT')
+         ida12_union['mbr_union_area'] = ida12_union.area('kilometer')
+         max_area_union = ida12_union['mbr_union_area'].max()
+         assert(int(max_area_union) == 6596)

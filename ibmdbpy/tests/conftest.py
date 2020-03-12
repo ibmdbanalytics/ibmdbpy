@@ -325,6 +325,27 @@ def idaview_tmp(request, idadb, idadf):
     idadb._create_view(idadf, "TEST_VIEW_ibmdbpy_TMP")
     return ibmdbpy.IdaDataFrame(idadb, "TEST_VIEW_ibmdbpy_TMP")
 
+@pytest.fixture(scope="function")
+def idageodf_county_view(request, idadb):
+    """
+    IdaGeoDataFrame to test geospatial methods with lowercase column names.
+    It refers to the view 'GEO_COUNTY_VIEW' where the columns of the
+    'SAMPLES.GEO_COUNTY' table have been renamed to their lowercase counterparts.
+    The view has one geometry column named 'shape' of type 'ST_MULTIPOLYGON'.
+    Don't use it for destructive nor non-destructive methods (modify columns).
+    """
+    def fin():
+        try:
+            idadb.drop_view("GEO_COUNTY_VIEW")
+            idadb.commit()
+        except:
+             pass
+    request.addfinalizer(fin)
+    idadb.ida_query('CREATE OR REPLACE VIEW GEO_COUNTY_VIEW AS ' +
+        '(SELECT "OBJECTID" as "objectid", "NAME" as "name", "SHAPE" as "shape"  FROM SAMPLES.GEO_COUNTY)')
+    idageodf = ibmdbpy.IdaGeoDataFrame(idadb, 'GEO_COUNTY_VIEW', indexer='objectid')
+    return idageodf
+
 @pytest.fixture(scope="session")
 def df(request):
     """
