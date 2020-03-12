@@ -484,14 +484,12 @@ class NaiveBayes(object):
         if self._idadb is None:
             raise IdaNaiveBayesError("The Naive Bayes model was not trained before.")
 
-        model_main = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_MODEL"')
+        model_main = self._idadb.ida_query('SELECT * FROM ' + modelname + '_MODEL')
         model_main.columns = ['ATTRIBUTE', 'VAL', 'CLASS', 'CLASSVALCOUNT', 'ATTRCLASSCOUNT',
        'CLASSCOUNT', 'TOTALCOUNT']
         model_main.columns = [x.upper() for x in model_main.columns]
 
-        disc = self._idadb.ida_query('SELECT * FROM "' +
-        self._idadb.current_schema + '"."' + modelname + '_DISCRANGES"')
+        disc = self._idadb.ida_query('SELECT * FROM ' + modelname + '_DISCRANGES')
         disc.columns = ['COLNAME', 'BREAK']
         disc.columns = [x.upper() for x in disc.columns]
 
