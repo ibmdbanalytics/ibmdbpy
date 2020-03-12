@@ -637,8 +637,8 @@ def cov(idadf, other = None):
         raise TypeError("cov() missing 1 required positional argument: 'other'")
 
     columns = idadf._get_numerical_columns()
-    if not columns:
-        print(idadf.name + " has no numeric columns")
+    if not columns or len(columns) < 2:
+        print(idadf.name + " has less than two numeric columns")
         return
 
     tuple_count = _numeric_stats(idadf, 'count', columns)
@@ -692,8 +692,8 @@ def corr(idadf, features=None,ignore_indexer=True):
     # TODO: catch case n <= 1
     numerical_columns = idadf._get_numerical_columns()
 
-    if not numerical_columns:
-        print(idadf.name + " has no numeric columns")
+    if not numerical_columns or len(numerical_columns) < 2 :
+        print(idadf.name + " has less than two numeric columns")
         return
 
     if ignore_indexer is True:
@@ -778,8 +778,8 @@ def mad(idadf):
     See IdaDataFrame.mad
     """
     columns = idadf._get_numerical_columns()
-    if not columns:
-        print(idadf.name + " has no numeric columns")
+    if not columns or len(columns) < 2 :
+        print(idadf.name + " has less than two numeric columns")
         return
 
     mean_tuple = _numeric_stats(idadf, "mean", columns)
