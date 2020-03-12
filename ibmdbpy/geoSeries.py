@@ -2058,11 +2058,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         # user, the column definition is considered, instead of its alias
         # in the Ida object.
         column_for_db2gse = self.internal_state.columndict[self.column]
-        if column_for_db2gse[0] == '\"' and column_for_db2gse[-1] == '\"':
-                column_for_db2gse = column_for_db2gse[1:-1]
 
-        arguments_for_db2gse_function = []
-        arguments_for_db2gse_function.append(column_for_db2gse)
+        arguments_for_db2gse_function = [column_for_db2gse]
 
         if additional_args is not None:
             for arg in additional_args:
@@ -2076,23 +2073,25 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
             )
 
         new_columndict = OrderedDict()
-        new_columndict[result_column] = result_column
+        # remove double quotes to avoid problems with Python keys and SQL identifiers
+        result_column_key = result_column.replace('"', '')
+        new_columndict[result_column_key] = result_column
 
         idaseries._reset_attributes(["columns", "shape", "dtypes"])
-        idaseries.internal_state.columns = ['\"' + result_column + '\"']
+        idaseries.internal_state.columns = ['\"' + result_column_key + '\"']
 
         idaseries.internal_state.columndict = new_columndict
         idaseries.internal_state.update()
 
         # Set the column attribute of the new idaseries
-        idaseries.column = result_column
+        idaseries.column = result_column_key
         
         try:
             del(idaseries.columns)
         except:
             pass
         
-        if idaseries.dtypes.TYPENAME[result_column].find('ST_') == 0:
+        if idaseries.dtypes.TYPENAME[result_column_key].find('ST_') == 0:
             return IdaGeoSeries.from_IdaSeries(idaseries)
         else:
             return idaseries
