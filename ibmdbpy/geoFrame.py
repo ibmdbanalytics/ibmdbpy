@@ -1028,22 +1028,9 @@ class IdaGeoDataFrame(IdaDataFrame):
 
         # Get the definitions of the columns, which will be the arguments for
         # the DB2GSE function
-        column1_for_db2gse = ida1.internal_state.columndict[ida1.geometry.column] 
-        if column1_for_db2gse[0] == '\"' and column1_for_db2gse[-1] == '\"':
-            column1_for_db2gse = column1_for_db2gse[1:-1]
-        column2_for_db2gse = ida2.internal_state.columndict[ida2.geometry.column] 
-        if column2_for_db2gse[0] == '\"' and column2_for_db2gse[-1] == '\"':
-            column2_for_db2gse = column2_for_db2gse[1:-1]
-
-        arguments_for_db2gse_function = []
-        if 'IDA1' or 'DB2GSE' in column1_for_db2gse:
-            arguments_for_db2gse_function.append(column1_for_db2gse) 
-        else:
-            arguments_for_db2gse_function.append('IDA1.'+column1_for_db2gse)
-        if 'IDA2' or 'DB2GSE' in column2_for_db2gse:
-            arguments_for_db2gse_function.append(column2_for_db2gse)
-        else:
-            arguments_for_db2gse_function.append('IDA2.'+column2_for_db2gse)
+        column1_for_db2gse = 'IDA1.\"%s\"' %(ida1.geometry.column)
+        column2_for_db2gse = 'IDA2.\"%s\"' %(ida2.geometry.column)
+        arguments_for_db2gse_function = [column1_for_db2gse, column2_for_db2gse]
         if additional_args is not None:
             for arg in additional_args:
                 arguments_for_db2gse_function.append(arg)
