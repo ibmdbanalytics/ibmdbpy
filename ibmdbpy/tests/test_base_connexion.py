@@ -34,7 +34,10 @@ class Test_ConnectToDB(object):
         assert isinstance(idadb.data_source_name, six.string_types)
         assert isinstance(idadb._con_type, six.string_types)
         assert isinstance(idadb._idadfs, list)
-        assert isinstance(idadb._connection_string, six.string_types)
+        if idadb._con_type =='odbc':
+          assert isinstance(idadb._connection_string, six.string_types)
+        elif idadb._con_type == 'jdbc':
+          assert(isinstance(idadb._connection_string, six.string_types) or isinstance(idadb._connection_string, list))
         assert(type(idadb._con).__name__ in ['Connection','instance'])
         assert(idadb._con_type in ["odbc", "jdbc"])
 
