@@ -585,7 +585,7 @@ class IdaDataBase(object):
         if len(tablelist):
              tabletype = tablelist['TYPE'].values[0]
              raise TypeError("%s.%s exists, but is not a model (of type '%s')"
-                  %(modelschema, modelname, tabletype))
+                             % (modelschema, modelname, tabletype))
 
         else:
             return False
