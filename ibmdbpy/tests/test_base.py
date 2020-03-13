@@ -94,9 +94,21 @@ class Test_DataBaseExploration(object):
     def test_idadb_exists_model_with_schema_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
         # Create a simple KMEANS model
-        kmeans = KMeans(n_clusters=3, modelname="MYSCHEMA.MODEL_58979457385")
+        kmeans = KMeans(n_clusters=3, modelname="MYSCHEMA.MODEL_45738558979")
         kmeans.fit(idadf_tmp)
-        assert(idadb.exists_model("MYSCHEMA.MODEL_58979457385") == 1)
+        assert(idadb.exists_model("MYSCHEMA.MODEL_45738558979") == 1)
+        try :
+            idadb.drop_model(kmeans.modelname)
+        except : pass
+
+    def test_idadb_exists_model_with_schema_positive_mixed_case(self, idadb, idadf_tmp):
+        idadb.add_column_id(idadf_tmp, destructive=True)
+        # Create a simple KMEANS model
+        kmeans = KMeans(n_clusters=3, modelname="mySchema.Model_85584573979")
+        kmeans.fit(idadf_tmp)
+        assert(idadb.exists_model("mySchema.Model_85584573979") == 1)
+        assert(idadb.exists_model("MYSCHEMA.MODEL_85584573979") == 1)
+        assert(idadb.exists_model("myschema.model_85584573979") == 1)
         try :
             idadb.drop_model(kmeans.modelname)
         except : pass
