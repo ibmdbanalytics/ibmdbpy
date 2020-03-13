@@ -2073,7 +2073,9 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
             )
 
         new_columndict = OrderedDict()
-        # remove double quotes to avoid problems with Python keys and SQL identifiers
+        # result_column_key must not include double quotes because it is used as as Python key and as
+        # an SQL alias for the result column expression like in
+        # SELECT DB2GSE.ST_AREA("SHAPE",'KILOMETER') AS "DB2GSE.ST_AREA(SHAPE,'KILOMETER')" FROM SAMPLES.GEO_COUNTY
         result_column_key = result_column.replace('"', '')
         new_columndict[result_column_key] = result_column
 
