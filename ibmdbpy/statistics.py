@@ -637,7 +637,7 @@ def cov(idadf, other = None):
         raise TypeError("cov() missing 1 required positional argument: 'other'")
 
     columns = idadf._get_numerical_columns()
-    if len(numerical_columns) < 2 :
+    if len(columns) < 2 :
         print(idadf.name + " has less than two numeric columns")
         return
 
@@ -778,7 +778,7 @@ def mad(idadf):
     See IdaDataFrame.mad
     """
     columns = idadf._get_numerical_columns()
-    if not columns or len(columns) < 2 :
+    if len(columns) < 2 :
         print(idadf.name + " has less than two numeric columns")
         return
 
