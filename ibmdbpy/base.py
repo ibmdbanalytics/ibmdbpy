@@ -565,8 +565,7 @@ class IdaDataBase(object):
         """
         modelname = ibmdbpy.utils.check_tablename(modelname)
         if '.' in modelname:
-            modelschema = modelname.split('.')[0]
-            modelname = modelname.split('.')[-1]
+            modelschema, modelschema = modelname.split('.')
         else:
             modelschema = self.current_schema
 
