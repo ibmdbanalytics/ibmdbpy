@@ -251,9 +251,8 @@ class KMeans(object):
         # Check or create a model name
         if self.modelname is None:
             self.modelname = idadf._idadb._get_valid_modelname('KMEANS_')
-        elif " " in self.modelname:
-            raise ValueError("Space in model name is not allowed")
         else:
+            self.modelname = ibmdbpy.utils.check_tablename(self.modelname)
             if idadf._idadb.exists_model(self.modelname):
                 idadf._idadb.drop_model(self.modelname)
 
