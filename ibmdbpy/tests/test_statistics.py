@@ -187,10 +187,10 @@ class Test_DescriptiveStatistics(object):
 
     @pytest.mark.parametrize("f",
                              [IDADF.describe,
-                              pytest.param(IDADF.cov, marks=pytest.mark.xfail),
-                              pytest.param(IDADF.corr, marks=pytest.mark.xfail),
+                              IDADF.cov,
+                              IDADF.corr,
                               IDADF.quantile,
-                              pytest.param(IDADF.mad, marks=pytest.mark.xfail),
+                              IDADF.mad,
                               IDADF.min,
                               IDADF.max,
                               IDADF.count,
