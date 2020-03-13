@@ -581,7 +581,7 @@ class IdaDataBase(object):
             return True
 
         tablelist = self.show_tables(show_all=True)
-        tablelist= tablelist[(tablelist['TABSCHEMA']==modelschema) & (tablelist['TABNAME']==modelname)]
+        tablelist = tablelist[(tablelist['TABSCHEMA']==modelschema) & (tablelist['TABNAME']==modelname)]
         if len(tablelist):
              tabletype = tablelist['TYPE'].values[0]
              raise TypeError("%s.%s exists, but is not a model (of type '%s')"
