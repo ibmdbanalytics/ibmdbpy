@@ -692,7 +692,7 @@ def corr(idadf, features=None,ignore_indexer=True):
     # TODO: catch case n <= 1
     numerical_columns = idadf._get_numerical_columns()
 
-    if not numerical_columns or len(numerical_columns) < 2 :
+    if len(numerical_columns) < 2 :
         print(idadf.name + " has less than two numeric columns")
         return
 
