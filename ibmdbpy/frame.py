@@ -1495,6 +1495,7 @@ class IdaDataFrame(object):
         """
         Compute the covariance matrix, composed of covariance coefficients
         between all pairs of columns in self.
+        It must have at least two numeric columns.
 
         Returns
         -------
@@ -1511,6 +1512,7 @@ class IdaDataFrame(object):
         """
         Compute the correlation matrix, composed of correlation coefficients
         between all pairs of columns in self.
+        It must have at least two numeric columns.
 
         Parameters
         ----------
@@ -1598,6 +1600,7 @@ class IdaDataFrame(object):
     def mad(self):
         """
         Compute the mean absolute distance for all numeric columns of self.
+        It must have at least two numeric columns.
 
         Returns
         -------
