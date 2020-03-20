@@ -45,10 +45,12 @@ class NaiveBayes(object):
         Parameters
         ----------
         modelname : str, optional
-            The name of the Naive Bayes model that will be built. If no name is 
-            specified, it will be generated automatically. If the parameter 
-            corresponds to an existing model in the database, it is replaced 
-            during the fitting step.
+            The name of the Naive Bayes model that will be built.
+            Should contain only alphanumerical characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If no name is specified, it will be generated automatically.
+            If the parameter corresponds to an existing model in the database,
+            it is replaced during the fitting step.
 
 
         disc : str, optional, default: ew
@@ -105,8 +107,8 @@ class NaiveBayes(object):
             If the parameter is not specified, all columns are input columns.
         
         colpropertiestable: Get set at fit step; str, optional
-            The input table where the properties of the columns of the input table are stored.
-            If this parameter is not specified, the column properties of the input table
+            The name of the input table where the properties of the columns of the input table
+            are stored. If this parameter is not specified, the column properties of the input table
             column properties are detected automatically.
         
         outable: Get set at predict step; str, optional
@@ -166,7 +168,7 @@ class NaiveBayes(object):
         self.outtableProb = None
         self.mestimation = None
 
-        self.modelname = modelname
+        self.modelname = ibmdbpy.utils.check_modelname(modelname)
         self.disc = disc
         self.bins = bins
 
@@ -255,7 +257,10 @@ class NaiveBayes(object):
             If the parameter is not specified, all columns are input columns.
 
         colpropertiestable : str, optional
-            The input table where the properties of the columns of the input table are stored.
+            The input IdaDataFrame or the name of the table where the properties of the
+            columns of the input IdaDataFrame (idadf) are stored.
+            The table name should contain only alphanumerical characters and underscores.
+            All lower case characters will be converted to upper case characters.
             If this parameter is not specified, the column properties of the input table
             column properties are detected automatically.
 
@@ -285,13 +290,15 @@ class NaiveBayes(object):
         self.incolumn = incolumn
         self.coldeftype = coldeftype
         self.coldefrole = coldefrole
+        if not (colpropertiestable is None or isinstance(colpropertiestable, ibmdbpy.frame.IdaDataFrame)):
+            colpropertiestable = ibmdbpy.utils.check_tablename(colpropertiestable)
         self.colpropertiestable = colpropertiestable
 
         # Check or create a model name, drop it if it already exists.
         if self.modelname is None:
             self.modelname = idadf._idadb._get_valid_modelname('NAIVEBAYES_')
         else:
-            self.modelname = ibmdbpy.utils.check_tablename(self.modelname)
+            self.modelname = ibmdbpy.utils.check_modelname(self.modelname)
             if idadf._idadb.exists_model(self.modelname):
                 idadf._idadb.drop_model(self.modelname)
 
@@ -345,15 +352,19 @@ class NaiveBayes(object):
             procedure to build the model.
 
         outtable : str, optional
-            The name of the output table where the predictions are stored. If
-            this parameter is not specified, it is generated automatically. If
+            The name of the output table where the predictions are stored.
+            It should contain only alphanumerical characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If this parameter is not specified, it is generated automatically. If
             the parameter corresponds to an existing table in the database, it
             will be replaced.
 
         outtableProb : str, optional
-            The output table where the probabilities for each of the classes are stored.
-            If this parameter is not specified, the table is not created. If
-            the parameter corresponds to an existing table in the database, it
+            The name of the output table where the probabilities for each of the classes are stored.
+            It should contain only alphanumerical characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If this parameter is not specified, the table is not created.
+            If the parameter corresponds to an existing table in the database, it
             will be replaced.
 
         mestimation : flag, default: False
@@ -479,7 +490,7 @@ class NaiveBayes(object):
         -----
         Needs better formatting instead of printing the tables.
         """
-        modelname = ibmdbpy.utils.check_tablename(modelname)
+        modelname = ibmdbpy.utils.check_modelname(modelname)
 
         if self._idadb is None:
             raise IdaNaiveBayesError("The Naive Bayes model was not trained before.")

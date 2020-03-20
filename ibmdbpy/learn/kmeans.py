@@ -58,10 +58,12 @@ class KMeans(object):
             Range : > 2
 
         modelname : str, optional
-            The name of the clustering model that is built. If it is not given, 
-            it is generated automatically. If the parameter corresponds to an 
-            existing model in the database, it is replaced during the fitting 
-            step.
+            The name of the clustering model that will be built.
+            It should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If it is not given, it will be generated automatically.
+            If the parameter corresponds to an existing model in the database,
+            it is replaced during the fitting step.
 
 
         max_iter : int, > 1 and <= 1000, default = 5
@@ -224,9 +226,11 @@ class KMeans(object):
             specified, all columns are input columns.
 
         colPropertiesTable : idaDataFrame, optional
-            The input IdaDataFrame where the properties of the columns of the 
-            input IdaDataFrame (idadf) are stored. If this parameter is not 
-            specified, the column properties of the input table column 
+            The input IdaDataFrame or name of the table where the properties of the
+            columns of the input IdaDataFrame (idadf) are stored.
+            The table name should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If this parameter is not specified, the column properties of the input table column
             properties are detected automatically.
 
         verbose : bool, default: False
@@ -252,9 +256,16 @@ class KMeans(object):
         if self.modelname is None:
             self.modelname = idadf._idadb._get_valid_modelname('KMEANS_')
         else:
-            self.modelname = ibmdbpy.utils.check_tablename(self.modelname)
+            self.modelname = ibmdbpy.utils.check_modelname(self.modelname)
             if idadf._idadb.exists_model(self.modelname):
                 idadf._idadb.drop_model(self.modelname)
+
+        self.incolumn = incolumn
+        self.coldeftype = coldeftype
+        self.coldefrole = coldefrole
+        if not (colPropertiesTable is None or isinstance(colPropertiesTable, ibmdbpy.frame.IdaDataFrame)):
+            colPropertiesTable = ibmdbpy.utils.check_tablename(colPropertiesTable)
+        self.colPropertiesTable = colPropertiesTable
 
         # Create a temporay view
         idadf.internal_state._create_view()
@@ -315,6 +326,8 @@ class KMeans(object):
 
         outtable : str
             The name of the output table where the assigned clusters are stored.
+            It should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
             If this parameter is not specified, it is generated automatically.
             If the parameter corresponds to an existing table in the database,
             it is replaced.
@@ -423,7 +436,7 @@ class KMeans(object):
         verbose : bol, default: False
             Verbosity mode.
         """
-        modelname = ibmdbpy.utils.check_tablename(modelname)
+        modelname = ibmdbpy.utils.check_modelname(modelname)
 
         if self._idadb is None:
             raise IdaKMeansError("No KMeans model was trained before")

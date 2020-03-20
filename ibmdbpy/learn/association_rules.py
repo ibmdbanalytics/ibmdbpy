@@ -46,9 +46,12 @@ class AssociationRules(object):
         Parameters
         ----------
         modelname : str
-            The name of the Association Rules model that is built. If the 
-            parameter corresponds to an existing model in the database, it 
-            will be replaced during the fitting step.
+            The name of the Association Rules model that will be built.
+            It should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If it is not given, it will be generated automatically.
+            If the parameter corresponds to an existing model in the database,
+            it will be replaced during the fitting step.
         
         minsupport : float or integer, optional
             The minimum fraction (0.0 - 1.0) or the minimum number (above 1) of
@@ -72,7 +75,8 @@ class AssociationRules(object):
         Attributes
         ----------
                
-        nametable: Gets set at fit step. The name of the optional table which contains a mapping between the items from the input table and the item names. 
+        nametable: Gets set at fit step. The name of the optional table which contains a mapping
+            between the items from the input table and the item names.
             This attribute is set through the nametable option of the fit method.
             This table must contain at least two columns, where
             * The first column has the same name as the column that is
@@ -80,14 +84,14 @@ class AssociationRules(object):
             * The second column has the same name as the name that is
             defined in the namecol parameter
         
-        namecol : Gets set at fit step. The name of the optional column which contains item names as defined in the nametable attribute. 
+        namecol : Gets set at fit step. The name of the optional column which contains item names as defined in the nametable attribute.
             This attribute is set through the fit method and cannot be specified of the nametable parameter of fit is not specified.
         
-        outtable: Gets set at predict step, name of the optional output table in which the mapping between the input 
-            sequences and the associated rules or patterns is written. If the parameter corresponds to an existing table in the database, 
+        outtable: Gets set at predict step, name of the optional output table in which the mapping between the input
+            sequences and the associated rules or patterns is written. If the parameter corresponds to an existing table in the database,
             it is replaced.
         
-        type: Gets set at predict step. Type : str, optional, default : "rules". The type of information that is written in the output table. 
+        type: Gets set at predict step. Type : str, optional, default : "rules". The type of information that is written in the output table.
             The following values are possible: ‘rules’ and ‘patterns’;
         
         limit: Gets set at predict step int, optional, >=1, default: 1
@@ -193,8 +197,10 @@ class AssociationRules(object):
         item_id : str
             The column of the input table that identifies an item of the transaction.
         nametable : str, optional
-            The table that contains a mapping of the items in the input table and their names.
-            The table must contain at least two columns, where
+            The IdaDataFrame or the name of the table that contains a mapping of the items in the input table
+            and their names. The table name should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            The name table must contain at least two columns, where
             * The first column has the same name as the column that is
             contained in the item parameter of the input table
             * The second column has the same name as the name that is
@@ -223,6 +229,9 @@ class AssociationRules(object):
         self._idadf = idadf
         self._transaction_id = transaction_id
         self._item_id = item_id
+
+        if not (nametable is None or isinstance(nametable, ibmdbpy.frame.IdaDataFrame)):
+            nametable = ibmdbpy.utils.check_tablename(nametable)
         self.nametable = nametable
         self.namecol = namecol
 
@@ -363,8 +372,10 @@ class AssociationRules(object):
 
         outtable : str, optional
             The name of the output table in which the mapping between the input 
-            sequences and the associated rules or patterns is written. If the 
-            parameter corresponds to an existing table in the database, it is 
+            sequences and the associated rules or patterns is written.
+            It should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If the parameter corresponds to an existing table in the database, it is
             replaced.
 
         transaction_id : str, optional
@@ -531,7 +542,7 @@ class AssociationRules(object):
         -----
         Needs better formatting instead of printing the tables
         """
-        modelname = ibmdbpy.utils.check_tablename(modelname)
+        modelname = ibmdbpy.utils.check_modelname(modelname)
 
         if self._idadb is None:
             raise IdaAssociationRulesError("No Association rules model was trained before.")

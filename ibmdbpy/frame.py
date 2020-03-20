@@ -92,6 +92,8 @@ class IdaDataFrame(object):
             IdaDataBase instance which contains the connection to be used.
         tablename : str
             Name of the table to be opened in the database.
+            It should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
         indexer : str, optional
             Name of the column that should be used as an index. This is
             optional. However, if no indexer is given, the order of rows issued
@@ -146,7 +148,7 @@ class IdaDataFrame(object):
         if not idadb.__class__.__name__ == "IdaDataBase":
             idadb_class = idadb.__class__.__name__
             raise TypeError("Argument 'idadb' is of type %s, expected : IdaDataBase"%idadb_class)
-        tablename = ibmdbpy.utils.check_case(tablename)
+        tablename = ibmdbpy.utils.check_tablename(tablename)
 
         #idadb._reset_attributes("cache_show_tables")
 
@@ -2411,5 +2413,3 @@ class IdaDataFrame(object):
             
 
 
-            
-        

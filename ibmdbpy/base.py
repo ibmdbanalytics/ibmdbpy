@@ -543,7 +543,9 @@ class IdaDataBase(object):
         Parameters
         ----------
         modelname : str
-            Name of the model to check.
+            Name of the model to check. It should contain only alphanumeric
+            characters and underscores. All lower case characters will be
+            converted to upper case characters.
 
         Returns
         -------
@@ -563,7 +565,7 @@ class IdaDataBase(object):
         >>> idadb.exists_model("NO_MODEL")
         TypeError : NO_TABLE exists but is not a model (of type '?')
         """
-        modelname = ibmdbpy.utils.check_tablename(modelname)
+        modelname = ibmdbpy.utils.check_modelname(modelname)
         if '.' in modelname:
             modelschema, modelname = modelname.split('.')
         else:
@@ -686,7 +688,9 @@ class IdaDataBase(object):
         Parameters
         ----------
         modelname : str
-            Name of the model to check.
+            Name of the model to check. It should contain only alphanumeric
+            characters and underscores. All lower case characters will be
+            converted to upper case characters.
 
         Returns
         -------
@@ -706,7 +710,7 @@ class IdaDataBase(object):
         >>> idadb.is_model("NOT_EXISTING")
         ValueError : NO_EXISTING doesn't exist in database
         """
-        modelname = ibmdbpy.utils.check_tablename(modelname)
+        modelname = ibmdbpy.utils.check_modelname(modelname)
 
         if '.' in modelname:
             modelname_noschema = modelname.split('.')[-1]
@@ -820,8 +824,10 @@ class IdaDataBase(object):
         dataframe : DataFrame
             Data to be uploaded, contained in a Pandas DataFrame.
         tablename : str, optional
-            Name to be given to the table created in the database. If not 
-            given, a valid tablename is generated (for example, DATA_FRAME_X 
+            Name to be given to the table created in the database.
+            It should contain only alphanumeric characters and underscores.
+            All lower case characters will be converted to upper case characters.
+            If not given, a valid tablename is generated (for example, DATA_FRAME_X
             where X is a random number).
         clear_existing : bool
             If set to True, a table will be replaced when a table with the same 
@@ -1037,7 +1043,7 @@ class IdaDataBase(object):
         idadf : IdaDataFrame
             IdaDataFrame object referencing the table to rename.
         newname : str
-            Name to be given to self. Should contain only alphanumerical 
+            Name to be given to self. It should contain only alphanumeric
             characters and underscores. All lower case characters will be 
             converted to upper case characters. The new name should not already 
             exist in the database.
