@@ -1468,6 +1468,7 @@ class IdaDataFrame(object):
         """
         A basic statistical summary about current IdaDataFrame. If at least one
         numerical column exists, the summary includes:
+
             * The count of non-missing values for each numerical column.
             * The mean for each numerical column.
             * The standart deviation for each numerical column.
@@ -2169,12 +2170,16 @@ class IdaDataFrame(object):
         Classify columns in the idaDataFrame into 4 classes: CATEGORICAL,
         STRING, NUMERIC or NONE. Use the database data type and a
         user-threshold “factor_threshold”:
-            * CATEGORICAL columns that have a number of distinct values that is greater than the factor_threshold should be considered a STRING.
-            * NUMERIC columns that have a number of distinct values that is smaller or equal to the factor_threshold should be considered CATEGORICAL.
+
+            * CATEGORICAL columns that have a number of distinct values that is greater
+              than the factor_threshold should be considered a STRING.
+            * NUMERIC columns that have a number of distinct values that is smaller or equal
+              to the factor_threshold should be considered CATEGORICAL.
 
         Returns
         -------
         DataFrame
+
             * Index is the columns of self.
             * Column "FACTORS" contains the number of distinct values.
             * Column "VALTYPE" contains the resulting class.
@@ -2227,8 +2232,8 @@ class IdaDataFrame(object):
         Get the columns of self that are considered as numerical. Their data
         type in the database determines whether these columns are numerical.
         The following data types are considered numerical:
-            'SMALLINT', 'INTEGER','BIGINT','REAL',
-            'DOUBLE','FLOAT','DECIMAL','NUMERIC'
+
+            SMALLINT, INTEGER, BIGINT, REAL, DOUBLE, FLOAT, DECIMAL, NUMERIC.
 
         Returns
         -------
@@ -2249,7 +2254,8 @@ class IdaDataFrame(object):
         Get the columns of self that are considered as categorical. Their data
         type in the database determines whether these columns are categorical.
         The following data types are considered categorical:
-            "VARCHAR","CHARACTER", "VARGRAPHIC", "GRAPHIC", "CLOB".
+
+            VARCHAR,CHARACTER, VARGRAPHIC, GRAPHIC, CLOB.
 
         Returns
         -------
@@ -2413,3 +2419,5 @@ class IdaDataFrame(object):
             
 
 
+            
+        

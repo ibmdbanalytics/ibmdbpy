@@ -201,11 +201,12 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         unit : str, optional
             Name of the unit, it is case-insensitive.
             If omitted, the following rules are used:
+
                 * If geometry is in a projected or geocentric coordinate
-                system, the linear unit associated with this coordinate system
-                is the default.
+                  system, the linear unit associated with this coordinate system
+                  is the default.
                 * If geometry is in a geographic coordinate system, the angular
-                unit associated with this coordinate system is the default.
+                  unit associated with this coordinate system is the default.
 
         Returns
         -------
@@ -219,12 +220,14 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         -----
         Restrictions on unit conversions: An error (SQLSTATE 38SU4) is returned
         if any of the following conditions occur:
+
             * The geometry is in an unspecified coordinate system and the unit
-            parameter is specified.
+              parameter is specified.
             * The geometry is in a projected coordinate system and an angular
-            unit is specified.
+              unit is specified.
             * The geometry is in a geographic coordinate system, but is not an
-            ST_Point value , and a linear unit is specified.
+              ST_Point value , and a linear unit is specified.
+
         # TODO: handle this SQLSTATE error
 
         References
@@ -550,6 +553,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         --------
         Sample to create in Db2, geometry column with data type ST_LineString
         Use this sample data for testing:
+
         >>> sample_lines = IdaGeoDataFrame(idadb, "SAMPLE_LINES", indexer = "ID", geometry  = "LOC")
         >>> sample_lines['end_point'] = sample_lines.end_point()
         >>> sample_lines.head()
@@ -777,11 +781,12 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         unit : str, optional
             Name of the unit, it is case-insensitive.
             If omitted, the following rules are used:
+
                 * If geometry is in a projected or geocentric coordinate
-                system, the linear unit associated with this coordinate system
-                is used.
+                  system, the linear unit associated with this coordinate system
+                  is used.
                 * If geometry is in a geographic coordinate system, the angular
-                unit associated with this coordinate system is used.
+                  unit associated with this coordinate system is used.
 
         Returns
         -------
@@ -795,12 +800,14 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         -----
         Restrictions on unit conversions: An error (SQLSTATE 38SU4) is returned
         if any of the following conditions occur:
+
             * The geometry is in an unspecified coordinate system and the unit
-            parameter is specified.
+              parameter is specified.
             * The geometry is in a projected coordinate system and an angular
-            unit is specified.
+              unit is specified.
             * The geometry is in a geographic coordinate system, and a linear
-            unit is specified.
+              unit is specified.
+
         # TODO: handle this SQLSTATE error
 
         References
@@ -897,11 +904,12 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         unit : str, optional
             Name of the unit, it is case-insensitive.
             If omitted, the following rules are used:
+
                 * If curve is in a projected or geocentric coordinate system,
-                the linear unit associated with this coordinate system is the
-                default.
+                  the linear unit associated with this coordinate system is the
+                  default.
                 * If curve is in a geographic coordinate system, the angular
-                unit associated with this coordinate system is the default.
+                  unit associated with this coordinate system is the default.
 
         Returns
         -------
@@ -915,12 +923,14 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         -----
         Restrictions on unit conversions: An error (SQLSTATE 38SU4) is returned
         if any of the following conditions occur:
+
             * The curve is in an unspecified coordinate system and the unit
-            parameter is specified.
+              parameter is specified.
             * The curve is in a projected coordinate system and an angular unit
-            is specified.
+              is specified.
             * The curve is in a geographic coordinate system, and a linear unit
-            is specified.
+              is specified.
+
         # TODO: handle this SQLSTATE error
 
         References
@@ -966,11 +976,12 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         unit : str, optional
             Name of the unit, it is case-insensitive.
             If omitted, the following rules are used:
+
                 * If surface is in a projected or geocentric coordinate system,
-                the linear unit associated with this coordinate system is the
-                default.
+                  the linear unit associated with this coordinate system is the
+                  default.
                 * If surface is in a geographic coordinate system, the angular
-                unit associated with this coordinate system is the default.
+                  unit associated with this coordinate system is the default.
 
         Returns
         -------
@@ -984,12 +995,14 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         -----
         Restrictions on unit conversions: An error (SQLSTATE 38SU4) is returned
         if any of the following conditions occur:
+
             * The geometry is in an unspecified coordinate system and the unit
-            parameter is specified.
+              parameter is specified.
             * The geometry is in a projected coordinate system and an angular
-            unit is specified.
+              unit is specified.
             * The geometry is in a geographic coordinate system and a linear
-            unit is specified.
+              unit is specified.
+
         # TODO: handle this SQLSTATE error
 
         References
@@ -1271,6 +1284,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         Examples
         --------
         Use sample table SAMPLE_POINTS, obtained with SQL script
+
         >>> sample_points = IdaGeoDataFrame(idadb, "SAMPLE_POINTS", indexer = "id", geometry = "LOC")
         >>> sample_points["is_3d"] = sample_points.is_3d()
         >>> sample_points[["LOC", "is_3d"]].head()
@@ -1384,7 +1398,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
         Examples
         --------
-        Max M, X, Y and Z        
+        Max M, X, Y and Z
+
         >>> sample_geometries = IdaGeoDataFrame(idadb, "SAMPLE_GEOMETRIES", indexer = "ID", geometry = "GEOMETRY")
         >>> sample_geometries["max_X"] = sample_geometries.max_x()
         >>> sample_geometries["max_Y"] = sample_geometries.max_y()

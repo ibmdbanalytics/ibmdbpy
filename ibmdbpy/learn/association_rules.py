@@ -56,9 +56,13 @@ class AssociationRules(object):
         minsupport : float or integer, optional
             The minimum fraction (0.0 - 1.0) or the minimum number (above 1) of
             transactions that must contain a pattern to be considered as frequent.
-            Default: system-determined
-            Range: >0.0 and <1.0 for a minimum fraction
-                   >1 for a minimum number of transactions.
+
+            Default:
+                * system-determined
+
+            Range:
+                * >0.0 and <1.0 for a minimum fraction
+                * >1 for a minimum number of transactions.
         
         maxlen : int, optional, >=2, default: 5
             The maximum length of a pattern or a rule, that is,
@@ -79,19 +83,25 @@ class AssociationRules(object):
             between the items from the input table and the item names.
             This attribute is set through the nametable option of the fit method.
             This table must contain at least two columns, where
+
             * The first column has the same name as the column that is
-            contained in the item parameter of the input table
+              contained in the item parameter of the input table
             * The second column has the same name as the name that is
-            defined in the namecol parameter
+              defined in the namecol parameter
         
-        namecol : Gets set at fit step. The name of the optional column which contains item names as defined in the nametable attribute.
-            This attribute is set through the fit method and cannot be specified of the nametable parameter of fit is not specified.
+        namecol : Gets set at fit step. The name of the optional column which
+            contains item names as defined in the nametable attribute.
+            This attribute is set through the fit method and cannot be specified
+            of the nametable parameter of fit is not specified.
         
-        outtable: Gets set at predict step, name of the optional output table in which the mapping between the input
-            sequences and the associated rules or patterns is written. If the parameter corresponds to an existing table in the database,
+        outtable: Gets set at predict step, name of the optional output table
+            in which the mapping between the input
+            sequences and the associated rules or patterns is written.
+            If the parameter corresponds to an existing table in the database,
             it is replaced.
         
-        type: Gets set at predict step. Type : str, optional, default : "rules". The type of information that is written in the output table.
+        type: Gets set at predict step. Type : str, optional, default : "rules".
+            The type of information that is written in the output table.
             The following values are possible: ‘rules’ and ‘patterns’;
         
         limit: Gets set at predict step int, optional, >=1, default: 1
@@ -201,10 +211,11 @@ class AssociationRules(object):
             and their names. The table name should contain only alphanumeric characters and underscores.
             All lower case characters will be converted to upper case characters.
             The name table must contain at least two columns, where
+
             * The first column has the same name as the column that is
-            contained in the item parameter of the input table
+              contained in the item parameter of the input table
             * The second column has the same name as the name that is
-            defined in the namecol parameter
+              defined in the namecol parameter
         namecol : str, optional
             The column that contains the item name that is defined in the
             nametable parameter. You cannot specify this parameter if the
@@ -290,10 +301,12 @@ class AssociationRules(object):
             least one of the listed items must be contained in a rule or
             pattern to be kept.
             For rules, the following conditions apply:
-                * To indicate that the item must be contained in the head of
-                then rule, the item names can be succeeded by :h or :head.
-                * To indicate that the item must be contained in the body of
-                the rule, the item names can be succeeded by :b or :body
+
+                * To indicate that the item must be contained in the head of then rule,
+                  the item names can be succeeded by :h or :head.
+                * To indicate that the item must be contained in the body of the rule,
+                  the item names can be succeeded by :b or :body
+
             If this parameter is not specified, no constraint is applied.
 
         itemsout : str or list, optional
@@ -499,11 +512,11 @@ class AssociationRules(object):
     def describe(self, detail=False):
         """
         Parameters
-        ------
+        ----------
         detail: bool, optional. False by default.
         
         Returns
-        -----
+        -------
         Returns a description of Association Rules Model. If detail is set to False, then
         only a table with the summary of the rules is displayed, if detail is set to True,
         then thenintermediary tables are shown too.
@@ -526,6 +539,7 @@ class AssociationRules(object):
         """
         Retrieve information about the model to print the results. The 
         Association Rules IDAX function stores its result in 4 tables:
+
             * <MODELNAME>_ASSOCPATTERNS
             * <MODELNAME>_ASSOCPATTERNS_STATISTICS
             * <MODELNAME>_ASSOCRULES

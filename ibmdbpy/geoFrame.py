@@ -407,11 +407,12 @@ class IdaGeoDataFrame(IdaDataFrame):
         unit : str, optional
             Name of the unit, it is case-insensitive.
             If omitted, the following rules are used:
+
                 * If geometry is in a projected or geocentric coordinate
-                system, the linear unit associated with this coordinate system
-                is used.
+                  system, the linear unit associated with this coordinate system
+                  is used.
                 * If geometry is in a geographic coordinate system, the angular
-                unit associated with this coordinate system is used.
+                  unit associated with this coordinate system is used.
 
         References
         ----------

@@ -74,7 +74,7 @@ Name checking
 -------------
 .. autofunction:: check_tablename
 .. autofunction:: check_viewname
-.. autofunction:: check_case
+.. autofunction:: check_modelname
 
 Private functions
 =================

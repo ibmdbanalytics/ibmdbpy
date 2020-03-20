@@ -39,7 +39,7 @@ class FilterQuery(object):
     FilterQuery objects also contain a logic that allows them to be
     combined, thus allowing complex filtering.
 
-      You can combine the following operators: |, &, ^ (OR, AND and XOR)
+      You can combine the following operators: \|, \&, \^ (OR, AND and XOR)
 
     Examples
     --------

@@ -52,10 +52,10 @@ class NaiveBayes(object):
             If the parameter corresponds to an existing model in the database,
             it is replaced during the fitting step.
 
-
         disc : str, optional, default: ew
             Determine the automatic discretization of all continuous attributes. 
-            The following values are allowed: ef, em, ew, and ewn. 
+            The following values are allowed: ef, em, ew, and ewn.
+
                 * disc=ef
                     Equal-frequency discretization.
                     An unsupervised discretization algorithm that uses the equal
@@ -92,9 +92,11 @@ class NaiveBayes(object):
             The columns of the input table that have specific properties,
             which are separated by a semi-colon (;). Each column is succeeded
             by one or more of the following properties:
-                * By type nominal (':nom') or by type continuous (':cont'). By default, numerical types are continuous, and all other types are nominal.
+
+                * By type nominal (':nom') or by type continuous (':cont'). By default,
+                  numerical types are continuous, and all other types are nominal.
                 * By role ':id', ':target', ':input', or ':ignore'.
-        
+
         coldeftype: Get set at fit step; str, optional
             The default type of the input table columns.
             The following values are allowed: 'nom' and 'cont'.
@@ -240,7 +242,9 @@ class NaiveBayes(object):
             The columns of the input table that have specific properties,
             which are separated by a semi-colon (;). Each column is succeeded
             by one or more of the following properties:
-                * By type nominal (':nom') or by type continuous (':cont'). By default, numerical types are continuous, and all other types are nominal.
+
+                * By type nominal (':nom') or by type continuous (':cont'). By default,
+                  numerical types are continuous, and all other types are nominal.
                 * By role ':id', ':target', ':input', or ':ignore'.
 
             If this parameter is not specified, all columns of the input table have default properties.
@@ -450,11 +454,11 @@ class NaiveBayes(object):
     def describe(self, detail=False):
         """
         Parameters
-        -------
+        ----------
         detail: bool, optional. False by default. 
         
         Returns
-        ------
+        -------
         Return a description of Naives Bayes.
         If False, only the a priori probabilities of each class are returned, 
         displayed in table format. If True, then intermediary tables are shown.
@@ -475,6 +479,7 @@ class NaiveBayes(object):
         """
         Retrieve information about the model to print the results. The Naive 
         Bayes IDAX function stores its result in 2 tables:
+
             * <MODELNAME>_MODEL
             * <MODELNAME>_DISCRANGES
 
