@@ -211,25 +211,27 @@ def check_tablename(tablename):
 
     Notes
     -----
-        Table names should consist of upper case characters or numbers that can 
+        Table names should consist of upper case characters or numbers that can
         be separated by underscores (“_”) characters.
     """
-    tablename = check_case(tablename)
-    if not all([(char.isalnum() | (char == '_') | (char == '.')) for char in tablename]):
-        raise ValueError("Table name is not valid, only alphanumeric characters and underscores are allowed.")
-    if tablename.count(".") > 1:
-        raise ValueError("Table name is not valid, only one '.' character is allowed.")
-    return tablename
+    return _check_database_objectname(tablename, 'Table')
 
 def check_viewname(viewname):
     """
-    Convenience function. Just an alternative name to check_tablename for 
-    checking view names, which have the same prerequisites as tablenames. See 
-    the check_tablename documentation.
+    Convenience function for checking view names, which have the same prerequisites as table names.
+    See the check_tablename documentation.
     """
-    return check_tablename(viewname)
+    return _check_database_objectname(viewname, 'View')
 
-def check_case(name):
+def check_modelname(modelname):
+    """
+    Convenience function for checking model names, which have the same prerequisites as table names.
+    See the check_tablename documentation.
+    """
+    return _check_database_objectname(modelname, 'Model')
+
+
+def _check_case(name):
     """
     Check if the name given as parameter is in upper case and convert it to 
     upper cases.
@@ -237,6 +239,38 @@ def check_case(name):
     if name != name.upper():
         warnings.warn("Mixed case names are not supported in database object names.", UserWarning)
     return name.upper()
+
+
+def _check_database_objectname(tablename, objecttype):
+    """
+    Check if a string is upper case. This function converts the string to upper
+    case and checks if it is a valid database object (table, view or model) name.
+
+    Parameters
+    ----------
+    tablename : str
+        string to be checked.
+
+    objecttype : str
+            ''
+
+    Returns
+    -------
+    str
+        Checked and upper cased database object name.
+
+    Notes
+    -----
+        Database object names should consist of upper case characters or numbers that can
+        be separated by underscores (“_”) characters.
+    """
+    tablename = _check_case(tablename)
+    if not all([(char.isalnum() | (char == '_') | (char == '.')) for char in tablename]):
+        raise ValueError("%s name '%s' is not valid, only alphanumeric characters and underscores are allowed."%(objecttype, tablename))
+    if tablename.count(".") > 1:
+        raise ValueError("%s name '%s' is not valid, only one '.' character is allowed."%(objecttype, tablename))
+    return tablename
+
 
 def _convert_dtypes(idadf, data):
     """
