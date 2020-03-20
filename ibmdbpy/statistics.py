@@ -244,7 +244,8 @@ def _count_level(idadf, columnlist=None):
 
     Notes
     -----
-    The function assumes the follwing:
+    The function assumes the following:
+
         * The columns given as parameter exists in the IdaDataframe.
         * The parameter columnlist is an optional list.
         * Columns are referenced by their own name (character string).
@@ -285,6 +286,7 @@ def _count_level_groupby(idadf, columnlist=None):
     Notes
     -----
     The function assumes the follwing:
+
         * The columns given as parameter exists in the IdaDataframe.
         * The parameter columnlist is a optional and is a list.
         * Columns are referenced by their own name (character string).
@@ -313,8 +315,10 @@ def _factors_count(idadf, columnlist, valuelist=None):
     valuelist : list
         List of column names that exist in self.
 
-    Assumptions
-    -----------
+     Notes
+     -----
+     The function assumes the following:
+
         * The columns given as parameter exists in the IdaDataframe
         * The parameter columnlist is a optional and is a list
         * Columns are referenced by their own name (character string)
@@ -356,8 +360,10 @@ def _factors_sum(idadf, columnlist, valuelist):
     valuelist : list
         List of column names that exist in self.
 
-    Assumptions
-    -----------
+    Notes
+    -----
+    The function assumes the following:
+
         * The columns given as parameter exists in the IdaDataframe
         * The parameter columnlist is a optional and is a list
         * Columns are referenced by their own name (character string)
@@ -395,8 +401,10 @@ def _factors_avg(idadf, columnlist, valuelist):
     valuelist : list
         List of column names that exist in self.
 
-    Assumptions
-    -----------
+    Notes
+    -----
+    The function assumes the following:
+
         * The columns given as parameter exists in the IdaDataframe
         * The parameter columnlist and valuelist are array-like
         * Columns are referenced by their own name (character string)

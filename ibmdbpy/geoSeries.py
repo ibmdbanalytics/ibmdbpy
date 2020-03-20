@@ -39,15 +39,19 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     It has geospatial methods based on Db2 Warehouse Spatial Extender (DB2GSE).
     
     Note on sample data used for the examples:
-    ------------------------------------------
-    Sample datasets available out of the box in Db2 Warehouse: GEO_TORNADO, GEO_COUNTY tables
-    Sample datasets which you can obtain yourself: SAMPLE_POLYGONS, SAMPLE_LINES,
-    SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS. --> See dedicated SQL script on 
-    https://github.com/ibmdbanalytics/ibmdbpy/blob/ibmdbpy_eva/ibmdbpy/sampledata/sql_script. 
-    You just need to copy this script into Db2 "RUN SQL" console to obtain these sample tables.
+
+        * Sample tables available out of the box in Db2 Warehouse:
+
+          GEO_TORNADO, GEO_COUNTY
+
+        * Sample tables which you can create by executing the SQL statements in
+          https://github.com/ibmdbanalytics/ibmdbpy/blob/master/ibmdbpy/sampledata/sql_script:
+
+          SAMPLE_POLYGONS, SAMPLE_LINES, SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS
+
     
-    Examples:
-    ---------
+    Examples
+    --------
     >>> idageodf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer='OBJECTID', geometry = "SHAPE")
     >>> idageoseries = idageodf["SHAPE"]
     >>> idageoseries.dtypes
@@ -57,8 +61,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         | SHAPE | ST_MULTIPOLYGON   |
          ----------------------------
 
-    Notes:
-    ------
+    Notes
+    -----
     An IdaGeoSeries doesn't have an indexer attribute because geometries are
     unorderable in DB2 Spatial Extender.
     """
@@ -303,10 +307,7 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
     def convex_hull(self):
         """
-        
-        Note: theory
-        -------------
-        The convex hull of a shape, also called convex envelope or convex closure, is the smallest convex set that contains it. 
+        The convex hull of a shape, also called convex envelope or convex closure, is the smallest convex set that contains it.
         For example, if you have a bounded subset of points in the Euclidean space, the convex hull may be visualized as 
         the shape enclosed by an elastic band stretched around the outside points of the subset. 
         If vertices of the geometry do not form a convex, convexhull returns a null.
@@ -314,19 +315,19 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         Valid types for the column in the calling IdaGeoSeries:
         ST_Geometry or one of its subtypes.
 
-        Note on the input type
-        -----------------------
-        If possible, the specific type of the returned geometry will be ST_Point, ST_LineString, or ST_Polygon. 
+        If possible, the specific type of the returned geometry will be ST_Point, ST_LineString, or ST_Polygon.
         The convex hull of a convex polygon with no holes is a single linestring, represented as ST_LineString. 
         The convex hull of a non convex polygon does not exit. 
         
         Returns
         -------
-        IdaGeoSeries. Returns an IdaGeoSeries containing geometries which are the convex hull of each
-        of the geometries in the calling IdaGeoSeries.
-        The resulting geometry is represented in the spatial reference system
-        of the given geometry.
-        For None geometries, for empty geometries and for non convex geometries the output is None.
+        IdaGeoSeries
+
+            Returns an IdaGeoSeries containing geometries which are the convex hull of each
+            of the geometries in the calling IdaGeoSeries.
+            The resulting geometry is represented in the spatial reference system
+            of the given geometry.
+            For None geometries, for empty geometries and for non convex geometries the output is None.
 
         References
         ----------
@@ -1981,8 +1982,8 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
     @lazy
     def linear_units(self):
         """
-        Returns:
-        --------
+        Returns
+        -------
         list of str
             The list of all allowed linear units that can be passed as option to geospatial methods.
         """

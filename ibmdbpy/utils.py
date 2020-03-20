@@ -127,7 +127,7 @@ def silent(function):
 
     Notes
     -----
-    * Legagy from Benchmark submodule
+    * Legacy from Benchmark submodule
 
     """
     @wraps(function)
@@ -182,10 +182,10 @@ def extend_dataset(df, n):
     """
     Extend a dataframe horizontaly by duplicating its columns n times
 
-    Note
-    ----
+    Notes
+    -----
 
-    * Legagy from Benchmark submodule
+    * Legacy from Benchmark submodule
     """
     df_2 = deepcopy(df)
     df_out = deepcopy(df)

@@ -298,7 +298,7 @@ class IdaGeoDataFrame(IdaDataFrame):
         Receives a column name to set as the "geometry" column of the
         IdaDataFrame.
 
-        Parameters:
+        Parameters
         -----------
         column_name : str
             Name of the column to be set as geometry column of the 
