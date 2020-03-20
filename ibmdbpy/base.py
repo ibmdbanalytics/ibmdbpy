@@ -1603,6 +1603,7 @@ class IdaDataBase(object):
         Arguments
         ---------
         dataframe: DataFrame
+
         Returns
         -------
         DataFrame
@@ -1651,7 +1652,7 @@ class IdaDataBase(object):
 
         Parameters
         ----------
-        prefix : str, default: "DATA_FRAME_"
+        prefix: str, default: "DATA_FRAME_"
             Prefix used to create the table name. The name is constructed using 
             this pattern : <prefix>_X where <prefix> corresponds to the string 
             parameter “prefix” capitalized and X corresponds to a pseudo 
@@ -1681,7 +1682,7 @@ class IdaDataBase(object):
         """
         Convenience function : Alternative name for get_valid_tablename.
 
-        The parameter prefix has its optional value changed to "VIEW_".
+        The parameter prefix has its optional value changed to "VIEW\_"".
 
         Examples
         --------
@@ -1700,7 +1701,7 @@ class IdaDataBase(object):
         """
         Convenience function : Alternative name for get_valid_tablename.
 
-        Parameter prefix has its optional value changed to "MODEL_".
+        Parameter prefix has its optional value changed to "MODEL\_".
 
         Examples
         --------

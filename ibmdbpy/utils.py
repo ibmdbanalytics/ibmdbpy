@@ -157,10 +157,11 @@ def to_nK(dataframe, nKrow):
 
     Notes
     -----
-    * If the dataset is smaller than nKrow, it will be imputed randomly 
-    with some existing rows, otherwise ve return a random sample
 
-    * Legagy from Benchmark submodule
+    * If the dataset is smaller than nKrow, it will be imputed randomly 
+      with some existing rows, otherwise a random sample is returned
+    * Legacy from Benchmark submodule
+
     """
     if nKrow < 1:
         raise ValueError("n should be an integer with minimum value 1")

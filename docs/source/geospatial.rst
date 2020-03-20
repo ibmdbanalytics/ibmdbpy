@@ -70,7 +70,7 @@ In the background, ibmdbpy-spatial looks for geometry columns in the table and b
 the area of each geometry.
 Here is the SQL request that was executed for this example:
 
-    SELECT *,ST_Area(SHAPE) AS "area" FROM SAMPLES.GEO_COUNTY;
+    SELECT \*,ST_Area(SHAPE) AS "area" FROM SAMPLES.GEO_COUNTY;
 
 
 It's as simple as that!

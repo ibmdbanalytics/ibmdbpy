@@ -84,11 +84,16 @@ class KMeans(object):
 
             The following values are allowed: ‘none’, ‘columns’, ‘values:n’, and ‘all’:
                 * If statistics='none' is specified, no statistics are collected.
-                * If statistics='columns' is specified, statistics on the columns of the input table are collected, for example, mean values.
-                * If statistics='values:n' is specified, and if n is a positive number, statistics on the columns and the column values are collected.
+                * If statistics='columns' is specified, statistics on the columns
+                  of the input table are collected, for example, mean values.
+                * If statistics='values:n' is specified, and if n is a positive number, statistics
+                  on the columns and the column values are collected.
+
                     Up to <n> column value statistics are collected.
-                        * If a nominal column contains more than <n> values, only the <n> most frequent column statistics are kept.
-                        * If a numeric column contains more than <n> values, the values are discretized, and the statistics are collected on the discretized values.
+                        * If a nominal column contains more than <n> values,
+                          only the <n> most frequent column statistics are kept.
+                        * If a numeric column contains more than <n> values, the values
+                          are discretized, and the statistics are collected on the discretized values.
                 * statistics=all is identical to statistics=values:100.
 
         Attributes
@@ -208,7 +213,9 @@ class KMeans(object):
             The columns of the input table that have specific properties, which
             are separated by a semi-colon (;).
             Each column is succeeded by one or more of the following properties:
-                * By type nominal (':nom') or by type continuous (':cont'). By default, numerical types are continuous, and all other types nominal.
+
+                * By type nominal (':nom') or by type continuous (':cont'). By default,
+                  numerical types are continuous, and all other types nominal.
                 * By role ':id', ':target', ':input', or ':ignore'.
 
             If this parameter is not specified, all columns of the input table
@@ -423,6 +430,7 @@ class KMeans(object):
         """
         Retrieve information about the model to print the results. The KMEANS 
         IDAX function stores its result in 4 tables:
+
             * <MODELNAME>_MODEL
             * <MODELNAME>_COLUMNS
             * <MODELNAME>_COLUMN_STATISTICS
