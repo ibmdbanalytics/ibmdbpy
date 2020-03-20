@@ -482,8 +482,8 @@ class IdaDataBase(object):
         """
         Check if a table exists in self.
 
-        Parameter
-        ---------
+        Parameters
+        ----------
         tablename : str
             Name of the table to check.
 
@@ -1168,8 +1168,8 @@ class IdaDataBase(object):
         """
         Add an ID column to an IdaDataFrame.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         idadf : IdaDataFrame
             IdaDataFrame object to which an ID column will be added
         column_id : str
@@ -1600,8 +1600,8 @@ class IdaDataBase(object):
         """
         Put every column name of a Pandas DataFrame in upper case.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         dataframe: DataFrame
 
         Returns
@@ -1620,8 +1620,8 @@ class IdaDataBase(object):
         refers to the current schema.
 
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         objectname : str
             Name of the object to process. Can be either under the form
             "SCHEMA.TABLE" or just "TABLE"
