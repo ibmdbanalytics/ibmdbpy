@@ -1602,7 +1602,7 @@ class IdaDataBase(object):
 
         Parameters
         ----------
-        dataframe: DataFrame
+        dataframe : DataFrame
 
         Returns
         -------
@@ -1652,7 +1652,7 @@ class IdaDataBase(object):
 
         Parameters
         ----------
-        prefix: str, default: "DATA_FRAME_"
+        prefix : str, default: "DATA_FRAME_"
             Prefix used to create the table name. The name is constructed using 
             this pattern : <prefix>_X where <prefix> corresponds to the string 
             parameter “prefix” capitalized and X corresponds to a pseudo 
