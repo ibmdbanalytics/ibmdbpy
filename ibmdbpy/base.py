@@ -1680,7 +1680,7 @@ class IdaDataBase(object):
 
     def _get_valid_viewname(self, prefix="VIEW_"):
         """
-        Convenience function : Alternative name for get_valid_tablename.
+        Convenience function : Alternative name for _get_valid_tablename.
 
         The parameter prefix has its optional value changed to "VIEW\_"".
 
@@ -1699,7 +1699,7 @@ class IdaDataBase(object):
 
     def _get_valid_modelname(self, prefix="MODEL_"):
         """
-        Convenience function : Alternative name for get_valid_tablename.
+        Convenience function : Alternative name for _get_valid_tablename.
 
         Parameter prefix has its optional value changed to "MODEL\_".
 
