@@ -79,7 +79,8 @@ class AssociationRules(object):
         Attributes
         ----------
                
-        nametable: Gets set at fit step. The name of the optional table which contains a mapping
+        nametable
+            Gets set at fit step. The name of the optional table which contains a mapping
             between the items from the input table and the item names.
             This attribute is set through the nametable option of the fit method.
             This table must contain at least two columns, where
@@ -89,18 +90,21 @@ class AssociationRules(object):
             * The second column has the same name as the name that is
               defined in the namecol parameter
         
-        namecol : Gets set at fit step. The name of the optional column which
+        namecol
+            Gets set at fit step. The name of the optional column which
             contains item names as defined in the nametable attribute.
             This attribute is set through the fit method and cannot be specified
             of the nametable parameter of fit is not specified.
         
-        outtable: Gets set at predict step, name of the optional output table
+        outtable
+            Gets set at predict step, name of the optional output table
             in which the mapping between the input
             sequences and the associated rules or patterns is written.
             If the parameter corresponds to an existing table in the database,
             it is replaced.
         
-        type: Gets set at predict step. Type : str, optional, default : "rules".
+        type : str, optional, default : "rules".
+            Gets set at predict step.
             The type of information that is written in the output table.
             The following values are possible: ‘rules’ and ‘patterns’;
         
