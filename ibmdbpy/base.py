@@ -563,7 +563,7 @@ class IdaDataBase(object):
         >>> idadb.exists_model("NOT_EXISTING")
         False
         >>> idadb.exists_model("NO_MODEL")
-        TypeError : NO_TABLE exists but is not a model (of type '?')
+        TypeError : NO_MODEL exists but is not a model (of type '?')
         """
         modelname = ibmdbpy.utils.check_modelname(modelname)
         if '.' in modelname:
@@ -708,7 +708,7 @@ class IdaDataBase(object):
         >>> idadb.is_model("NO_MODEL")
         False
         >>> idadb.is_model("NOT_EXISTING")
-        ValueError : NO_EXISTING doesn't exist in database
+        ValueError : NOT_EXISTING doesn't exist in database
         """
         modelname = ibmdbpy.utils.check_modelname(modelname)
 
