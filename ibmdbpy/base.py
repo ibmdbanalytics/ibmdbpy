@@ -188,28 +188,45 @@ class IdaDataBase(object):
 
         if self._con_type == 'jdbc':
 
+            missingCredentialsMsg = ("Missing credentials to connect via JDBC.")
+            ambiguousDefinitionMsg = ("Ambiguous definition of userID or password: " +
+                                      "Cannot be defined in uid and pwd parameters " +
+                                      "and in jdbc_url_string at the same time.")
+
             # remove trailing ":" or ";" or spaces on dsn, we will replace.
             dsn = dsn.rstrip(';: ')
             # find parameters on dsn; if any exist, there will be an equals sign.
             ix = dsn.find("=")
             # if no parameters exist, then this is the complete dsn
             if (ix < 0):
-                # confirm uid and pwd args are present, do NOT allow blank password
-                if (uid == '') | (pwd == ''):
-                    message = ("Missing credentials to connect via JDBC.")
-                    raise IdaDataBaseError(message)
-                # add uid, pwd parameters.
-                dsn = dsn + ':user={};password={};'.format(uid, pwd)
+                # nothing needs to be done, if uid and pwd are missing
+                # (uid and pwd are not needed for local database connections)
+                # otherwise both uid and pwd have to be specified
+                if (uid != '') | (pwd != ''):
+                    # confirm both uid and pwd args are present
+                    if (uid == '') | (pwd == ''):
+                        raise IdaDataBaseError(missingCredentialsMsg)
+                    else:
+                        # add uid, pwd parameters.
+                        dsn = dsn + ':user={};password={};'.format(uid, pwd)
             else:
                 # if we know there is at least one parameter; we can assume there exists a ":" before the parameter
                 # portion of the string in a correctly formatted dsn.  Therefore, just check for the existence of 
-                # the uid and pwd and add if they are missing.  If they are on the string, IGNORE these arguments
-                # and keep the string as-is.
+                # the uid and pwd and add if they are missing.  If they are on the string, IGNORE eep the string as-is.
                 if not ('user=' in dsn):
+                    if (uid == ''):
+                        raise IdaDataBaseError(missingCredentialsMsg)
                     dsn = dsn + ';user=' + uid
+                elif (uid != ''):
+                    raise IdaDataBaseError(ambiguousDefinitionMsg)
+
                 if not ('password=' in dsn):
+                    if (pwd == ''):
+                        raise IdaDataBaseError(missingCredentialsMsg)
                     dsn = dsn + ';password=' + pwd
-                # add trailing ";" to dsn.
+                elif (pwd != ''):
+                    raise IdaDataBaseError(ambiguousDefinitionMsg)
+                 # add trailing ";" to dsn.
                 dsn = dsn + ';'
 
             jdbc_url = dsn
@@ -220,7 +237,19 @@ class IdaDataBase(object):
             except ImportError:
                 raise ImportError("Please install optional dependency jaydebeapi "+
                             "to work with JDBC.")
-            
+
+            # check versions
+            if jaydebeapi.__version__.startswith('0'):
+                # Older JaydeBeAPi versions where the connection information is specified through a list
+                # are supported anymore.
+                # The connection information has to be included now in a single connection string.
+                message = ("Your JayDeBeApi module is not supported anymore.  Please install version 1.x or higher.")
+                raise IdaDataBaseError(message)
+
+            if jpype.__version__ != '0.6.3':
+                message = ("Your JPype1 version is not compatible with JayDeBeApi. Please install version 0.6.3.")
+                raise IdaDataBaseError(message)
+
             here = os.path.abspath(os.path.dirname(__file__))
             
             if not jpype.isJVMStarted():
@@ -289,16 +318,7 @@ class IdaDataBase(object):
                        
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
 
-            if jaydebeapi.__version__.startswith('0'):
-                # deprecate this and throw error, this is very old version at this point.
-                # now we can just focus on building a single parameter string.
-                message = ("You jaydebeapi module is deprecated.  Please install version 1.x or higher.")
-                raise IdaDataBaseError(message)
-            
-                self._connection_string = [jdbc_url, uid, pwd]
-            else:
-                #self._connection_string = jdbc_url + ':user={};password={};'.format(uid, pwd)
-                self._connection_string = jdbc_url
+            self._connection_string = jdbc_url
             
             driver_not_found = ("HELP: The JDBC driver for IBM Db2 could "+
             "not be found. Please download the latest JDBC Driver at the "+
@@ -1632,7 +1652,6 @@ class IdaDataBase(object):
         Helper function that returns the name and the schema from an object 
         name. Implicitly, if no schema name was given, it is assumed that user 
         refers to the current schema.
-
 
         Parameters
         ----------
