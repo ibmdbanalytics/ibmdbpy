@@ -329,10 +329,9 @@ class IdaDataBase(object):
             
             try:
                 self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
-            except:
+            except  Exception as e:
                 print(driver_not_found)
-                raise
-                #raise IdaDataBaseError(driver_not_found)
+                raise IdaDataBaseError(e)
              
             if verbose: 
                 print("Connection successful!")
