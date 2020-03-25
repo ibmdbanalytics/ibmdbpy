@@ -241,7 +241,7 @@ class IdaDataBase(object):
             # check versions
             if jaydebeapi.__version__.startswith('0'):
                 # Older JaydeBeAPi versions where the connection information is specified through a list
-                # are supported anymore.
+                # are not supported anymore.
                 # The connection information has to be included now in a single connection string.
                 message = ("Your JayDeBeApi module is not supported anymore.  Please install version 1.x or higher.")
                 raise IdaDataBaseError(message)
