@@ -42,16 +42,19 @@ class Test_ConnectToDB(object):
         assert(idadb._con_type in ["odbc", "jdbc"])
 
     def test_idadb_instance_fail(self, idadb):
-        with pytest.raises(IdaDataBaseError):
-            if idadb._con_type == 'odbc':
+
+        if idadb._con_type == 'odbc':
+            with pytest.raises(IdaDataBaseError):
                 IdaDataBase(dsn = 'NOTEXISTING_DATASOURCE')
-            else:
+
+        if idadb._con_type == 'jdbc':
+            with pytest.raises(IdaDataBaseError):
                 IdaDataBase(dsn='jdbc:NOTEXISTING_DATASOURCE')
-        with pytest.raises(IdaDataBaseError):
-            IdaDataBase(dsn = 'jdbc:db2://awh-yp-small03.services.dal.bluemix.net:50000/BLUDB:user=XXXXXXXXXX;password=XXXXXXXXXXXX',
+            with pytest.raises(IdaDataBaseError):
+                IdaDataBase(dsn = 'jdbc:db2://awh-yp-small03.services.dal.bluemix.net:50000/BLUDB:user=XXXXXXXXXX;password=XXXXXXXXXXXX',
                         uid="hello", pwd="world")
-        with pytest.raises(IdaDataBaseError):
-            IdaDataBase(dsn = 'jdbc:db2://awh-yp-small03.services.dal.bluemix.net:50000/BLUDB')
+            with pytest.raises(IdaDataBaseError):
+                IdaDataBase(dsn = 'jdbc:db2://awh-yp-small03.services.dal.bluemix.net:50000/BLUDB')
 
 
 class Test_ConnexionManagement(object):
