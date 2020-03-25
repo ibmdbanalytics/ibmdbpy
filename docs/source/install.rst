@@ -59,11 +59,16 @@ Optional dependencies
 
 Some optional libraries can be installed to benefit from extra features, for example:
 
-	* jaydebeapi (Connection via JDBC)
+	* JayDeBeApi with JPype1 (Connection via JDBC)
 	* pytest (for running tests)
 	* sphinx (for building the documentation)
 
-JayDeBeApi requires a C++ compiler, which may make it difficult to install for some users.
+You can install ibmdbpy together with the required versions of the JayDeBeApi and JPype1 packages
+for the JDBC support by executing the following statement::
+
+  > pip install ibmdbpy[jdbc]
+
+JayDeBeApi and JPype1 require a C++ compiler, which may make it difficult to install for some users.
 
 Package structure
 -----------------
