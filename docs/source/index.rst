@@ -58,7 +58,9 @@ Next, we compute the correlation matrix:
 
 >>> idadf.corr()
 
-In the background, ibmdbpy looks for numerical columns in the table and builds an SQL request that returns the correlation between each pair of columns. Here is the SQL request that was executed for this example:
+In the background, ibmdbpy looks for numerical columns in the table and
+builds an SQL request that returns the correlation between each pair of columns.
+Here is the SQL request that was executed for this example::
 
    SELECT CORRELATION("sepal_length","sepal_width"),
    CORRELATION("sepal_length","petal_length"),
@@ -68,7 +70,9 @@ In the background, ibmdbpy looks for numerical columns in the table and builds a
    CORRELATION("petal_length","petal_width")
    FROM IRIS
 
-The result fetched by ibmdbpy is a tuple containing all values of the matrix. This tuple is formatted back into a Pandas.DataFrame and then returned::
+The result fetched by ibmdbpy is a tuple containing all values of the matrix.
+This tuple is formatted back into a Pandas.DataFrame and then returned::
+
 
                  sepal_length  sepal_width  petal_length  petal_width
    sepal_length      1.000000    -0.117570      0.871754     0.817941
@@ -154,6 +158,9 @@ Here is the list of the persons who contributed to the project, in the chronolog
 - Rafael Rodriguez Morales (geospatial extension, core)
 - Avipsa Roy (geospatial extension)
 - Nicole Schoen (core)
+- Wieland Hoffmann (core)
+- Toni Bollinger (core)
+- Eva Feillet (geospatial extension, core)
 
 Indexes and tables
 ==================
