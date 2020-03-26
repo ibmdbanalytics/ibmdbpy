@@ -197,6 +197,7 @@ class IdaDataBase(object):
             dsn = dsn.rstrip(';: ')
             # find parameters on dsn; if any exist, there will be an equals sign.
             ix = dsn.find("=")
+
             # if no parameters exist, then this is the complete dsn
             if (ix < 0):
                 # nothing needs to be done, if uid and pwd are missing
@@ -213,20 +214,30 @@ class IdaDataBase(object):
             else:
                 # if we know there is at least one parameter; we can assume there exists a ":" before the parameter
                 # portion of the string in a correctly formatted dsn.  Therefore, just check for the existence of 
-                # the uid and pwd and add if they are missing.  If they are on the string, IGNORE eep the string as-is.
+                # the uid and pwd and add if they are missing.  If they are on the string, IGNORE the string as-is.
+
+                uidSpecified = uid != ''
+                pwdSpecified = pwd != ''
+
                 if not ('user=' in dsn):
-                    if (uid == ''):
-                        raise IdaDataBaseError(missingCredentialsMsg)
-                    dsn = dsn + ';user=' + uid
-                elif (uid != ''):
+                    if (uidSpecified):
+                       dsn = dsn + ';user=' + uid
+                elif (uidSpecified):
                     raise IdaDataBaseError(ambiguousDefinitionMsg)
+                uidSpecified = uidSpecified | ('user=' in dsn)
 
                 if not ('password=' in dsn):
-                    if (pwd == ''):
-                        raise IdaDataBaseError(missingCredentialsMsg)
-                    dsn = dsn + ';password=' + pwd
-                elif (pwd != ''):
+                    if (pwdSpecified):
+                        dsn = dsn + ';password=' + pwd
+                elif (pwdSpecified):
                     raise IdaDataBaseError(ambiguousDefinitionMsg)
+                pwdSpecified = pwdSpecified | ('password=' in dsn)
+
+                # throw an exception if either uid or pwd are specified,
+                # i.e. not both or none of the two
+                if (uidSpecified^pwdSpecified):
+                    raise IdaDataBaseError(missingCredentialsMsg)
+
                  # add trailing ";" to dsn.
                 dsn = dsn + ';'
 
