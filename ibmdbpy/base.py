@@ -202,13 +202,14 @@ class IdaDataBase(object):
                 # nothing needs to be done, if uid and pwd are missing
                 # (uid and pwd are not needed for local database connections)
                 # otherwise both uid and pwd have to be specified
-                if (uid != '') | (pwd != ''):
-                    # confirm both uid and pwd args are present
-                    if (uid == '') | (pwd == ''):
-                        raise IdaDataBaseError(missingCredentialsMsg)
-                    else:
-                        # add uid, pwd parameters.
-                        dsn = dsn + ':user={};password={};'.format(uid, pwd)
+                if uid and pwd:
+                    dsn = dsn + ':user={};password={};'.format(uid, pwd)
+                elif not uid and not pwd:
+                   # Neither UID nor PWD have to be specified for local connections.
+                   # This assumes that if they're missing, the connection is local.
+                    pass
+                else:
+                     raise IdaDataBaseError(missingCredentialsMsg)                        
             else:
                 # if we know there is at least one parameter; we can assume there exists a ":" before the parameter
                 # portion of the string in a correctly formatted dsn.  Therefore, just check for the existence of 
