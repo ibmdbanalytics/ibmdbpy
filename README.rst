@@ -12,7 +12,7 @@ The ibmdbpy project is compatible with Python releases 2.7 up to 3.6 and can be 
 
 The project is still at an early stage and many of its features are still in development. However, several experiments have already demonstrated that it provides significant performance advantages when operating on medium or large amounts of data, that is, on tables of 1 million rows or more.
 
-The latest version of ibmdbpy is available on the `Python Package Index`_ and Github_.
+The latest version of ibmdbpy is available on the `Python Package Index`__ and Github_.
 
 __ https://pypi.python.org/pypi/ibmdbpy
 
