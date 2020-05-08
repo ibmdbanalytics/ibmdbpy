@@ -83,11 +83,17 @@ def aggregate_idadf(idadf, method, other, swap = False):
     if swap:
         idadf, other = other, idadf
 
+
+    if self._idadb._is_netezza_system():
+        power_function = " POW"
+    else:
+        power_function = " POWER"
+
     simplemethod = {"add": " + ", "mul": " * ",  "div": " / ", "sub": " - "}
     complexmethod = {"floordiv" : " FLOOR(%s/%s) ",
                      "mod" : " MOD(%s,%s) ",
                      "neg" : " -%s%s ",
-                     "pow" : " POWER(%s,%s)"} # overflow risk, to handle
+                     "pow" : power_function + "(%s,%s)"} # overflow risk, to handle
 
     all_methods = list(simplemethod.keys())+list(complexmethod.keys())
     if method not in all_methods:

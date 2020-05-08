@@ -75,7 +75,7 @@ def discretize(idadf, columns = None, disc= "em", target = None, bins = None, ou
     
     
     # Calculate bounds
-    idadf._idadb._call_stored_procedure("IDAX.%s"%stored_proc,
+    idadf._idadb._call_stored_procedure(stored_proc,
                                         outtable=bound_outtable,
                                         intable=intable,
                                         incolumn=incolumn,
@@ -95,7 +95,7 @@ def discretize(idadf, columns = None, disc= "em", target = None, bins = None, ou
         disc_outtable = outtable
     
     try:
-        idadf._idadb._call_stored_procedure("IDAX.APPLY_DISC",
+        idadf._idadb._call_stored_procedure("APPLY_DISC",
                                             outtable=disc_outtable,
                                             intable=intable,
                                             btable=bound_outtable,

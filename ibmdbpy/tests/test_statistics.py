@@ -44,7 +44,8 @@ class Test_PrivateStatisticsMethods(object):
 
     def test_idadf_onecolumn_numeric_numeric_stats_one_column(self, idadf_onecolumn_numeric):
         column = idadf_onecolumn_numeric.columns.tolist()
-        assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "count", column), numpy.float64)
+        assert(isinstance(_numeric_stats(idadf_onecolumn_numeric, "count", column), numpy.float64) |
+               isinstance(_numeric_stats(idadf_onecolumn_numeric, "count", column), numpy.int64) )
         assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "mean", column), numpy.float64)
         assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "median", column), numpy.ndarray)
         assert isinstance(_numeric_stats(idadf_onecolumn_numeric, "std", column), numpy.float64)

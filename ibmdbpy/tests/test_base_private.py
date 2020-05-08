@@ -96,10 +96,10 @@ class Test_IdaDataBase_PrivateMethods(object):
     def test_idadb_create_view(self, idadb, df):
         try : idadb.drop_table("CREATE_VIEW_TEST_585960708904")
         except: pass
-        idadb._create_table(df, "CREATE_VIEW_TEST_585960708904")
-        ida = IdaDataFrame(idadb, "CREATE_VIEW_TEST_585960708904")
         try : idadb.drop_view("VIEW_TEST_585960708904")
         except: pass
+        idadb._create_table(df, "CREATE_VIEW_TEST_585960708904")
+        ida = IdaDataFrame(idadb, "CREATE_VIEW_TEST_585960708904")
         idadb._create_view(ida, "VIEW_TEST_585960708904")
         idadb.drop_table("CREATE_VIEW_TEST_585960708904")
         idadb.drop_view("VIEW_TEST_585960708904")

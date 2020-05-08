@@ -63,7 +63,14 @@ def gini_pairwise(idadf, target=None, features=None, ignore_indexer=True):
         
     gini_dict = OrderedDict()
     length = len(idadf)
-    
+
+    if idadf._idadb._is_netezza_system():
+        power_function = "POW"
+        div_term = "* POW(c,-1)) * POW(%s,-1)"%length
+    else:
+        power_function = "POWER"
+        div_term = "/c)/%s"%length
+
     for t in target:
         gini_dict[t] = OrderedDict() 
         features_notarget = [x for x in features if (x != t)]
@@ -72,11 +79,11 @@ def gini_pairwise(idadf, target=None, features=None, ignore_indexer=True):
             if t not in gini_dict:
                 gini_dict[t] = OrderedDict()
             
-            query = ("SELECT SUM((POWER(c,2) - gini)/c)/%s FROM "+ 
-            "(SELECT SUM(POWER(count,2)) as gini, SUM(count) as c FROM "+
-            "(SELECT CAST(COUNT(*) AS FLOAT) AS count, \"%s\" FROM %s GROUP BY \"%s\",\"%s\") "+
-            "GROUP BY \"%s\")")
-            query0 = query%(length, feature, idadf.name, t, feature, feature)
+            query = ("SELECT SUM((%s(c,2) - gini)%s FROM "+
+            "(SELECT SUM(%s(count,2)) as gini, SUM(count) as c FROM "+
+            "(SELECT CAST(COUNT(*) AS FLOAT) AS count, \"%s\" FROM %s GROUP BY \"%s\",\"%s\") AS T1 "+
+            "GROUP BY \"%s\") AS T2 ")
+            query0 = query%(power_function, div_term, power_function, feature, idadf.name, t, feature, feature)
             gini_dict[t][feature] = idadf.ida_scalar_query(query0)
             
     result = pd.DataFrame(gini_dict).fillna(np.nan)
@@ -149,11 +156,18 @@ def gini(idadf, features=None, ignore_indexer=True):
     value_dict = OrderedDict()
         
     length = len(idadf)**2
-    
-    for feature in features: 
+
+    if idadf._idadb._is_netezza_system():
+      power_function = "POW"
+      div_term = "* POW(%s, -1)"%length
+    else:
+      power_function = "POWER"
+      div_term ="/%s"*length
+
+    for feature in features:
         
         subquery = "SELECT COUNT(*) AS count FROM %s GROUP BY \"%s\""%(idadf.name, feature)
-        query = "SELECT (%s - SUM(POWER(count,2)))/%s FROM (%s)"%(length, length, subquery)
+        query = "SELECT (%s - SUM(%s(count,2)))%s FROM (%s) AS T "%(length, power_function, div_term, subquery)
         value_dict[feature] = idadf.ida_scalar_query(query)
             
         if len(features) > 1:

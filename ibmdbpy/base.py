@@ -115,6 +115,12 @@ class IdaDataBase(object):
         _con : connection object
             Connection object to the remote Database.
 
+        _database_system: str
+            Underlying database system, either 'db2' or 'netezza'
+
+        _database_name: str
+            The name of the database the application is connected to.
+
         _idadfs : list
             List of IdaDataFrame objects opened under this connection.
 
@@ -161,9 +167,17 @@ class IdaDataBase(object):
 
         self.data_source_name = dsn
 
+        # default value for _database_system is db2 is db2
+        self._database_system = 'db2'
+
         # Detect if user attempt to connection with ODBC or JDBC
-        if "jdbc:" in dsn:
+        if dsn.startswith('jdbc:'):
             self._con_type = "jdbc"
+            if dsn.startswith('jdbc:netezza:'):
+                self._database_system = 'netezza'
+                # for Netezza the internal connection is always in autocommit mode
+                # to allow explicit commits
+                dsn+= ';autocommit=false'
         else:
             self._con_type = "odbc"
 
@@ -263,8 +277,8 @@ class IdaDataBase(object):
                 raise IdaDataBaseError(message)
 
             here = os.path.abspath(os.path.dirname(__file__))
-            
-            if not jpype.isJVMStarted():
+
+            if (not jpype.isJVMStarted()) & (not self._is_netezza_system()):
                 classpath = os.getenv('CLASSPATH','')
                 jarpath = ''
                 platform = sys.platform
@@ -340,7 +354,10 @@ class IdaDataBase(object):
             "it in the folder %s"%here)
             
             try:
-                self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
+                if self._is_netezza_system():
+                    self._con = jaydebeapi.connect('org.netezza.Driver', self._connection_string)
+                else:
+                    self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
             except  Exception as e:
                 print(driver_not_found)
                 raise IdaDataBaseError(e)
@@ -353,7 +370,13 @@ class IdaDataBase(object):
             #self.ida_query(query)
             #not anymore, reported problems with ODBC
             #better mention DB2GSE explicitly when accessing its functions
-                
+
+        # determine name of database
+        if self._is_netezza_system():
+            self._database_name = self.ida_scalar_query('select OBJNAME from _T_OBJECT where OBJID = CURRENT_DB;')
+        else:
+            self._database_name = self.ida_scalar_query('select CURRENT_SERVER from SYSIBM.SYSDUMMY1')
+
         # Setting Autocommit and verbose environment variables
         set_autocommit(autocommit)
         set_verbose(verbose)
@@ -377,7 +400,10 @@ class IdaDataBase(object):
         >>> idadb.current_schema()
         'DASHXXXXXX'
         """
-        query = "SELECT TRIM(CURRENT_SCHEMA) FROM SYSIBM.SYSDUMMY1"
+        if self._is_netezza_system():
+          query = 'select TRIM(CURRENT_SCHEMA)'
+        else:
+          query = "SELECT TRIM(CURRENT_SCHEMA) FROM SYSIBM.SYSDUMMY1"
         return self.ida_scalar_query(query)
 
     def show_tables(self, show_all=False):
@@ -433,13 +459,27 @@ class IdaDataBase(object):
             if cache is not None:
                 return cache
 
-        where_part = "WHERE (OWNERTYPE = 'U')"
+        where_part = ""
         if not show_all:
-            where_part += ("AND(TABSCHEMA= '%s') " % self.current_schema)
+            where_part = ("AND TABSCHEMA = '%s' " % self.current_schema)
 
-        query = ('SELECT distinct TABSCHEMA, TABNAME,' +
-                 ' OWNER, TYPE from SYSCAT.TABLES ' + where_part +
-                 ' ORDER BY "TABSCHEMA","TABNAME"')
+        if self._is_netezza_system():
+            query = ("SELECT SCHEMA as TABSCHEMA, TABLENAME as TABNAME, OWNER, 'T' as TYPE FROM _V_TABLE " +
+                     "WHERE DATABASE = '" + self._database_name + "' and OBJTYPE = 'TABLE' " + where_part +
+                     "UNION ALL " +
+                     "SELECT SCHEMA as TABSCHEMA, VIEWNAME as TABNAME, OWNER, 'V' as TYPE FROM _V_VIEW " +
+                     "WHERE DATABASE = '" + self._database_name + "' and OBJTYPE = 'VIEW' " + where_part)
+            query = ("SELECT SCHEMA as TABSCHEMA, OBJNAME as TABNAME, OWNER, " +
+                             "CASE WHEN OBJTYPE = 'TABLE' THEN 'T' ELSE 'V' END AS TYPE " +
+                      "FROM _V_OBJECTS  " +
+                      "WHERE OBJTYPE in ('TABLE', 'VIEW') " + where_part +
+                      "ORDER BY TABSCHEMA, TABNAME")
+        else:
+            query = ("SELECT DISTINCT TABSCHEMA, TABNAME, OWNER, TYPE " +
+                     "FROM SYSCAT.TABLES " +
+                     "WHERE OWNERTYPE = 'U' " + where_part +
+                     "ORDER BY TABSCHEMA, TABNAME")
+
         data = self.ida_query(query)
         
         # Workaround for some ODBC version which does not get the entire
@@ -485,12 +525,21 @@ class IdaDataBase(object):
         1   DASHXXXXXX  KMEANS_11726_1434977692  DASHXXXXXX
         2   DASHXXXXXX  KMEANS_11948_1434976568  DASHXXXXXX
         """
-        data = self.ida_query("call idax.list_models()")
+        if self._is_netezza_system():
+            sp_schema = 'NZA.'
+            result_columns =  ['modelname', 'owner', 'created', 'state','miningfunction', 'algorithm', 'usercategory']
+        else:
+            sp_schema = 'IDAX'
+            result_columns = ['modelschema', 'modelname', 'owner', 'created', 'state',
+                              'miningfunction', 'algorithm', 'usercategory']
+
+        data = self.ida_query("call %s.list_models()"%sp_schema)
+
+        data.columns = result_columns
+
         # Workaround for some ODBC version which does not get the entire
         # string of the column name in the cursor descriptor. 
         # This is hardcoded, so be careful
-        data.columns = ['modelschema', 'modelname', 'owner', 'created', 'state',
-       'miningfunction', 'algorithm', 'usercategory']
         data = self._upper_columns(data)
         return data
 
@@ -617,7 +666,11 @@ class IdaDataBase(object):
             modelschema = self.current_schema
 
         # check if schema exists to avoid exception thrown by idax.list_models
-        schemaquery = "select count(*) from syscat.schemata where schemaname = '" + modelschema + "'"
+        if self._is_netezza_system():
+            schemaquery = ("SELECT COUNT(*) from _v_objects WHERE OBJTYPE in ('TABLE', 'VIEW') " +
+                           " AND SCHEMA = '" + modelschema + "'")
+        else:
+            schemaquery = "SELECT count(*) FROM SYSCAT.SCHEMATA WHERE SCHEMANAME = '" + modelschema + "'"
         schemaexists = self.ida_scalar_query(schemaquery) >= 1
         if not schemaexists:
           return False
@@ -799,7 +852,7 @@ class IdaDataBase(object):
 
         Examples
         --------
-        >>> idadb.ida_query("SELECT * FROM IRIS FETCH FIRST 5 ROWS ONLY")
+        >>> idadb.ida_query("SELECT * FROM IRIS LIMIT 5")
            sepal_length  sepal_width  petal_length  petal_width species
         0           5.1          3.5           1.4          0.2  setosa
         1           4.9          3.0           1.4          0.2  setosa
@@ -1113,18 +1166,29 @@ class IdaDataBase(object):
         newname = ibmdbpy.utils.check_tablename(newname)
 
         if self.is_table(idadf._name):
-            query = "RENAME TABLE %s TO %s"%(idadf._name, newname)
+            if self._is_netezza_system():
+                 query = "ALTER TABLE %s RENAME TO %s"%(idadf._name, newname)
+            else:
+                query = "RENAME TABLE %s TO %s"%(idadf._name, newname)
             try:
                 self._prepare_and_execute(query)
             except Exception as e:
                 if self._con_type == "odbc":
                     raise NameError(e.value[-1])
                 else:
-                    sql_code = int(str(e.args[0]).split("SQLCODE=")[-1].split(",")[0])
-                    if sql_code == -601:
-                        raise NameError("The new name is identical to the old one")
+                    if self._is_netezza_system():
+                        if "ERROR:  relation does not exist" in str(e.args[0]):
+                            raise ValueError("Object does not exist.")
+                        elif 'ERROR:  ALTER TABLE: object "%s" already exists'%newname in str(e.args[0]):
+                            raise NameError("The new name is identical to the old one")
+                        else:
+                            raise e
                     else:
-                        raise e
+                        sql_code = int(str(e.args[0]).split("SQLCODE=")[-1].split(",")[0])
+                        if sql_code == -601:
+                            raise NameError("The new name is identical to the old one")
+                        else:
+                            raise e
 
             idadf._name = newname
             idadf.tablename = newname
@@ -1251,15 +1315,22 @@ class IdaDataBase(object):
         if destructive is True:
 
             viewname = self._get_valid_tablename(prefix="VIEW_")
-            self._prepare_and_execute("CREATE VIEW " + viewname + " AS SELECT ((ROW_NUMBER() OVER())-1)" +
+            if self._is_netezza_system():
+                order_by = "ORDER BY NULL"
+            else:
+                order_by = ""
+            self._prepare_and_execute("CREATE VIEW " + viewname + " AS SELECT ((ROW_NUMBER() OVER("+ order_by +"))-1)" +
                                       " AS \"" + column_id + "\", \""+
                                       "\",\"".join(idadf._get_all_columns_in_table()) +
                                       "\" FROM " + idadf._name)
 
             # Initiate the modified table under a random name
             tablename = self._get_valid_tablename(prefix="DATA_FRAME_")
-            self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tablename,viewname))
-            self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tablename,viewname))
+            if self._is_netezza_system():
+                 self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s)"%(tablename,viewname))
+            else:
+                self._prepare_and_execute("CREATE TABLE %s LIKE %s"%(tablename,viewname))
+                self._prepare_and_execute("INSERT INTO %s (SELECT * FROM %s)"%(tablename,viewname))
 
             # Drop the view and old table
             self.drop_view(viewname)
@@ -1285,7 +1356,11 @@ class IdaDataBase(object):
             # prepend the columndict OrderedDict
             items = idadf.internal_state.columndict.items()
             idadf.internal_state.columndict = OrderedDict()
-            idadf.internal_state.columndict[column_id] = "((ROW_NUMBER() OVER())-1)"
+            if self._is_netezza_system():
+                order_by = "ORDER BY NULL"
+            else:
+                order_by = ""
+            idadf.internal_state.columndict[column_id] = "((ROW_NUMBER() OVER("+ order_by +"))-1)"
             for item in items:
                 idadf.internal_state.columndict[item[0]] = item[1]
             idadf.internal_state.update()
@@ -1336,8 +1411,11 @@ class IdaDataBase(object):
 
             tablename = self._get_valid_tablename(prefix="DATA_FRAME_")
 
-            self._prepare_and_execute("CREATE TABLE " + tablename + " LIKE " + viewname)
-            self._prepare_and_execute("INSERT INTO " + tablename + " (SELECT * FROM " + viewname + ")")
+            if self._is_netezza_system():
+                self._prepare_and_execute("CREATE TABLE %s AS (SELECT * FROM %s)"%(tablename,viewname))
+            else:
+                self._prepare_and_execute("CREATE TABLE " + tablename + " LIKE " + viewname)
+                self._prepare_and_execute("INSERT INTO " + tablename + " (SELECT * FROM " + viewname + ")")
 
             # Drop the view and old table
             self.drop_view(viewname)
@@ -1629,13 +1707,19 @@ class IdaDataBase(object):
                 if e.value[0] == "42809":
                     raise TypeError(e.value[1])  # object is not of expected type
             else:
-                sql_code = int(str(e.args[0]).split("SQLCODE=")[-1].split(",")[0])
-                if sql_code == -204:
-                    raise ValueError("Object does not exist.")
-                elif sql_code == -159:
-                    raise TypeError("Object is not of expected type")
+                if self._is_netezza_system():
+                    if "ERROR:  relation does not exist" in str(e.args[0]):
+                        raise ValueError("Object does not exist.")
+                    else:
+                        raise e
                 else:
-                    raise e # let the expection raise anyway
+                    sql_code = int(str(e.args[0]).split("SQLCODE=")[-1].split(",")[0])
+                    if sql_code == -204:
+                        raise ValueError("Object does not exist.")
+                    elif sql_code == -159:
+                        raise TypeError("Object is not of expected type")
+                    else:
+                        raise e # let the expection raise anyway
         else:
             self._reset_attributes("cache_show_tables")
             return True
@@ -1805,6 +1889,13 @@ class IdaDataBase(object):
         # Check the tablename
         tablename = ibmdbpy.utils.check_tablename(tablename)
 
+        # for Netezza we have to check if the schema exists already
+        # otherwise we have to create it
+        if self._is_netezza_system() & ("." in tablename):
+            schemaname, tabname = tablename.split(".")
+            if self.ida_scalar_query("SELECT COUNT(*) FROM _V_SCHEMA WHERE SCHEMA='%s'"%schemaname) == 0:
+                self.ida_query("CREATE SCHEMA " + schemaname)
+
         column_string = ''
         for column in dataframe.columns:
             if dataframe.dtypes[column] in [object,bool]:
@@ -1969,6 +2060,16 @@ class IdaDataBase(object):
             else:
                 boolean_flaglist.append(0)
 
+        if self._is_netezza_system():
+            sepstr1 = 'SELECT '
+            sepstr2 = ' UNION ALL SELECT '
+            sepstr3 = ' '
+        else:
+            sepstr1 = 'VALUES ('
+            sepstr2 = '), ('
+            sepstr3 = ') '
+
+        row_separator = sepstr1
         for rows in dataframe.values:
             value_string = ''
             for colindex, value in enumerate(rows):
@@ -1994,15 +2095,16 @@ class IdaDataBase(object):
                     value_string += '%s,' % value
             if value_string[-1] == ',':
                 value_string = value_string[:-1]
-            row_string += "(%s)," % value_string
+            row_string += (row_separator + " %s ") % value_string
+            row_separator = sepstr2
+        row_string = row_string +  sepstr3
         if row_string[-2:] == '),':
             row_string = row_string[:-2]
         if row_string[0] == '(':
             row_string = row_string[1:]
+        query = ("INSERT INTO \"%s\".\"%s\" (%s) (%s)" % (schema, tablename, column_string, row_string))
 
-        query = ("INSERT INTO \"%s\".\"%s\" (%s) VALUES (%s)" % (schema, tablename, column_string, row_string))
-
-        #print(query)
+        # print(query)
         # TODO: Good idea : create a savepoint before creating the table
         # Rollback in to savepoint in case of failure
         self._prepare_and_execute(query, autocommit=False, silent=silent)
@@ -2054,9 +2156,11 @@ class IdaDataBase(object):
 
         if alg_name is None:
             alg_name = proc_name
-
-        query = ("SELECT COUNT(*) FROM SYSCAT.ROUTINES WHERE ROUTINENAME='%s" +
-                 "' AND ROUTINEMODULENAME = 'IDAX'") % proc_name
+        if self._is_netezza_system():
+            query = ("SELECT COUNT(*) FROM NZA.._V_PROCEDURE WHERE PROCEDURE='%s'") % proc_name
+        else:
+            query = ("SELECT COUNT(*) FROM SYSCAT.ROUTINES WHERE ROUTINENAME='%s" +
+                     "' AND ROUTINEMODULENAME = 'IDAX'") % proc_name
         flag = self.ida_scalar_query(query)
 
         if int(flag) == False:
@@ -2066,7 +2170,7 @@ class IdaDataBase(object):
 
     def _call_stored_procedure(self, sp_name, **kwargs):
         """
-        Call a specific stored procedure from Db2 Warehouse and return its result.
+        Call a specific IDAX/INZA stored procedure and return its result.
 
         Parameters
         ----------
@@ -2077,6 +2181,11 @@ class IdaDataBase(object):
         """
         tmp = []
         views = []
+        if self._is_netezza_system():
+            sp_schema = 'NZA.'
+        else:
+            sp_schema = 'IDAX'
+
         for key, value in six.iteritems(kwargs):
             if value is None:
                 continue  # Go to next iteration
@@ -2094,11 +2203,14 @@ class IdaDataBase(object):
             else:
                 tmp.append("%s=%s" % (key, value))
         try:
-            call = "CALL %s('%s')" % (sp_name, ",".join(tmp))
+            call = "CALL %s.%s('%s')" % (sp_schema, sp_name, ",".join(tmp))
             result = self._prepare_and_execute(call)
         except:
-            query = "values idax.last_message"
-            raise IdaDataBaseError(self.ida_scalar_query(query))
+            if self._is_netezza_system():
+                error_msg = "Error"
+            else:
+                error_msg = self.ida_scalar_query("values idax.last_message")
+            raise IdaDataBaseError(error_msg)
         finally:
             for view in views:
                 self.drop_view(view)
@@ -2134,11 +2246,20 @@ class IdaDataBase(object):
             except Exception as e:
                 raise IdaDataBaseError(e.value[-1])
         elif self._con_type == "jdbc":
+            # This avoids infinite recursions on Netezza due to reconnect calls in
+            sql.ida_query, sql.ida_scalar_query and sql._prepare_and_execute
+            if self._con._closed:
+                raise IdaDataBaseError("The connection is closed")
             try:
                 # Avoid infinite recursion
-                sql.ida_query(self,"SELECT distinct TABSCHEMA, TABNAME, OWNER,"+
-                              " TYPE from SYSCAT.TABLES WHERE (OWNERTYPE = 'U')",
-                              True, True)
+                if self._is_netezza_system():
+                    # On Netezza no result sets are returned after the first database error
+                    if sql.ida_query(self, "SELECT count(*) FROM _V_TABLE", True, True) == None:
+                        raise IdaDataBaseError("The connection is closed")
+                else:
+                    sql.ida_query(self,"SELECT distinct TABSCHEMA, TABNAME, OWNER,"+
+                                  " TYPE from SYSCAT.TABLES WHERE (OWNERTYPE = 'U')",
+                                  True, True)
             except Exception as e:
                 raise IdaDataBaseError("The connection is closed")
 
@@ -2163,3 +2284,10 @@ class IdaDataBase(object):
         exists in self. This is used to refresh lazy attributes and caches.
         """
         ibmdbpy.utils._reset_attributes(self, attributes)
+
+
+    def _is_netezza_system(self):
+         """
+         Checks if the underlying database system is Netezza.
+         """
+         return self._database_system == 'netezza'

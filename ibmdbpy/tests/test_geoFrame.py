@@ -30,6 +30,7 @@ from ibmdbpy import IdaSeries
 from ibmdbpy import IdaGeoDataFrame
 from ibmdbpy import IdaGeoSeries
 
+@pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
 class Test_IdaGeoDataFrame(object):
 
     def test_idageodf_set_geometry_error(self, idageodf_county):

@@ -127,20 +127,20 @@ class Test_UploadDataFrame(object):
         idadb.drop_table("DUMMY.TEST_AS_IDADF_18729493954_23849590")
 
     def test_idadb_ida_query(self, idadb, idadf):
-        query = "SELECT * FROM %s FETCH FIRST 5 ROWS ONLY"%idadf.name
+        query = "SELECT * FROM %s FETCH LIMIT 5"%idadf.name
         df = idadb.ida_query(query)
         assert(isinstance(df,pandas.DataFrame))
         assert(len(idadf.columns) == len(df.columns))
         assert(len(df) == 5)
 
     def test_idadb_ida_query_first_row_only(self, idadb, idadf, df):
-        query = "SELECT * FROM %s FETCH FIRST 5 ROWS ONLY"%idadf.name
+        query = "SELECT * FROM %s FETCH LIMIT 5"%idadf.name
         downloaded_df = idadb.ida_query(query, first_row_only=True)
         assert(isinstance(downloaded_df,tuple))
         assert(len(downloaded_df) == len(df.loc[0]))
 
     def test_idadb_ida_scalar_query(self, idadb, idadf):
-        query = "SELECT * FROM %s FETCH FIRST 5 ROWS ONLY"%idadf.name
+        query = "SELECT * FROM %s FETCH LIMIT 5"%idadf.name
         downloaded_df = idadb.ida_scalar_query(query)
         assert(isinstance(downloaded_df,six.string_types)|isinstance(downloaded_df,Number))
 

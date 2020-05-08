@@ -43,7 +43,7 @@ class KMeans(object):
 
 
     The KMeans class provides an interface for using the KMEANS
-    and PREDICT_KMEANS IDAX methods of Db2 Warehouse.
+    and PREDICT_KMEANS IDAX/INZA methods.
     """
     def __init__(self, n_clusters=3, modelname=None, max_iter=5, distance="euclidean",
                  random_state=12345, idbased=False, statistics=None):
@@ -275,8 +275,8 @@ class KMeans(object):
         self.colPropertiesTable = colPropertiesTable
 
         # Create a temporay view
-        idadf.internal_state._create_view()
-        tmp_view_name = idadf.internal_state.current_state # deprecated, hange to idadf.name
+        tmp_view_name = idadf.internal_state._create_view()
+        # tmp_view_name = idadf.internal_state.current_state # deprecated, hange to idadf.name
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
@@ -284,7 +284,7 @@ class KMeans(object):
         try:
             # TODO: outtable is optional but this does not match with the doc
             # Defect to declare
-            idadf._idadb._call_stored_procedure("IDAX.KMEANS ",
+            idadf._idadb._call_stored_procedure("KMEANS ",
                                                 model = self.modelname,
                                                 intable = tmp_view_name,
                                                 k = self.n_clusters,
@@ -370,14 +370,14 @@ class KMeans(object):
 
         self.outtable = outtable
         # Create a temporay view
-        idadf.internal_state._create_view()
-        tmp_view_name = idadf.internal_state.current_state
+        tmp_view_name = idadf.internal_state._create_view()
+        # tmp_view_name = idadf.internal_state.current_state
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
             
         try:
-            idadf._idadb._call_stored_procedure("IDAX.PREDICT_KMEANS ",
+            idadf._idadb._call_stored_procedure("PREDICT_KMEANS ",
                                                  model = self.modelname,
                                                  intable = tmp_view_name,
                                                  id = column_id,
@@ -421,7 +421,7 @@ class KMeans(object):
             print("Within cluster sum of squares by cluster:")
             print(self.withinss)
             try:
-                self._idadb._call_stored_procedure("IDAX.PRINT_MODEL ", model = self.modelname)
+                self._idadb._call_stored_procedure("PRINT_MODEL ", model = self.modelname)
             except:
                 raise
             return
@@ -429,7 +429,7 @@ class KMeans(object):
     def _retrieve_KMeans_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The KMEANS 
-        IDAX function stores its result in 4 tables:
+        IDAX/INZA function stores its result in 4 tables:
 
             * <MODELNAME>_MODEL
             * <MODELNAME>_COLUMNS

@@ -62,6 +62,13 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
     >>> idadf = IdaDataFrame(idadb, "IRIS")
     >>> pearson(idadf)
     """
+    # check if the corr function is installed on the Netezza system
+    if idadf._idadb._is_netezza_system():
+        corr_query = "SELECT count(*) from _V_OBJECT  where OBJNAME like 'CORR#%' AND OBJDB = CURRENT_DB"
+        if idadf._idadb.ida_scalar_query(corr_query) == 0:
+            raise NotImplementedError("The CORR function is not installed on the Netezza database.")
+
+
     numerical_columns = idadf._get_numerical_columns()
     if features is None:
         features = numerical_columns
@@ -85,9 +92,14 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
             value_dict[t] = OrderedDict()
             
             features_notarget = [x for x in features if x != t]
-            
+
+            if idadf._idadb._is_netezza_system():
+                corr_funct = "CORR"
+            else:
+                corr_funct = "CORRELATION"
+
             if len(features_notarget) < 64:
-                agg_list = ["CORRELATION(\"%s\",\"%s\")"%(x, t) for x in features_notarget]
+                agg_list = ["%s(\"%s\",\"%s\")"%(corr_funct, x, t) for x in features_notarget]
                 agg_string = ', '.join(agg_list)
                 name = idadf.internal_state.current_state
                 data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
@@ -95,7 +107,7 @@ def pearson(idadf, target=None, features=None, ignore_indexer=True):
                 chunkgen = chunklist(features_notarget, 100)
                 data = ()
                 for chunk in chunkgen: 
-                    agg_list = ["CORRELATION(\"%s\",\"%s\")"%(x, t) for x in chunk]
+                    agg_list = ["%s(\"%s\",\"%s\")"%(corr_funct, x, t) for x in chunk]
                     agg_string = ', '.join(agg_list)
             
                     name = idadf.internal_state.current_state
@@ -181,11 +193,16 @@ def spearman(idadf, target=None, features = None, ignore_indexer=True):
     numerical_features = list(set(numerical_features) | set(numerical_targets))
     
     
-    agg_list = ["CAST(RANK() OVER (ORDER BY \"%s\") AS INTEGER) AS \"%s\""%(x, x) for x in numerical_features]
+    agg_list = ["CAST(RANK() OVER (ORDER BY \"%s\") AS INTEGER) AS \"%s_rank\""%(x, x) for x in numerical_features]
     agg_string = ', '.join(agg_list)
+
     
     expression = "SELECT %s FROM %s"%(agg_string, idadf.name)
-    
+    if idadf._idadb._is_netezza_system():
+        select_list = ["\"%s_rank\" AS \"%s\""%(x, x) for x in numerical_features]
+        select_string = ', '.join(select_list)
+        expression = "SELECT " + select_string + " FROM ( " + expression + ") AS T"
+
     viewname = idadf._idadb._create_view_from_expression(expression)
     
     try:

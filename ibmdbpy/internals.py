@@ -176,7 +176,7 @@ class InternalState(object):
         created view, otherwise returns the name of the table.
         """
         if self.viewstack:
-            return self.viewstack[-1]
+            return self.viewstack[-1] + " AS TEMP"
         else:
             return self.name
 
@@ -200,7 +200,7 @@ class InternalState(object):
         query = "CREATE VIEW \"%s\" AS (%s)"%(view, self.get_state())
         self._idadf._prepare_and_execute(query, autocommit = True)
         self.viewstack.append(view)
-        return
+        return view
 
     def _delete_view(self, viewname = None):
         """
@@ -249,8 +249,8 @@ class InternalState(object):
             self._views.append(query)
         elif self.order is not None:
             # Assumption : order is the only modification
-            query = "SELECT * FROM (SELECT * FROM %s"+self.get_order()+")"
-            self.order = None
+            query = "SELECT * FROM (SELECT * FROM %s"+self.get_order()+") AS TEMP"
+            # self.order = None
             #self.stop_cumulating_columns()
             self._views = self._views + self._cumulative
             self._cumulative = []
@@ -291,12 +291,17 @@ class InternalState(object):
                     #columns = "\"" + "\",\"".join(self._idadf.columns) + "\""
 
                 if self._idadf.indexer:
-                    query = ("SELECT " + columns + " FROM %s "+ "WHERE " +
+                    query = ("SELECT " + columns + " FROM %s AS TEMP1 WHERE " +
                              self._idadf.indexer + indexstring)
                 else:
-                    query = ("SELECT " + columns + " FROM (SELECT TEMP.*, "+
-                            "(ROWNUMBER() OVER()-1) AS RN FROM %s AS TEMP) "+
+                    if self._idadf._idadb._is_netezza_system():
+                        order_by = "ORDER BY NULL"
+                    else:
+                        order_by = ""
+                    query = ("SELECT " + columns + " FROM (SELECT TEMP1.*, "+
+                            "(ROW_NUMBER() OVER(" + order_by + ")-1) AS RN FROM %s AS TEMP1) AS TEMP2 "+
                             "WHERE RN " + indexstring)
+
                 self.index = None
 
                 #self.stop_cumulating_columns()
@@ -375,6 +380,7 @@ class InternalState(object):
         """
         Changes order in the internal state of the IdaDataframe.
         """
+        print("set_order " + order[0])
         self.order = order
         self.ascending = ascending
 

@@ -485,7 +485,7 @@ class IdaDataFrame(object):
 
                 # Performance improvement
                 # avoid, caused wrong dtypes for the result
-                # newidaseries.dtypes = self.dtypes.loc[[item]]
+                newidaseries.dtypes = self.dtypes.loc[[item]]
 
                 return newidaseries
 
@@ -512,7 +512,7 @@ class IdaDataFrame(object):
 
             # Performance improvement
             # avoid, caused wrong dtypes for the result
-            # newidadf.dtypes = self.dtypes.loc[item]
+            newidadf.dtypes = self.dtypes.loc[item]
 
         return newidadf
 
@@ -980,9 +980,11 @@ class IdaDataFrame(object):
         versions because it is not very useful.
         """
         name = self.internal_state.current_state
-
-        pk = self.ida_query("SELECT NAME FROM SYSIBM.SYSCOLUMNS WHERE TBNAME = '" +
-                            name + "' AND KEYSEQ > 0 ORDER BY KEYSEQ ASC", first_row_only = True)
+        pk = NULL
+        # on Netezza primary keys are not supported
+        if not self._idadb._is_netezza_system():
+            pk = self.ida_query("SELECT NAME FROM SYSIBM.SYSCOLUMNS WHERE TBNAME = '" +
+                                name + "' AND KEYSEQ > 0 ORDER BY KEYSEQ ASC", first_row_only = True)
         if pk:
             return pk[0]
         else:
@@ -1059,8 +1061,7 @@ class IdaDataFrame(object):
             raise ValueError("Parameter nrow should be an int greater than 0.")
         else:
             name = self.internal_state.current_state
-
-            order = ''
+            order = self.internal_state.get_order()
             if not " ORDER BY " in self.internal_state.get_state():
                 if (self.indexer is not None)&(self.indexer in self.columns):
                     order = " ORDER BY \"" + str(self.indexer) + "\" ASC"
@@ -1072,7 +1073,7 @@ class IdaDataFrame(object):
                         order = " ORDER BY \"" + column + "\" ASC"
                     else:
                         order = ''
-            data = self.ida_query("SELECT * FROM %s%s FETCH FIRST %s ROWS ONLY"%(name, order, nrow))
+            data = self.ida_query("SELECT * FROM %s %s LIMIT %s "%(name, order, nrow))
 
             if data.shape[0] != 0:
                 # otherwise column sort order is reverted
@@ -1082,7 +1083,6 @@ class IdaDataFrame(object):
 #                data = ibmdbpy.utils._convert_dtypes(self, data)
                 if isinstance(self, ibmdbpy.IdaSeries):
                     data = pd.Series(data)
-
             return data
 
     # TODO : There is a warning in anaconda when there are missing values -> why ?
@@ -1129,12 +1129,15 @@ class IdaDataFrame(object):
             name = self.internal_state.current_state
 
             if " ORDER BY " in self.internal_state.get_state():
-                query = "SELECT * FROM %s FETCH FIRST %s ROWS ONLY"%(name, nrow)
+                query = "SELECT * FROM %s LIMIT %s "%(name, nrow)
                 data = self.ida_query(query)
                 data.columns = self.columns
                 data.set_index(data[self.indexer], inplace=True)
             else:
-                order = ''
+                if self._idadb._is_netezza_system():
+                    order = "ORDER BY NULL"
+                else:
+                    order = ""
                 if self.indexer:
                     sortkey = str(self.indexer)
                     order = "ORDER BY \"" + sortkey + "\""
@@ -1147,16 +1150,16 @@ class IdaDataFrame(object):
                 query = ("SELECT * FROM (SELECT * FROM (SELECT " + column_string +
                          ", ((ROW_NUMBER() OVER(" + order +
                          "))-1) AS ROWNUMBER FROM " + name +
-                         ") ORDER BY ROWNUMBER DESC FETCH FIRST " + str(nrow) +
-                         " ROWS ONLY) ORDER BY ROWNUMBER ASC")
+                         ") AS TEMP1 ORDER BY ROWNUMBER DESC LIMIT " + str(nrow) +
+                         " ) AS TEMP2 ORDER BY ROWNUMBER ASC")
                 data = self.ida_query(query)
                 data.set_index(data.columns[-1], inplace=True)  # Set the index
                 data.columns = self.columns
 
-            del data.index.name
+            # del data.index.name
             #            data = ibmdbpy.utils._convert_dtypes(self, data)
             if isinstance(self, ibmdbpy.IdaSeries):
-                    data = pd.Series(data[data.columns[0]])
+                data = pd.Series(data[data.columns[0]])
             return data
 
     @idadf_state
@@ -1703,11 +1706,15 @@ class IdaDataFrame(object):
 
         #C = self.levels(target)
         N = len(self)
+        if self._idadb._is_netezza_system():
+            power_function = "POW"
+        else:
+            power_function = "POWER"
 
         if len(features) < 5:
 
             avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(features)]
-            sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(features)]
+            sumlist = ["SUM(CAST(%s(\"%s\" - \"average%s\", 2) as DOUBLE))"%(power_function, feature, index) for index, feature in enumerate(features)]
 
             avgstr = ", ".join(avglist)
             sumstr = ", ".join(sumlist)
@@ -1736,7 +1743,7 @@ class IdaDataFrame(object):
             result = pd.Series()
             for chunk in chunkgen:
                 avglist = ["AVG(\"%s\") as \"average%s\""%(feature, index) for index, feature in enumerate(chunk)]
-                sumlist = ["SUM(CAST(POWER(\"%s\" - \"average%s\", 2) as DOUBLE))"%(feature, index) for index, feature in enumerate(chunk)]
+                sumlist = ["SUM(CAST(%s(\"%s\" - \"average%s\", 2) as DOUBLE))"%(power_function, feature, index) for index, feature in enumerate(chunk)]
 
                 avgstr = ", ".join(avglist)
                 sumstr = ", ".join(sumlist)
@@ -1804,7 +1811,7 @@ class IdaDataFrame(object):
             if isinstance(features, six.string_types):
                 features = [features]
 
-        avglist = ["CAST(AVG(\"%s\") as FLOAT)"%feature for feature in features]
+        avglist = ["CAST(AVG(\"%s\") as FLOAT) AS \"%s_AVG\""%(feature, feature) for feature in features]
         avgstr = ", ".join(avglist)
 
         query = "SELECT \"%s\", %s FROM %s GROUP BY \"%s\""%(groupby, avgstr, self.name, groupby)
@@ -2121,19 +2128,29 @@ class IdaDataFrame(object):
         if '.' in name :
             name = name.split('.')[-1]
 
+        if self._idadb._is_netezza_system():
+            query_select = ("SELECT COLUMN_NAME AS COLNAME, " +
+                            "CASE WHEN strpos(TYPE_NAME, '(') = 0 THEN TYPE_NAME " +
+                            "ELSE substr(TYPE_NAME, 1, strpos(TYPE_NAME,'(')-1) END AS TYPENAME " +
+                            "FROM _V_SYS_COLUMNS ")
+            query_where1 = "WHERE TABLE_NAME =\'%s\' "
+            query_where2 = "AND TABLE_SCHEM =\'%s\' "
+            query_order_by = "ORDER BY ORDINAL_POSITION "
+        else:
+            query_select = "SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "
+            query_where1 = "WHERE TABNAME =\'%s\' "
+            query_where2 = "AND TABSCHEMA =\'%s\' "
+            query_order_by = "ORDER BY COLNO"
+
         if name.find("TEMP_VIEW_") == 0:
             #When the column names are going to be retrieved from a temporary
             #view that was created with the definition of the current state of
             #the IdaDataFrame, the schema name cannot be assumed as the same of
             #the IdaDataFrame. Also mind that the name of the temporary view
             #is thought to be random enough to avoid collisions
-            data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
-                               "WHERE TABNAME=\'%s\' "+
-                               "ORDER BY COLNO")%(name))
+            data = self.ida_query((query_select + query_where1 + query_order_by)%(name))
         else:
-           data = self.ida_query(("SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "+
-                               "WHERE TABNAME=\'%s\' AND TABSCHEMA=\'%s\' "+
-                               "ORDER BY COLNO")%(name, self.schema))
+            data = self.ida_query((query_select + query_where1 + query_where2 + query_order_by)%(name, self.schema))
 
         # Workaround for some ODBC version which does not get the entire
         # string of the column name in the cursor descriptor.
@@ -2141,7 +2158,7 @@ class IdaDataFrame(object):
         data.columns = ["COLNAME", "TYPENAME"]
         data.columns = [x.upper() for x in data.columns]
         data.set_index(keys='COLNAME', inplace=True)
-        del data.index.name
+        # del data.index.name
         return data
 
     def _reset_attributes(self, attributes):
@@ -2201,10 +2218,10 @@ class IdaDataFrame(object):
             """
             Decides if a column should be considered categorical or numerical
             """
-            categorical_attributes = ['VARCHAR', 'CHARACTER', 'VARGRAPHIC',
+            categorical_attributes = ['VARCHAR', 'CHARACTER VARYING', 'CHARACTER', 'VARGRAPHIC',
                                       'GRAPHIC', 'CLOB']
             numerical_attributes = ['SMALLINT', 'INTEGER', 'BIGINT', 'REAL',
-                                    'DOUBLE', 'FLOAT', 'DECIMAL', 'NUMERIC']
+                                    'DOUBLE', 'DOUBLE PRECISION', 'FLOAT', 'DECIMAL', 'NUMERIC']
             if tup[0] in categorical_attributes:
                 if factor_threshold is None:
                     return "CATEGORICAL"
@@ -2246,7 +2263,7 @@ class IdaDataFrame(object):
         ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
         """
         num = ['SMALLINT', 'INTEGER', 'BIGINT', 'REAL',
-                            'DOUBLE', 'FLOAT', 'DECIMAL', 'NUMERIC']
+                            'DOUBLE', 'DOUBLE PRECISION', 'FLOAT', 'DECIMAL', 'NUMERIC']
         return list(self.dtypes.loc[self.dtypes['TYPENAME'].isin(num)].index)
 
     def _get_categorical_columns(self):

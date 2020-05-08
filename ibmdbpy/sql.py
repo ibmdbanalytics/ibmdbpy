@@ -61,6 +61,8 @@ def _prepare_and_execute(idaobject, query, autocommit = True, silent = False):
         if autocommit is True:
             idaobject._autocommit()
     except:
+        if idaobject._is_netezza_system():
+            idaobject.reconnect()
         raise
     else:
         return True
@@ -227,6 +229,8 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
             return result                       
             
     except:
+        if idadb._is_netezza_system():
+            idadb.reconnect()
         raise
     finally:
         cursor.close()
@@ -249,6 +253,8 @@ def ida_scalar_query(idadb, query, silent = False, autocommit = False):
         if result is None:
             result = np.nan
     except:
+        if idadb._is_netezza_system():
+            idadb.reconnect()
         raise
     finally:
         cursor.close()

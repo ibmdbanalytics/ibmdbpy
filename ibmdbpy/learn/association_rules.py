@@ -36,7 +36,7 @@ class AssociationRules(object):
     preferred due to its scalability.
 
     The AssociationRules class provides an interface for using the
-    ASSOCRULES amd PREDICT_ASSOCRULES IDAX methods of Db2 Warehouse.
+    ASSOCRULES amd PREDICT_ASSOCRULES IDAX/INZA methods.
     """
 
     def __init__(self, modelname = None, minsupport = None, maxlen = 5, maxheadlen = 1, minconf = 0.5):
@@ -259,15 +259,15 @@ class AssociationRules(object):
                 idadf._idadb.drop_model(self.modelname)
 
         # Create a temporay view
-        idadf.internal_state._create_view()
-        tmp_view_name = idadf.internal_state.current_state
+        tmp_view_name = idadf.internal_state._create_view()
+        # tmp_view_name = idadf.internal_state.current_state
         print(tmp_view_name)
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
-            idadf._idadb._call_stored_procedure("IDAX.ASSOCRULES ",
+            idadf._idadb._call_stored_procedure("ASSOCRULES ",
                                                  model = self.modelname,
                                                  intable = tmp_view_name,
                                                  tid = transaction_id,
@@ -357,7 +357,7 @@ class AssociationRules(object):
             itemsin = ";".join(itemsin)
 
         try:
-            self._idadf._idadb._call_stored_procedure("IDAX.PRUNE_ASSOCRULES ",
+            self._idadf._idadb._call_stored_procedure("PRUNE_ASSOCRULES ",
                                                  model = self.modelname,
                                                  itemsin = itemsin,
                                                  itemsout = itemsout,
@@ -467,14 +467,14 @@ class AssociationRules(object):
         self.sort = sort
 
         # Create a temporay view
-        idadf.internal_state._create_view()
-        tmp_view_name = idadf.internal_state.current_state
+        tmp_view_name = idadf.internal_state._create_view()
+        # tmp_view_name = idadf.internal_state.current_state
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
-            idadf._idadb._call_stored_procedure("IDAX.PREDICT_ASSOCRULES ",
+            idadf._idadb._call_stored_procedure("PREDICT_ASSOCRULES ",
                                                  model = self.modelname,
                                                  intable = tmp_view_name,
                                                  outtable = outtable,
@@ -529,7 +529,8 @@ class AssociationRules(object):
             return self.get_params
         else:
             try:
-                res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                # res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                res = self._idadb._call_stored_procedure("PRINT_MODEL ", model = self.modelname)
                 if detail:
                     self._retrieve_AssociationRules_Model(self.modelname, verbose=True)
             except:
@@ -542,7 +543,7 @@ class AssociationRules(object):
     def _retrieve_AssociationRules_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The 
-        Association Rules IDAX function stores its result in 4 tables:
+        Association Rules IDAX/INZA function stores its result in 4 tables:
 
             * <MODELNAME>_ASSOCPATTERNS
             * <MODELNAME>_ASSOCPATTERNS_STATISTICS

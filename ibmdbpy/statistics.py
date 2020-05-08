@@ -83,8 +83,15 @@ def _numeric_stats(idadf, stat, columns):
             count_dict = dict((x, y) for x, y in zip(columns, tuple_count))
             agg_list = []
             for column in columns:
-                agg_list.append("STDDEV(\"%s\")*(SQRT(%s)/SQRT(%s))"
-                                %(column, count_dict[column], count_dict[column]-1))
+                if idadf._idadb._is_netezza_system():
+                    # workaround for error on Netezza related to "/"
+                    # ERROR:  Function 'QRT(INT4)' does not exist
+                    # sqrt_term = "SQRT(%s) * POW(SQRT(%s), -1)" %(count_dict[column], count_dict[column]-1)
+                    sqrt_term = 1
+                else:
+                    sqrt_term = "SQRT(%s)/SQRT(%s)"  %(count_dict[column], count_dict[column]-1)
+                # agg_list.append("STDDEV(\"%s\")*(SQRT(%s)/SQRT(%s))"
+                agg_list.append("STDDEV(\"%s\")*( %s )" %(column, sqrt_term))
             select_string = ', '.join(agg_list)
         elif stat == "var":
             tuple_count = _numeric_stats(idadf, 'count', columns)
@@ -93,8 +100,14 @@ def _numeric_stats(idadf, stat, columns):
             count_dict = dict((x, int(y)) for x, y in zip(columns, tuple_count))
             agg_list = []
             for column in columns:
-                agg_list.append("VAR(\"%s\")*(%s.0/%s.0)"
-                                %(column, count_dict[column], count_dict[column]-1))
+                if idadf._idadb._is_netezza_system():
+                # workaround for error on Netezza related to "/"
+                # ERROR:  Unable to identify an operator '//' ..
+                    # div_term = "%s.0 * POW(%s.0, -1)" %(count_dict[column], count_dict[column]-1)
+                    div_term = 1
+                else:
+                    div_term = "%s.0/%s.0" %(count_dict[column], count_dict[column]-1)
+                agg_list.append("VARIANCE(\"%s\")*(%s)" %(column, div_term))
             select_string = ', '.join(agg_list)
         elif stat == "min":
             select_string = 'MIN(\"' + '\"), MIN(\"'.join(columns) + '\")'
@@ -159,7 +172,7 @@ def _get_percentiles(idadf, percentiles, columns):
         df = idadf.ida_query("(SELECT \""+column+"\" AS \""+column+"\" FROM (SELECT "+
                         "ROW_NUMBER() OVER(ORDER BY \""+column+"\") as rn, \""+
                         column + "\" FROM (SELECT * FROM " + name +
-                        ")) WHERE rn  in("+ indexes_string +"))")
+                        ") AS T1) AS T2 WHERE rn  in("+ indexes_string +"))")
 
         #indexvalues = list(df[df.columns[0]])
         indexvalues = list(df)
@@ -218,7 +231,7 @@ def _get_number_of_nas(idadf, columns):
     query_list = list()
     for column in columns:
         string = ("(SELECT COUNT(*) AS \"" + column + "\" FROM " +
-                name + " WHERE \"" + column + "\" IS NULL)")
+                name + " WHERE \"" + column + "\" IS NULL) AS T_" + column)
         query_list.append(string)
 
     query_string = ', '.join(query_list)
@@ -260,7 +273,7 @@ def _count_level(idadf, columnlist=None):
         # Here cast ?
         query_list.append("(SELECT COUNT(*) AS \"" + column +"\" FROM (" +
                           "SELECT \"" + column + "\" FROM " + name +
-                          " GROUP BY \"" + column + "\" ))")
+                          " GROUP BY \"" + column + "\" ) AS T1_" + column + ") AS T2_" + column)
         #query_list.append("(SELECT CAST(COUNT(*) AS BIGINT) AS \"" + column +"\" FROM (" +
         #                  "SELECT \"" + column + "\" FROM " + name + " ))")
 
@@ -298,7 +311,7 @@ def _count_level_groupby(idadf, columnlist=None):
 
     column_string = '\"' + '\", \"'.join(columnlist) + '\"'
     query = (("SELECT COUNT(*) FROM (SELECT %s, COUNT(*) as COUNT "+
-            "FROM %s GROUP BY %s ORDER BY %s, COUNT ASC)")
+            "FROM %s GROUP BY %s ORDER BY %s, COUNT ASC) AS T ")
             %(column_string, name, column_string, column_string))
     return idadf.ida_query(query, first_row_only = True)
 
@@ -644,6 +657,12 @@ def cov(idadf, other = None):
     if isinstance(idadf, ibmdbpy.IdaSeries):
         raise TypeError("cov() missing 1 required positional argument: 'other'")
 
+    # check if the covariance function is installed on the Netezza system
+    if idadf._idadb._is_netezza_system():
+        covar_query = "SELECT count(*) from _V_OBJECT  where OBJNAME like 'COVAR_SAMP#%' AND OBJDB = CURRENT_DB"
+        if idadf._idadb.ida_scalar_query(covar_query) == 0:
+            raise NotImplementedError("The COVAR_SAMP function is not installed on the Netezza database.")
+
     columns = idadf._get_numerical_columns()
     if len(columns) < 2 :
         print(idadf.name + " has less than two numeric columns")
@@ -657,12 +676,16 @@ def cov(idadf, other = None):
     combinations = [x for x in itertools.combinations_with_replacement(columns, 2)]
     columns_set = [{x[0], x[1]} for x in combinations]
 
-    for column_pair in combinations:
-        agg_list.append("COVARIANCE(\"" + column_pair[0] + "\",\"" +
-                        column_pair[1] + "\")*(" +
-                        str(min([count_dict[column_pair[0]],
+    if idadf._idadb._is_netezza_system():
+        for column_pair in combinations:
+            agg_list.append("COVAR_SAMP(\"" + column_pair[0] + "\",\"" + column_pair[1] + "\")")
+    else:
+        for column_pair in combinations:
+            agg_list.append("COVARIANCE(\"" + column_pair[0] + "\",\"" +
+                            column_pair[1] + "\")*(" +
+                            str(min([count_dict[column_pair[0]],
                                  count_dict[column_pair[1]]])) + ".0/" +
-                        str(min([count_dict[column_pair[0]],
+                            str(min([count_dict[column_pair[0]],
                                  count_dict[column_pair[1]]])-1) + ".0)")
 
     agg_string = ', '.join(agg_list)
@@ -697,9 +720,14 @@ def corr(idadf, features=None,ignore_indexer=True):
     """
     if isinstance(idadf, ibmdbpy.IdaSeries):
         raise TypeError("corr() missing 1 required positional argument: 'other'")
-    # TODO: catch case n <= 1
-    numerical_columns = idadf._get_numerical_columns()
 
+    # check if the corr function is installed on the Netezza system
+    if idadf._idadb._is_netezza_system():
+        corr_query = "SELECT count(*) from _V_OBJECT  where OBJNAME like 'CORR#%' AND OBJDB = CURRENT_DB"
+        if idadf._idadb.ida_scalar_query(corr_query) == 0:
+            raise NotImplementedError("The CORR function is not installed on the Netezza database.")
+
+    numerical_columns = idadf._get_numerical_columns()
     if len(numerical_columns) < 2 :
         print(idadf.name + " has less than two numeric columns")
         return
@@ -726,10 +754,15 @@ def corr(idadf, features=None,ignore_indexer=True):
     combinations = [x for x in itertools.combinations(features, 2)]
     #columns_set = [{x[0], x[1]} for x in combinations]
 
+    if idadf._idadb._is_netezza_system():
+        corr_function = "CORR"
+    else:
+        corr_function = "CORRELATION"
+
     if len(features) < 64: # the limit of variables for an SQL statement is 4096, i.e 64^2
         agg_list = []
         for column_pair in combinations:
-            agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
+            agg = corr_function + "(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
             agg_list.append(agg)
 
         agg_string = ', '.join(agg_list)
@@ -753,7 +786,7 @@ def corr(idadf, features=None,ignore_indexer=True):
         for chunk in chunkgen:
             agg_list = []
             for column_pair in chunk:
-                agg = "CORRELATION(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
+                agg = corr_function + "(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
                 agg_list.append(agg)
 
             agg_string = ', '.join(agg_list)
@@ -796,9 +829,15 @@ def mad(idadf):
 
     agg_list = []
     for index_col, column in enumerate(columns):
+        if idadf._idadb._is_netezza_system():
+            # workaround for error on Netezza related to "/"
+            # ERROR:  Unable to identify an operator '//'
+            div_term = "* pow(" + str(idadf.shape[0] - tuple_na[index_col]) + ", -1)"
+        else:
+            div_term = "/" + str(idadf.shape[0] - tuple_na[index_col])
         agg_list.append("SUM(ABS(\"" + column + "\" -" +
-                        str(absmean_dict[column]) + "))/" +
-                        str(idadf.shape[0] - tuple_na[index_col]))
+                        str(absmean_dict[column]) + "))" +
+                        div_term)
 
     agg_string = ', '.join(agg_list)
 

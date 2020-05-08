@@ -35,7 +35,7 @@ class NaiveBayes(object):
     on reality. Therefore, they are considered naive.
 
     The NaiveBayes class provides an interface for using the NAIVEBAYES
-    and PREDICT_NAIVEBAYES IDAX methods of Db2 Warehouse.
+    and PREDICT_NAIVEBAYES IDAX/INZA methods.
     """
 
     def __init__(self, modelname = None, disc = None, bins = None):
@@ -308,14 +308,14 @@ class NaiveBayes(object):
 
         # Create a temporay view
         # TODO: Why do we need actually to create a view ?
-        idadf.internal_state._create_view()
-        tmp_view_name = idadf.internal_state.current_state
+        tmp_view_name = idadf.internal_state._create_view()
+        # tmp_view_name = idadf.internal_state.current_state
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
-            idadf._idadb._call_stored_procedure("IDAX.NAIVEBAYES ",
+            idadf._idadb._call_stored_procedure("NAIVEBAYES ",
                                                  model = self.modelname,
                                                  intable = tmp_view_name,
                                                  id = self._column_id,
@@ -416,14 +416,14 @@ class NaiveBayes(object):
         self.mestimation = mestimation
 
         # Create a temporay view
-        idadf.internal_state._create_view()
-        tmp_view_name = idadf.internal_state.current_state
+        tmp_view_name = idadf.internal_state._create_view()
+        # tmp_view_name = idadf.internal_state.current_state
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
 
         try:
-            idadf._idadb._call_stored_procedure("IDAX.PREDICT_NAIVEBAYES ",
+            idadf._idadb._call_stored_procedure("PREDICT_NAIVEBAYES ",
                                                  model = self.modelname,
                                                  intable = tmp_view_name,
                                                  id = column_id,
@@ -467,7 +467,8 @@ class NaiveBayes(object):
             return self.get_params
         else:
             try:
-                res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                # res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                res = self._idadb._call_stored_procedure("PRINT_MODEL ", model = self.modelname)
                 if detail:
                     self._retrieve_NaiveBayes_Model(self.modelname, verbose=True)
             except:
@@ -478,7 +479,7 @@ class NaiveBayes(object):
     def _retrieve_NaiveBayes_Model(self, modelname, verbose=False):
         """
         Retrieve information about the model to print the results. The Naive 
-        Bayes IDAX function stores its result in 2 tables:
+        Bayes IDAX/INZA function stores its result in 2 tables:
 
             * <MODELNAME>_MODEL
             * <MODELNAME>_DISCRANGES
