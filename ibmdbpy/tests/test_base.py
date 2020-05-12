@@ -40,13 +40,15 @@ class Test_DataBaseExploration(object):
         assert isinstance(test, pandas.core.frame.DataFrame)
         assert (list(test.columns) == ['TABSCHEMA','TABNAME','OWNER','TYPE'])
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_show_models(self, idadb):
         df = idadb.show_models()
         assert isinstance(df, pandas.core.frame.DataFrame)
         if not df.empty:
-            assert (list(df.columns) == ['MODELSCHEMA', 'MODELNAME', 'OWNER', 'CREATED', 'STATE',
-                                         'MININGFUNCTION', 'ALGORITHM', 'USERCATEGORY'])
+            show_model_columns = ['MODELNAME', 'OWNER', 'CREATED', 'STATE',
+                                  'MININGFUNCTION', 'ALGORITHM', 'USERCATEGORY']
+            if not idadb._is_netezza_system():
+                show_model_columns =  ['MODELSCHEMA'] + show_model_columns
+            assert (list(df.columns) == show_model_columns)
 
     def test_idadb_exists_table_or_view_positive0(self, idadb, idadf, idaview):
         assert(idadb.exists_table_or_view(idadf.name) == 1)
@@ -87,7 +89,6 @@ class Test_DataBaseExploration(object):
         with pytest.raises(TypeError):
             idadb.exists_view(idadf.name)
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_exists_model_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
         # Create a simple KMEANS model
@@ -123,19 +124,16 @@ class Test_DataBaseExploration(object):
         except : pass
 
     @flaky
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_exists_model_negative(self, idadb):
         if idadb.exists_model("MODEL_58979457385"):
             idadb.drop_model("MODEL_58979457385")
         assert(idadb.exists_model("MODEL_58979457385") == 0)
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_exists_model_with_schema_negative(self, idadb):
         if idadb.exists_model("SCHEMA_58979457385.MODEL_58979457385"):
             idadb.drop_model("SCHEMA_58979457385.MODEL_58979457385")
         assert(idadb.exists_model("SCHEMA_58979457385.MODEL_58979457385") == 0)
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_exists_model_error(self, idadb, idadf):
         with pytest.raises(TypeError):
             idadb.exists_model(idadf.name)
@@ -171,7 +169,6 @@ class Test_DataBaseExploration(object):
         with pytest.raises(ValueError):
             idadb.is_view("NOT_EXISTING_VIEW_130530496_4860385960")
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_is_model_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive = True)
         # Create a simple KMEANS model
@@ -181,13 +178,12 @@ class Test_DataBaseExploration(object):
         try : idadb.drop_model(kmeans.modelname)
         except : pass
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_is_model_negative(self, idadb, idadf, idaview):
         assert(idadb.is_model(idadf.name) == 0)
         assert(idadb.is_model(idaview.name) == 0)
-        assert(idadb.is_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
+        if not idadb._is_netezza_system():
+            assert(idadb.is_model("ST_INFORMTN_SCHEMA.ST_UNITS_OF_MEASURE") == 0)
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
     def test_idadb_is_model_error(self, idadb):
         with pytest.raises(ValueError):
             idadb.is_model("NOTEXISTINGOBJECT_496070383095079384063739509")

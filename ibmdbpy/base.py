@@ -526,14 +526,15 @@ class IdaDataBase(object):
         2   DASHXXXXXX  KMEANS_11948_1434976568  DASHXXXXXX
         """
         if self._is_netezza_system():
-            sp_schema = 'NZA.'
+            list_models_stmt = ("SELECT MODELNAME, OWNER, CREATED, STATE, MININGFUNCTION, ALGORITHM, USERCATEGORY " +
+                                "FROM INZA.V_NZA_MODELS")
             result_columns =  ['modelname', 'owner', 'created', 'state','miningfunction', 'algorithm', 'usercategory']
         else:
-            sp_schema = 'IDAX'
+            list_models_stmt = "call IDAX.LIST_MODELS()"
             result_columns = ['modelschema', 'modelname', 'owner', 'created', 'state',
                               'miningfunction', 'algorithm', 'usercategory']
 
-        data = self.ida_query("call %s.list_models()"%sp_schema)
+        data = self.ida_query(list_models_stmt)
 
         data.columns = result_columns
 
@@ -665,20 +666,21 @@ class IdaDataBase(object):
         else:
             modelschema = self.current_schema
 
-        # check if schema exists to avoid exception thrown by idax.list_models
         if self._is_netezza_system():
-            schemaquery = ("SELECT COUNT(*) from _v_objects WHERE OBJTYPE in ('TABLE', 'VIEW') " +
-                           " AND SCHEMA = '" + modelschema + "'")
+            # on Netezza the model schema part of the model name is ignored
+            modelquery = "SELECT count(*) FROM INZA.V_NZA_MODELS WHERE MODELNAME ='%s'"%modelname
+            modelexists = self.ida_scalar_query(modelquery) >= 1
+            if modelexists:
+                return True
         else:
-            schemaquery = "SELECT count(*) FROM SYSCAT.SCHEMATA WHERE SCHEMANAME = '" + modelschema + "'"
-        schemaexists = self.ida_scalar_query(schemaquery) >= 1
-        if not schemaexists:
-          return False
-
-        data = self.ida_query("call idax.list_models('schema=%s, where=MODELNAME=''%s''')" % (modelschema, modelname))
-
-        if not data.empty:
-            return True
+            # check if schema exists to avoid exception thrown by idax.list_models
+            schemaquery = "SELECT count(*) FROM SYSCAT.SCHEMATA WHERE SCHEMANAME = '%s'"%modelschema
+            schemaexists = self.ida_scalar_query(schemaquery) >= 1
+            if not schemaexists:
+                return False
+            data = self.ida_query("call idax.list_models('schema=%s, where=MODELNAME=''%s''')" % (modelschema, modelname))
+            if not data.empty:
+                return True
 
         tablelist = self.show_tables(show_all=True)
         tablelist = tablelist[(tablelist['TABSCHEMA']==modelschema) & (tablelist['TABNAME']==modelname)]

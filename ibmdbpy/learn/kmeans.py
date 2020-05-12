@@ -280,7 +280,8 @@ class KMeans(object):
         
         #if "." in tmp_view_name:
             #tmp_view_name = tmp_view_name.split('.')[-1]
-
+        if (self.outtable == None) & self._idadb._is_netezza_system():
+            self.outtable = self._idadb._get_valid_tablename(prefix="OUTTABLE_KMEANS_")
         try:
             # TODO: outtable is optional but this does not match with the doc
             # Defect to declare
@@ -289,7 +290,7 @@ class KMeans(object):
                                                 intable = tmp_view_name,
                                                 k = self.n_clusters,
                                                 maxiter = self.max_iter,
-                                                #outtable = self.outtable_fit,
+                                                outtable = self.outtable,
                                                 distance = self.distance,
                                                 id = self._column_id,
                                                 randseed = self.random_state,
@@ -449,26 +450,30 @@ class KMeans(object):
         if self._idadb is None:
             raise IdaKMeansError("No KMeans model was trained before")
 
-        model_main = self._idadb.ida_query('SELECT * FROM ' + modelname + '_MODEL')
+        if self._idadb._is_netezza_system():
+            modeltable_prefix = "INZA.NZA_META_"
+        else:
+            modeltable_prefix = ""
+        model_main = self._idadb.ida_query('SELECT * FROM ' + modeltable_prefix + modelname + '_MODEL')
         # Woraround for specific version of ODBC
         model_main.columns = ['MODELCLASS', 'COMPARISONTYPE', 'COMPARISONMEASURE', 'NUMCLUSTERS']
         model_main.columns = [x.upper() for x in model_main.columns]
 
 
-        col_info = self._idadb.ida_query('SELECT * FROM ' + modelname + '_COLUMNS',)
+        col_info = self._idadb.ida_query('SELECT * FROM ' + modeltable_prefix + modelname + '_COLUMNS',)
         col_info.columns = ['COLUMNNAME', 'DATATYPE', 'OPTYPE', 'USAGETYPE', 'COLUMNWEIGHT',
        'AUTOTRANSFORM', 'TRANSFORMEDCOLUMN', 'COMPAREFUNCTION', 'IMPORTANCE',
        'OUTLIERTREATMENT', 'LOWERLIMIT', 'UPPERLIMIT', 'CLOSURE',
        'STATISTICSTYPE']
         col_info.columns = [x.upper() for x in col_info.columns]
 
-        col_stats = self._idadb.ida_query('SELECT * FROM ' + modelname + '_COLUMN_STATISTICS')
+        col_stats = self._idadb.ida_query('SELECT * FROM ' + modeltable_prefix + modelname + '_COLUMN_STATISTICS')
         col_stats.columns = ['CLUSTERID', 'COLUMNNAME', 'CARDINALITY', 'MODE', 'MINIMUM', 'MAXIMUM',
        'MEAN', 'VARIANCE', 'VALIDFREQ', 'MISSINGFREQ', 'INVALIDFREQ',
        'IMPORTANCE']
         col_stats.columns = [x.upper() for x in col_stats.columns]
 
-        km_out_stat = self._idadb.ida_query('SELECT * FROM ' + modelname + '_CLUSTERS')
+        km_out_stat = self._idadb.ida_query('SELECT * FROM ' + modeltable_prefix + modelname + '_CLUSTERS')
         km_out_stat.columns = ['CLUSTERID', 'NAME', 'DESCRIPTION', 'SIZE', 'RELSIZE', 'WITHINSS']
         km_out_stat.columns = [x.upper() for x in km_out_stat.columns]
 

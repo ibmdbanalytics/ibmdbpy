@@ -451,11 +451,11 @@ class NaiveBayes(object):
         self.fit(idadf, column_id, incolumn, coldeftype, coldefrole, colprepertiesTable, verbose)
         return self.predict(idadf, column_id, outtable, outtableProb, mestimation)
 
-    def describe(self, detail=False):
+    def describe(self, detail=True):
         """
         Parameters
         ----------
-        detail: bool, optional. False by default. 
+        detail: bool, optional. True by default.
         
         Returns
         -------
@@ -467,13 +467,15 @@ class NaiveBayes(object):
             return self.get_params
         else:
             try:
-                # res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
-                res = self._idadb._call_stored_procedure("PRINT_MODEL ", model = self.modelname)
                 if detail:
                     self._retrieve_NaiveBayes_Model(self.modelname, verbose=True)
+                # PRINT_MODEL not supported for Naive Bayes on Netezza‚
+                if not self._idadb._is_netezza_system():
+                     # res = self._idadb.ida_query("CALL IDAX.PRINT_MODEL('model = " + self.modelname +"')")
+                    self._idadb._call_stored_procedure("PRINT_MODEL ", model = self.modelname)
             except:
                 raise
-            return res
+            return
 
 
     def _retrieve_NaiveBayes_Model(self, modelname, verbose=False):
@@ -501,12 +503,19 @@ class NaiveBayes(object):
         if self._idadb is None:
             raise IdaNaiveBayesError("The Naive Bayes model was not trained before.")
 
-        model_main = self._idadb.ida_query('SELECT * FROM ' + modelname + '_MODEL')
+        if self._idadb._is_netezza_system():
+            modeltable_prefix = "INZA.NZA_META_"
+            disctable_postfix =  "_DISC"
+        else:
+            modeltable_prefix = ""
+            disctable_postfix =  "_DISCRANGES"
+
+        model_main = self._idadb.ida_query('SELECT * FROM ' + modeltable_prefix + modelname + '_MODEL')
         model_main.columns = ['ATTRIBUTE', 'VAL', 'CLASS', 'CLASSVALCOUNT', 'ATTRCLASSCOUNT',
        'CLASSCOUNT', 'TOTALCOUNT']
         model_main.columns = [x.upper() for x in model_main.columns]
 
-        disc = self._idadb.ida_query('SELECT * FROM ' + modelname + '_DISCRANGES')
+        disc = self._idadb.ida_query('SELECT * FROM ' + modeltable_prefix + modelname + disctable_postfix)
         disc.columns = ['COLNAME', 'BREAK']
         disc.columns = [x.upper() for x in disc.columns]
 
