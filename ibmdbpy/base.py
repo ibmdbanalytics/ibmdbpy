@@ -200,6 +200,12 @@ class IdaDataBase(object):
             except Exception as e:
                 raise IdaDataBaseError(e.value[1])
 
+            try:
+                self.ida_query("select count(*) from _V_OBJECT")
+                self._database_system = 'netezza'
+            except  Exception as e:
+                self._database_system = 'db2'
+
         if self._con_type == 'jdbc':
 
             missingCredentialsMsg = ("Missing credentials to connect via JDBC.")
@@ -352,7 +358,7 @@ class IdaDataBase(object):
             "and put the file 'db2jcc.jar' or 'db2jcc4.jar' in the CLASSPATH variable "+
             "or in a folder that is in the CLASSPATH variable. Alternatively place "+
             "it in the folder %s"%here)
-            
+
             try:
                 if self._is_netezza_system():
                     self._con = jaydebeapi.connect('org.netezza.Driver', self._connection_string)
