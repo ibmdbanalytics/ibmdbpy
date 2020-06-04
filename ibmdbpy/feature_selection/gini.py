@@ -162,7 +162,7 @@ def gini(idadf, features=None, ignore_indexer=True):
       div_term = "* POW(%s, -1)"%length
     else:
       power_function = "POWER"
-      div_term ="/%s"*length
+      div_term ="/%s"%length
 
     for feature in features:
         

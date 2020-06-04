@@ -48,11 +48,15 @@ def idadf_state(function=None, force=False):
         # Note: 5 is arbitrary. Maybe not the most relevant threshold
         # Means that not view should be created if the idadataframe was 
         # not modified at least 5 times. 
-        if (len(self.internal_state.views) < 5)&(force is False): 
+        if (len(self.internal_state.views) < 5)&(force is False):
             # Here, avoid creating a view but putting in the stack the string
             # that corresponds to the state of the idadataframe
+            if self._idadb._is_netezza_system():
+                asTemp = " AS TEMP"
+            else:
+                asTemp = ""
             if self.internal_state.views:
-                self.internal_state.viewstack.append("(" + self.internal_state.get_state() + ")")
+                self.internal_state.viewstack.append("(" + self.internal_state.get_state() + ")" + asTemp)
             try:
                 result = function(self, *args, **kwds)
             except:
@@ -176,7 +180,7 @@ class InternalState(object):
         created view, otherwise returns the name of the table.
         """
         if self.viewstack:
-            return self.viewstack[-1] + " AS TEMP"
+            return self.viewstack[-1]
         else:
             return self.name
 

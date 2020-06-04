@@ -1118,7 +1118,7 @@ class IdaDataBase(object):
         """
 
         try:
-            self._prepare_and_execute("CALL IDAX.DROP_MODEL('model=" + modelname + "')")
+            self._call_stored_procedure("DROP_MODEL ", model = modelname)
         except Exception as e:
             try:
                 flag = self.exists_table(modelname)
@@ -1175,7 +1175,7 @@ class IdaDataBase(object):
 
         if self.is_table(idadf._name):
             if self._is_netezza_system():
-                 query = "ALTER TABLE %s RENAME TO %s"%(idadf._name, newname)
+                query = "ALTER TABLE %s RENAME TO %s"%(idadf._name, newname)
             else:
                 query = "RENAME TABLE %s TO %s"%(idadf._name, newname)
             try:

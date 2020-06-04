@@ -193,17 +193,15 @@ def spearman(idadf, target=None, features = None, ignore_indexer=True):
     numerical_features = list(set(numerical_features) | set(numerical_targets))
     
     
-    agg_list = ["CAST(RANK() OVER (ORDER BY \"%s\") AS INTEGER) AS \"%s_rank\""%(x, x) for x in numerical_features]
+    agg_list = ["CAST(RANK() OVER (ORDER BY \"%s\") AS INTEGER) AS \"%s_RANK\""%(x, x) for x in numerical_features]
     agg_string = ', '.join(agg_list)
+    subselect_stmt = "SELECT %s FROM %s"%(agg_string, idadf.name)
 
-    
-    expression = "SELECT %s FROM %s"%(agg_string, idadf.name)
-    if idadf._idadb._is_netezza_system():
-        select_list = ["\"%s_rank\" AS \"%s\""%(x, x) for x in numerical_features]
-        select_string = ', '.join(select_list)
-        expression = "SELECT " + select_string + " FROM ( " + expression + ") AS T"
+    select_list = ["\"%s_RANK\" AS \"%s\""%(x, x) for x in numerical_features]
+    select_string = ', '.join(select_list)
+    select_stmt = "SELECT " + select_string + " FROM ( " + subselect_stmt + ") AS T"
 
-    viewname = idadf._idadb._create_view_from_expression(expression)
+    viewname = idadf._idadb._create_view_from_expression(select_stmt)
     
     try:
         idadf_rank = ibmdbpy.IdaDataFrame(idadf._idadb, viewname)

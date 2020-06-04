@@ -2134,7 +2134,7 @@ class IdaDataFrame(object):
                             "ELSE substr(TYPE_NAME, 1, strpos(TYPE_NAME,'(')-1) END AS TYPENAME " +
                             "FROM _V_SYS_COLUMNS ")
             query_where1 = "WHERE TABLE_NAME =\'%s\' "
-            query_where2 = "AND TABLE_SCHEM =\'%s\' "
+            query_where2 = "AND SCHEMA =\'%s\' "
             query_order_by = "ORDER BY ORDINAL_POSITION "
         else:
             query_select = "SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "
