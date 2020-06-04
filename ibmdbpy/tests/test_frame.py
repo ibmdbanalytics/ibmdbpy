@@ -325,10 +325,12 @@ class Test_DataExploration(object):
 
             df_sorted = df.sort_values(sortkey)
             df_head = df_sorted[columns].head()
-
+            ida_sortkeys = ida_head[sortkey].tolist()
+            df_sortkeys = df_head[sortkey].tolist()
             assert isinstance(ida_head, pandas.core.frame.DataFrame)
             assert len(ida_head) == 5
-            assert(ida_head[sortkey].tolist() == df_head[sortkey].tolist())
+            # assert(ida_head[sortkey].tolist() == df_head[sortkey].tolist())
+            assert([ round(x, 10) for x in  ida_sortkeys] == [ round(x, 10) for x in df_sortkeys ])
 
     def test_idadf_head_sorted(self, idadf, df):
         sortIdx = len(df.columns) - 1
@@ -395,9 +397,13 @@ class Test_DataExploration(object):
             df_sorted = df.sort_values(sortkey)
             df_tail = df_sorted[columns].tail()
 
+            ida_sortkeys = ida_tail[sortkey].tolist()
+            df_sortkeys = df_tail[sortkey].tolist()
+
             assert isinstance(ida_tail, pandas.core.frame.DataFrame)
             assert len(ida_tail) == 5
-            assert(ida_tail[sortkey].tolist() == df_tail[sortkey].tolist())
+            # assert(ida_tail[sortkey].tolist() == df_tail[sortkey].tolist())
+            assert([ round(x, 10) for x in  ida_sortkeys] == [ round(x, 10) for x in df_sortkeys ])
 
     @pytest.mark.skip(reason="tail on sorted dataframe fails in general, needs fixing first")
     def test_idadf_tail_sorted(self, idadf, df):
