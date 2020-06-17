@@ -167,8 +167,10 @@ class IdaDataBase(object):
 
         self.data_source_name = dsn
 
-        # default value for _database_system is db2 is db2
+        # default value for _database_system is db2
         self._database_system = 'db2'
+        # first delimiter before the parameters in the jdbc-url
+        url_1stparam_del = ':'
 
         # Detect if user attempt to connection with ODBC or JDBC
         if dsn.startswith('jdbc:'):
@@ -178,6 +180,12 @@ class IdaDataBase(object):
                 # for Netezza the internal connection is always in autocommit mode
                 # to allow explicit commits
                 dsn+= ';autocommit=false'
+                url_1stparam_del = ';'
+            elif dsn.startswith('jdbc:db2:'):
+                self._database_system = 'db2'
+            else:
+                raise IdaDataBaseError(("The JDBC connection string is invalid for Db2 and Netezza. " +
+                                        "It has to start either with 'jdbc:db2' or 'jdbc:netezza'."))
         else:
             self._con_type = "odbc"
 
@@ -224,13 +232,13 @@ class IdaDataBase(object):
                 # (uid and pwd are not needed for local database connections)
                 # otherwise both uid and pwd have to be specified
                 if uid and pwd:
-                    dsn = dsn + ':user={};password={};'.format(uid, pwd)
+                    dsn = dsn + url_1stparam_del + 'user={};password={};'.format(uid, pwd)
                 elif not uid and not pwd:
                    # Neither UID nor PWD have to be specified for local connections.
                    # This assumes that if they're missing, the connection is local.
                     pass
                 else:
-                     raise IdaDataBaseError(missingCredentialsMsg)                        
+                    raise IdaDataBaseError(missingCredentialsMsg)
             else:
                 # if we know there is at least one parameter; we can assume there exists a ":" before the parameter
                 # portion of the string in a correctly formatted dsn.  Therefore, just check for the existence of 
@@ -283,81 +291,85 @@ class IdaDataBase(object):
                 raise IdaDataBaseError(message)
 
             here = os.path.abspath(os.path.dirname(__file__))
+            driver_not_found = ""
+            if self._is_netezza_system():
+                driverlibs = ["nzjdbc3.jar"]
+            else:
+                driverlibs = ["db2jcc4.jar", "db2jcc.jar"]
 
-            if (not jpype.isJVMStarted()) & (not self._is_netezza_system()):
+            if (not jpype.isJVMStarted()):
                 classpath = os.getenv('CLASSPATH','')
                 jarpath = ''
                 platform = sys.platform
-                
-                if verbose: print("Trying to find a path to the db2 jcc driver in CLASSPATH...")
-                if ("db2jcc4.jar" in classpath) or ("db2jcc.jar" in classpath):
+
+                if verbose: print("Trying to find a path to the JDBC driver jar file in CLASSPATH (%s)."%classpath)
+
+                if platform == 'win32':
+                    classpaths = classpath.split(';')
+                else:
+                    classpaths = classpath.split(':')
+
+                if any(dl for dl in driverlibs if dl in classpath):
                     # A path to the driver exists in the classpath variable
-                    if platform == 'win32':
-                        db2jcclist = [x for x in classpath.split(';') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]                        
-                    else:
-                        db2jcclist = [x for x in classpath.split(':') if (("db2jcc4.jar" in x) or ("db2jcc.jar" in x))]
+                    jarpaths =  [jp for jp in classpaths if any([dl in jp for dl in driverlibs])]
+                    jarpath = ""
                     
-                    jarpath = db2jcclist.pop(0) # just take the first
-                    
-                    if not os.path.isfile(jarpath): # Is the path correct?
-                        if verbose: 
-                            print("The path %s does not seem to be correct. Trying to recover..."%jarpath)
-                        jarpath = ''
-                        while db2jcclist: # Try others
-                            jarpath = db2jcclist.pop(0)
-                            if not os.path.isfile(jarpath): 
-                                if verbose: 
-                                    print("The path %s does not seem to be correct. Trying to recover..."%jarpath)
-                                jarpath = ''
-                                
-                    if jarpath and (platform == 'win32'):
-                        jarpath = jarpath.split(':')[1].replace('\\', '/') # get rid of windows style formatting
-                            
+                    while jarpaths: # check if a least one path exists
+                        jarpath = jarpaths.pop(0) # just take the first
+                        if os.path.isfile(jarpath): # Is the path correct?
+                            if platform == 'win32':
+                                jarpath = jarpath.split(':')[1].replace('\\', '/') # get rid of windows style formatting
+                            break
+                        else:
+                            if verbose: print("The path %s does not seem to be correct.\nTrying to recover..."%jarpath)
+                            jarpath = ""
+
                 if not jarpath: # Means the search for a direct path in the CLASSPATH was not successful
-                    def _get_db2driver_from_folder(folder):
+                    def _get_jdbc_driver_from_folders(folders):
                         jarpath = ''
                         if platform == 'win32':
-                            # Windows specific code
-                            if os.path.isfile(folder + "\\db2jcc4.jar"):
-                                jarpath = folder.split(':')[1].replace('\\', '/') + "/db2jcc4.jar"
-                            elif os.path.isfile(folder + "\\db2jcc.jar"):
-                                jarpath = folder.split(':')[1].replace('\\', '/') + "/db2jcc.jar"
+                            jarpaths = [fld.split(':')[1].replace('\\', '/') + "/"  + dl
+                                      for fld in folders for dl in driverlibs if os.path.isfile(fld + "/" + dl)]
                         else:
-                            if os.path.isfile(folder + "/db2jcc4.jar"):
-                                jarpath = folder + "/db2jcc4.jar"
-                            elif os.path.isfile(folder + "/db2jcc.jar"):
-                                jarpath = folder + "/db2jcc.jar"
-                        return jarpath
+                            jarpaths = [fld + "/"  + dl for fld in folders for dl in driverlibs if os.path.isfile(fld + "/" + dl)]
+
+                        if jarpaths:
+                            return jarpaths[0]
                         
                     if classpath: # There is at least something in the classpath variable
                         # Let us see if the jar in a folder of the classpath
-                        if verbose: print("Trying to find the db2 jcc driver in the folders of CLASSPATH...")
-                        if sys.platform == 'win32':
-                            db2jcclist = [x for x in classpath.split(';')]
-                        else:
-                            db2jcclist = [x for x in classpath.split(':')]
-                        for folder in db2jcclist:
-                            if not jarpath:
-                                jarpath = _get_db2driver_from_folder(folder)
+                        if verbose: print("Trying to find the JDBC driver in the folders of CLASSPATH (%s)."%classpath)
+
+                        jarpath = _get_jdbc_driver_from_folders(classpaths)
                     
-                    if not jarpath: # jarpath is still ''
-                        if verbose: print("Trying to find the db2 jcc driver in the local folder of ibmdbpy (%s)"%here)
-                        # Try to get the path to the driver from the ibmdbpy folder, the last chance
-                        jarpath = _get_db2driver_from_folder(here)
-                    
+                        if not jarpath: # jarpath is still ''
+                            if verbose: print("Trying to find the JDBC driver in the local folder of ibmdbpy (%s)"%here)
+                            # Try to get the path to the driver from the ibmdbpy folder, the last chance
+                            jarpath = _get_jdbc_driver_from_folders([here])
+
                 if jarpath:
-                    if verbose: print("Found it at %s! Trying to connect..."%jarpath)
-                       
+                    if verbose: print("Found it at %s!\nTrying to connect..."%jarpath)
+
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
 
+            if self._is_netezza_system():
+                driver_not_found = ("HELP: The Netezza JDBC driver library 'nzjdbc3.jar' could not be found. "+
+                                    "Please, follow the instructions on "+
+                                    "'https://www.ibm.com/support/knowledgecenter/en/SS5FPD_1.0.0/com.ibm.ips.doc/postgresql/odbc/c_datacon_plg_overview.html' "+
+                                    "for downloading and installing the JDBC driver "+
+                                    "and put the file 'nzjdbc3.jar' in the CLASSPATH variable "+
+                                    "or in a folder that is in the CLASSPATH variable. Alternatively place "+
+                                    "it in the folder '%s'."%here)
+
+            else:
+                driver_not_found = ("HELP: The JDBC driver for IBM Db2 could "+
+                                    "not be found. Please download the latest JDBC Driver at the "+
+                                    "following address: 'https://www.ibm.com/support/pages/node/382667' "+
+                                    "and put the file 'db2jcc.jar' or 'db2jcc4.jar' in the CLASSPATH variable "+
+                                    "or in a folder that is in the CLASSPATH variable. Alternatively place "+
+                                    "it in the folder '%s'."%here)
+
             self._connection_string = jdbc_url
-            
-            driver_not_found = ("HELP: The JDBC driver for IBM Db2 could "+
-            "not be found. Please download the latest JDBC Driver at the "+
-            "following address: 'http://www-01.ibm.com/support/docview.wss?uid=swg21363866' "+
-            "and put the file 'db2jcc.jar' or 'db2jcc4.jar' in the CLASSPATH variable "+
-            "or in a folder that is in the CLASSPATH variable. Alternatively place "+
-            "it in the folder %s"%here)
 
             try:
                 if self._is_netezza_system():
@@ -368,8 +380,7 @@ class IdaDataBase(object):
                 print(driver_not_found)
                 raise IdaDataBaseError(e)
              
-            if verbose: 
-                print("Connection successful!")
+            if verbose: print("Connection successful!")
                 
             #add DB2GSE to the database FUNCTION PATH            
             #query = "SET CURRENT FUNCTION PATH = CURRENT FUNCTION PATH, db2gse"
