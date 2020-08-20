@@ -185,7 +185,7 @@ class IdaDataBase(object):
                 self._database_system = 'db2'
             else:
                 raise IdaDataBaseError(("The JDBC connection string is invalid for Db2 and Netezza. " +
-                                        "It has to start either with 'jdbc:db2' or 'jdbc:netezza'."))
+                                        "It has to start either with 'jdbc:db2:' or 'jdbc:netezza:'."))
         else:
             self._con_type = "odbc"
 
