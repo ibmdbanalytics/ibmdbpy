@@ -49,7 +49,13 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
 
           SAMPLE_POLYGONS, SAMPLE_LINES, SAMPLE_GEOMETRIES, SAMPLE_MLINES, SAMPLE_POINTS
 
-    
+    Notes
+    -----
+    IdaGeoDataSeries objects are not supported on Netezza.
+
+    An IdaGeoSeries doesn't have an indexer attribute because geometries are
+    unorderable in DB2 Spatial Extender.
+
     Examples
     --------
     >>> idageodf = IdaGeoDataFrame(idadb, 'SAMPLES.GEO_COUNTY', indexer='OBJECTID', geometry = "SHAPE")
@@ -61,10 +67,6 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         | SHAPE | ST_MULTIPOLYGON   |
          ----------------------------
 
-    Notes
-    -----
-    An IdaGeoSeries doesn't have an indexer attribute because geometries are
-    unorderable in DB2 Spatial Extender.
     """
     def __init__(self, idadb, tablename, indexer, column):
         """
@@ -82,6 +84,10 @@ class IdaGeoSeries(ibmdbpy.IdaSeries):
         might have as indexer another column of the table whose column the
         IdaGeoSeries refers to.
         """
+
+        if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
+                    raise IdaGeoDataFrameError("IdaGeoDataSeries objects are not supported on Netezza.")
+
         super(IdaGeoSeries, self).__init__(idadb, tablename, indexer, column)
         if self.dtypes.TYPENAME[self.column].find('ST_') != 0:
             raise TypeError("Specified column doesn't have geometry type. "

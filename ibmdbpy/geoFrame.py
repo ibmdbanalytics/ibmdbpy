@@ -28,6 +28,7 @@ standard_library.install_aliases()
 import ibmdbpy
 from ibmdbpy.frame import IdaDataFrame
 from ibmdbpy.geoSeries import IdaGeoSeries
+from ibmdbpy.exceptions import IdaGeoDataFrameError
 
 from copy import deepcopy
 
@@ -50,6 +51,10 @@ class IdaGeoDataFrame(IdaDataFrame):
 
     See IdaDataFrame.
     See IdaGeoSeries.
+
+    Notes
+    -----
+    IdaGeoDataFrame objects are not supported on Netezza.
 
     Examples
     --------
@@ -144,6 +149,10 @@ class IdaGeoDataFrame(IdaDataFrame):
         """
         # TODO: Add support for receiving either a string or an IdaGeoSeries as 
         # geometry parameter.        
+
+        if (idadb.__class__.__name__ == "IdaDataBase") & idadb._is_netezza_system():
+            raise IdaGeoDataFrameError("IdaGeoDataFrame objects are not supported on Netezza.")
+
         if geometry is not None and not isinstance(geometry, six.string_types):
             raise TypeError("geometry must be a string")
         super(IdaGeoDataFrame, self).__init__(idadb, tablename, indexer)
