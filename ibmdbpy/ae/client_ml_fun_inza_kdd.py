@@ -13,7 +13,7 @@ idadf = IdaDataFrame(idadb, 'KDDCUP99')
 #print(idadf.head())
 
 
-def decision_tree_ml(self, df):
+code_str="""def decision_tree_ml(self, df):
     from sklearn.model_selection import cross_val_score
     from sklearn.impute import SimpleImputer
     from sklearn.tree import DecisionTreeClassifier
@@ -69,7 +69,7 @@ def decision_tree_ml(self, df):
     cvscores_3 = cross_val_score(dt, X, y, cv=3)
 
     return ds_size, protocol_type, np.mean(cvscores_3)
-
+    """
 
 
 
@@ -92,7 +92,7 @@ def apply_fun(self, x):
 
 import time
 start = time.time()
-nz_groupapply = NZFunGroupedApply(df=idadf, index='protocol_type', fun=decision_tree_ml, output_signature=["dataset_size=int", "protocol_type=str", "classifier_accuracy=double"])
+nz_groupapply = NZFunGroupedApply(df=idadf, index='protocol_type', code_str=code_str, fun_name="decision_tree_ml", output_signature=["dataset_size=int", "protocol_type=str", "classifier_accuracy=double"])
 result = nz_groupapply.get_result()
 print("\n")
 print(result)

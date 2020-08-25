@@ -14,6 +14,7 @@ print(idadf.head())
 
 
 
+code_str="""
 def decision_tree_ml_host(self, df):
 
     from sklearn.model_selection import cross_val_score
@@ -78,12 +79,14 @@ def decision_tree_ml_host(self, df):
 
         ml_result = decision_tree_classifier(df=group)
         self.output(ml_result)
+        """
 
 
 
 
-
-
+#file_to_persist = open("file_persist.py", "wb")
+#pickle.dump(decision_tree_ml, file_to_persist)
+#file_to_persist.close()
 
 
 
@@ -104,16 +107,17 @@ def apply_fun(self, x):
 
 import time
 start = time.time()
-nz_groupapply = NZFunTApply(df=idadf, fun=decision_tree_ml_host,  parallel=False, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
+nz_groupapply = NZFunTApply(df=idadf, code_str=code_str, fun_name ="decision_tree_ml_host", parallel=False, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
 result = nz_groupapply.get_result()
-print("Host only execution")
+print("Host only execution - user code partitions the data")
 print(result)
 print("\n")
 
 end = time.time()
 print(end - start)
 
-def decision_tree_ml(self, df):
+
+code_str="""def decision_tree_ml(self, df):
     from sklearn.model_selection import cross_val_score
     from sklearn.impute import SimpleImputer
     from sklearn.tree import DecisionTreeClassifier
@@ -169,16 +173,29 @@ def decision_tree_ml(self, df):
     cvscores_3 = cross_val_score(dt, X, y, cv=3)
 
     self.output(ds_size, location, np.mean(cvscores_3))
-
+"""
 
 
 
 import time
 start = time.time()
-nz_groupapply = NZFunGroupedApply(df=idadf, index='LOCATION', fun=decision_tree_ml,  output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
+
+nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str, index='LOCATION', fun_name="decision_tree_ml",  output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
 result = nz_groupapply.get_result()
-print("Parallel Execution on SPUs: \n")
+print("HOS+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
 print(result)
 end = time.time()
 print(end - start)
 
+
+
+import time
+start = time.time()
+nz_groupapply = NZFunTApply(df=idadf, code_str=code_str, fun_name ="decision_tree_ml", parallel=True, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
+result = nz_groupapply.get_result()
+print("Host +SPUs execution - slicing on a default column- ML function for the entire slices")
+print(result)
+print("\n")
+
+end = time.time()
+print(end - start)

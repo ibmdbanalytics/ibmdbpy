@@ -202,9 +202,9 @@ class IdaDataBase(object):
             SQL_BLOB to SQL_LONGVARBINARY
             SQL_DBCLOB to SQL_WLONGVARCHAR
             """
-            import pypyodbc
+            import pyodbc
             try :
-                self._con = pypyodbc.connect(self._connection_string)
+                self._con = pyodbc.connect(self._connection_string)
             except Exception as e:
                 raise IdaDataBaseError(e.value[1])
 
@@ -1611,9 +1611,9 @@ class IdaDataBase(object):
             self._check_connection()
         except IdaDataBaseError:
             if self._con_type == 'odbc':
-                import pypyodbc
+                import pyodbc
                 try:
-                    self._con = pypyodbc.connect(self._connection_string)
+                    self._con = pyodbc.connect(self._connection_string)
                 except:
                     raise
                 else:

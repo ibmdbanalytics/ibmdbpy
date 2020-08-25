@@ -9,7 +9,7 @@ idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
-query = 'select * from weather_x10'
+query = 'select * from weather'
 
 df = idadf.ida_query(query)
 print(df.dtypes)
@@ -34,10 +34,10 @@ def decision_tree_ml(df):
     #location = imputed_df.location[0]
 
 
-    imputed_df['cloud9am'] = imputed_df.cloud9am.astype('str')
-    imputed_df['cloud3pm'] = imputed_df.cloud3pm.astype('str')
-    imputed_df['sunshine'] = imputed_df.sunshine.astype('float')
-    imputed_df['evaporation'] = imputed_df.evaporation.astype('float')
+    imputed_df['CLOUD9AM'] = imputed_df.CLOUD9AM.astype('str')
+    imputed_df['CLOUD3PM'] = imputed_df.CLOUD3PM.astype('str')
+    imputed_df['SUNSHINE'] = imputed_df.SUNSHINE.astype('float')
+    imputed_df['EVAPORATION'] = imputed_df.EVAPORATION.astype('float')
 
 
     #imputed_df = imputed_df.drop('date', 1)
@@ -84,8 +84,8 @@ def decision_tree_ml(df):
             #print(le.classes_)
             imputed_df[column] = le.transform(imputed_df[column])
 
-    X = imputed_df.drop(['risk_mm', 'raintomorrow'], axis=1)
-    y = imputed_df['raintomorrow']
+    X = imputed_df.drop(['RISK_MM', 'RAINTOMORROW'], axis=1)
+    y = imputed_df['RAINTOMORROW']
 
     # Create a decision tree
     dt = DecisionTreeClassifier(max_depth=5)
@@ -96,12 +96,12 @@ def decision_tree_ml(df):
 
 
 
-def grouped_local(index,db_name,df):
+def grouped_local(df):
 
 
     #df = data_preparation(df)
     #print(df.head(10))
-    result = df.groupby('location')
+    result = df.groupby('LOCATION')
 
     #result = idadf.ida_query(query, autocommit=True)
 
@@ -114,7 +114,7 @@ def grouped_local(index,db_name,df):
 
 
 
-grouped_local(index='location', db_name='ADMIN.weather',df=df)
+grouped_local(df=df)
 end = time.time()
 print(end-start)
 

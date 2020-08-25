@@ -80,9 +80,36 @@ def ida_query(idadb, query, silent=False, first_row_only=False, autocommit = Fal
     _ida_query_JDBC()
     """
     if idadb._con_type == 'odbc':
-        return _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit)
+        return _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit)
     else:
         return _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit)
+
+def _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit):
+    """
+       For ODBC connections no further work needs to be done regarding
+       CLOB retrieval because it's fixed with a configuration keyword at
+       connection creation point. See IdaDataBase.__init__
+       """
+    print("query : \n" + query)
+
+    # print("commit query: ")
+    # print (autocommit)
+    try:
+        result = read_sql(query, idadb._con)
+
+        return result
+    except Exception as e:
+
+        str_to_check = "\'NoneType\' object is not iterable"
+
+        if str(e) == str_to_check:
+
+            if autocommit is True:
+                idadb.commit()
+            return None
+        else:
+            raise
+
 
 def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
     """

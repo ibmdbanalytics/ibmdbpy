@@ -28,14 +28,16 @@ standard_library.install_aliases()
 
 class NZFunTApply(object):
 
-    def __init__(self, df, fun, parallel,  output_signature, output_table=None):
+    def __init__(self, df,  parallel,  output_signature, output_table=None, code_str=None, fun_ref=None, fun_name=None ):
         """
         Constructor for tapply
         """
         self.db_name = df.internal_state.current_state
         self.df = df
         self.db = df._idadb
-        self.fun = fun
+        self.fun = fun_ref
+        self.fun_name =fun_name
+        self.code_str = code_str
         self.output_table = output_table
         self.output_signature = output_signature
         self.parallel =parallel
@@ -50,7 +52,11 @@ class NZFunTApply(object):
 
         # get the default ae class coupled with client ml code
         # code_string = self.build_udtf_ae_code(self.fun, self.columns)
-        code_string = self.build_udtf_shaper_ae_code(self.fun, self.columns, self.output_signature)
+
+        if self.code_str:
+         code_string = self.build_udtf_shaper_ae_code_fun_as_str(self.code_str, self.fun_name, self.columns, self.output_signature)
+        else :
+         code_string = self.build_udtf_shaper_ae_code_fun_as_ref(self.fun, self.columns, self.output_signature)
 
 
         # send the code as dynamic variable to ae function
@@ -82,39 +88,22 @@ class NZFunTApply(object):
         return result
 
 
-    def build_udtf_ae_code(self, fun, columns):
+
+
+
+    def build_udtf_shaper_ae_code_fun_as_ref(self, fun, columns, output_signature):
         # we need extra single quotes for correct escaping
 
         fun_code = inspect.getsource(fun)
         fun_code = fun_code.replace("'", "''")
+        fun_name = fun.__name__
 
-        base_code = self.get_base_udtf(columns, fun)
-
-        run_string = textwrap.dedent(""" BaseUdtf.run()""")
-
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '    ') \
-                     + run_string
-
-        print_string = """
-       
-        print(3+4)
-        """
-
-        return inspect.cleandoc(final_code)
-
-
-    def build_udtf_shaper_ae_code(self, fun, columns, output_signature):
-        # we need extra single quotes for correct escaping
-
-        fun_code = inspect.getsource(fun)
-        fun_code = fun_code.replace("'", "''")
-
-        base_code = self.get_base_shaper(columns, fun, output_signature)
+        base_code = self.get_base_shaper(columns, fun_name, output_signature)
 
         run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
 
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ') \
-                     + run_string
+        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
+        final_code = final_code+"\n"+ run_string
 
 
         print_string = """
@@ -124,8 +113,27 @@ class NZFunTApply(object):
 
         return inspect.cleandoc(final_code)
 
-    def get_base_udtf(self, columns, fun):
-        fun_name = fun.__name__
+    def build_udtf_shaper_ae_code_fun_as_str(self, code_str, fun_name, columns, output_signature):
+        # we need extra single quotes for correct escaping
+
+        fun_code = code_str
+
+        fun_code = fun_code.replace("'", "''")
+
+        base_code = self.get_base_shaper(columns, fun_name, output_signature)
+
+        run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
+        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
+        final_code = final_code + "\n" + run_string
+
+
+
+
+
+        return inspect.cleandoc(final_code)
+
+    def get_base_udtf(self, columns, fun_name):
+
 
         code_string = """
                 import nzae
@@ -142,8 +150,8 @@ class NZFunTApply(object):
 
         return inspect.cleandoc(code_string)
 
-    def get_base_shaper(self, columns, fun, output_signature):
-        fun_name = fun.__name__
+    def get_base_shaper(self, columns, fun_name, output_signature):
+
         output_signature_str = ""
 
         for i in range(len(output_signature)):
