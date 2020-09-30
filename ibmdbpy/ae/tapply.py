@@ -21,18 +21,19 @@ import inspect
 import textwrap
 from builtins import dict
 from future import standard_library
-from ibmdbpy import IdaDataFrame
+
+from ibmdbpy.ae import shaper, result_builder
 
 standard_library.install_aliases()
 
 
 class NZFunTApply(object):
 
-    def __init__(self, df,  parallel,  output_signature, output_table=None, code_str=None, fun_ref=None, fun_name=None ):
+    def __init__(self, df,  parallel,  output_signature=None, output_table=None, code_str=None, fun_ref=None, fun_name=None, merge_output_with_df=False):
         """
         Constructor for tapply
         """
-        self.db_name = df.internal_state.current_state
+        self.table_name = df.internal_state.current_state
         self.df = df
         self.db = df._idadb
         self.fun = fun_ref
@@ -41,9 +42,14 @@ class NZFunTApply(object):
         self.output_table = output_table
         self.output_signature = output_signature
         self.parallel =parallel
+        self.merge_output = merge_output_with_df
 
         # convert the columns index object to a list
         self.columns = self.df.columns.tolist()
+
+
+
+
 
     def get_result(self):
         # we need a comma separated string of column values
@@ -62,7 +68,7 @@ class NZFunTApply(object):
         # send the code as dynamic variable to ae function
         columns_string = columns_string + ",'CODE_TO_EXECUTE=" + "\"" + code_string + "\"" + "'"
 
-        print("db name is " + self.db_name)
+        print("table name is " + self.table_name)
         # print(columns_string)
         if not self.parallel:
             ae_name = "py_udtf_host"
@@ -70,21 +76,12 @@ class NZFunTApply(object):
             ae_name ="py_udtf_any"
 
         query = "select ae_output.* from " + \
-                " (select * from " + self.db_name + ") as input_t" + \
+                " (select * from " + self.table_name + ") as input_t" + \
                 ", table with final (" + ae_name + "(" + columns_string + ")) as ae_output"
 
         # print(query)
-        if self.output_table:
-            if self.db.exists_table(self.output_table):
-              create_string = "insert into "+self.output_table+" "
-            else:
-              create_string = "create table " + self.output_table + " as "
-            query = create_string+query
-            result = self.df.ida_query(query, autocommit=True)
-            idadf = IdaDataFrame(self.db, self.output_table)
-            df = idadf.as_dataframe()
-            return df
-        result = self.df.ida_query(query)
+        result = result_builder.build_result(self.output_table, self.merge_output, self.db, self.df,
+                                             self.output_signature, self.table_name, query)
         return result
 
 
@@ -98,7 +95,11 @@ class NZFunTApply(object):
         fun_code = fun_code.replace("'", "''")
         fun_name = fun.__name__
 
-        base_code = self.get_base_shaper(columns, fun_name, output_signature)
+
+        if output_signature is None:
+            base_code =self.get_base_default(columns, fun_name)
+        else:
+            base_code = shaper.get_base_shaper_tapply(columns, fun_name, output_signature)
 
         run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
 
@@ -120,7 +121,9 @@ class NZFunTApply(object):
 
         fun_code = fun_code.replace("'", "''")
 
-        base_code = self.get_base_shaper(columns, fun_name, output_signature)
+        base_code = shaper.get_base_shaper_tapply(columns, fun_name, output_signature)
+
+
 
         run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
         final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
@@ -132,79 +135,6 @@ class NZFunTApply(object):
 
         return inspect.cleandoc(final_code)
 
-    def get_base_udtf(self, columns, fun_name):
-
-
-        code_string = """
-                import nzae
-                import pandas as pd
-                class BaseUdtf(nzae.Ae):
-                    def _runUdtf(self):
-                       rows_list=[]
-                       for row in self:
-                         rows_list.append(row)
-                       df = pd.DataFrame(rows_list, columns=""" + str(columns) + """ )
-                       self.""" + fun_name + """(df)"""
-
-        code_string = code_string.replace("'", "''")
-
-        return inspect.cleandoc(code_string)
-
-    def get_base_shaper(self, columns, fun_name, output_signature):
-
-        output_signature_str = ""
-
-        for i in range(len(output_signature)):
-            column_signature = output_signature[i]
-            col_sig_list = column_signature.split('=')
-            if col_sig_list[1]=='int':
-                col_sig_list[1]= 'self.DATA_TYPE__INT32'
-                output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + col_sig_list[
-                    1] + """) """
-            if col_sig_list[1] == 'float':
-                col_sig_list[1] = 'self.DATA_TYPE__FLOAT'
-                output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + col_sig_list[
-                    1] + """) """
-            if col_sig_list[1] == 'double':
-                col_sig_list[1] = 'self.DATA_TYPE__DOUBLE'
-                output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + \
-                                        col_sig_list[
-                                            1] + """) """
-            if col_sig_list[1] == 'str':
-                col_sig_list[1] = 'self.DATA_TYPE__VARIABLE'
-                output_signature_str += """
-                            self.addOutputColumnString('""" + col_sig_list[
-                    0] + """',""" + \
-                                        col_sig_list[
-                                            1] + """,1000) """
 
 
 
-
-        #output_signature_final = inspect.cleandoc(output_signature_str)
-        code_string ="""import nzae
-                        import pandas as pd
-                        class BaseShaperUdtf(nzae.Ae):
-                             def _runUdtf(self):
-                               rows_list=[]
-                               for row in self:
-                                 rows_list.append(row)
-                                 #rows_list.append(str(self.getDatasliceId())+str(self.getHardwareId()))  
-                               df = pd.DataFrame(rows_list, columns=""" + str(columns) + """ )
-                               value = self.""" + fun_name + """(df)
-                               #self.output(value)
-                               #self.output(str(len(rows_list)), str(rows_list[12000]))
-                               
-                             def _runShaper(self):
-                               """   + textwrap.indent(output_signature_str, '                      ') + """
-                                                          
-        
-                             
-                               
-                               """
-
-        code_string = code_string.replace("'", "''")
-        return inspect.cleandoc(code_string)

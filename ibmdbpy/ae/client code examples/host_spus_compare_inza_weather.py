@@ -9,12 +9,14 @@ from ibmdbpy.ae import NZFunGroupedApply
 idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
 
-idadf = IdaDataFrame(idadb, 'WEATHER')
+idadf = IdaDataFrame(idadb, 'WEATHER_x10')
 print(idadf.head())
+query = 'select * from weather limit 10000'
+
+df = idadf.ida_query(query)
 
 
-
-code_str="""
+code_str_host="""
 def decision_tree_ml_host(self, df):
 
     from sklearn.model_selection import cross_val_score
@@ -95,29 +97,30 @@ def decision_tree_ml_host(self, df):
 #print("\n")
 #print(result)
 
+code_str_apply="""
 def apply_fun(self, x):
     from math import sqrt
     max_temp = x[3]
     fahren_max_temp = (max_temp*1.8)+32
-    return fahren_max_temp, max_temp
+    self.output(fahren_max_temp, max_temp)"""
 
-#nz_apply = NZFunApply(df=idadf, fun=apply_fun, output_signature=["fahren_max_temp=double", "max_temp=double"], output_table='weather_new' )
+#nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name='apply_fun', output_signature=["fahren_max_temp=double", "max_temp=double"])
 #result = nz_apply.get_result()
 #print(result)
 
 import time
 start = time.time()
-nz_groupapply = NZFunTApply(df=idadf, code_str=code_str, fun_name ="decision_tree_ml_host", parallel=False, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
-result = nz_groupapply.get_result()
+# = NZFunTApply(df=idadf, code_str=code_str_host, fun_name ="decision_tree_ml_host", parallel=False, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
+#result = nz_groupapply.get_result()
 print("Host only execution - user code partitions the data")
-print(result)
+#print(result)
 print("\n")
 
 end = time.time()
 print(end - start)
 
 
-code_str="""def decision_tree_ml(self, df):
+code_str_host_spus="""def decision_tree_ml(self, df):
     from sklearn.model_selection import cross_val_score
     from sklearn.impute import SimpleImputer
     from sklearn.tree import DecisionTreeClassifier
@@ -180,10 +183,11 @@ code_str="""def decision_tree_ml(self, df):
 import time
 start = time.time()
 
-nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str, index='LOCATION', fun_name="decision_tree_ml",  output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
-result = nz_groupapply.get_result()
-print("HOS+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
-print(result)
+#nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml",  output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
+#nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml")
+#result = nz_groupapply.get_result()
+print("Host+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
+#print(result)
 end = time.time()
 print(end - start)
 
@@ -191,7 +195,8 @@ print(end - start)
 
 import time
 start = time.time()
-nz_groupapply = NZFunTApply(df=idadf, code_str=code_str, fun_name ="decision_tree_ml", parallel=True, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
+output_signature = {'DATASET_SIZE': 'int', 'LOCATION':'str', 'CLASSIFIER_ACCURACY':'double'}
+nz_groupapply = NZFunTApply(df=idadf, code_str=code_str_host_spus, fun_name ="decision_tree_ml", parallel=True, output_signature=output_signature)
 result = nz_groupapply.get_result()
 print("Host +SPUs execution - slicing on a default column- ML function for the entire slices")
 print(result)
