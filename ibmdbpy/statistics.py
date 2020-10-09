@@ -172,6 +172,7 @@ def _get_percentiles(idadf, percentiles, columns):
         df = idadf.ida_query("(SELECT \""+column+"\" AS \""+column+"\" FROM (SELECT "+
                         "ROW_NUMBER() OVER(ORDER BY \""+column+"\") as rn, \""+
                         column + "\" FROM (SELECT * FROM " + name +
+                        " WHERE " + column + " IS NOT NULL " +
                         ") AS T1) AS T2 WHERE rn  in("+ indexes_string +"))")
 
         #indexvalues = list(df[df.columns[0]])
