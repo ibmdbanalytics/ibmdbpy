@@ -2129,17 +2129,19 @@ class IdaDataFrame(object):
             name = name.split('.')[-1]
 
         if self._idadb._is_netezza_system():
+            nz_hidden_columns =  "('ROWID', 'DATASLICEID', 'CREATEXID', 'DELETEXID', '_PAGEID', '_EXTENTID') "
             query_select = ("SELECT COLUMN_NAME AS COLNAME, " +
                             "CASE WHEN strpos(TYPE_NAME, '(') = 0 THEN TYPE_NAME " +
                             "ELSE substr(TYPE_NAME, 1, strpos(TYPE_NAME,'(')-1) END AS TYPENAME " +
                             "FROM _V_SYS_COLUMNS ")
-            query_where1 = "WHERE TABLE_NAME =\'%s\' "
-            query_where2 = "AND SCHEMA =\'%s\' "
+            # hidden Netezza columns are not included in the set of columns of this data frame
+            query_where1 = "WHERE TABLE_NAME = \'%s\' AND COLUMN_NAME NOT IN " + nz_hidden_columns
+            query_where2 = "AND SCHEMA = \'%s\' "
             query_order_by = "ORDER BY ORDINAL_POSITION "
         else:
             query_select = "SELECT COLNAME, TYPENAME FROM SYSCAT.COLUMNS "
-            query_where1 = "WHERE TABNAME =\'%s\' "
-            query_where2 = "AND TABSCHEMA =\'%s\' "
+            query_where1 = "WHERE TABNAME = \'%s\' "
+            query_where2 = "AND TABSCHEMA = \'%s\' "
             query_order_by = "ORDER BY COLNO"
 
         if name.find("TEMP_VIEW_") == 0:
