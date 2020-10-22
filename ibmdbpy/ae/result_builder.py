@@ -38,5 +38,26 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         idadf = IdaDataFrame(db, output_table)
         df = idadf.as_dataframe()
         return df
+    if output_table is None and merge_output is True:
+        output_table ="pyida_table"
+        create_string = "create table " + output_table + "_temp as "
+        query = create_string + query
+        result = df.ida_query(query, autocommit=True)
+        # join the two
+        columns_str = ""
+        for column in output_signature:
+            if column == 'ID':
+                continue
+            columns_str = columns_str + "link. " + column + ","
+        if len(columns_str) > 0:
+            columns_str = columns_str[:-1]
+
+        print(columns_str)
+        query = " select  " + columns_str + " , base.*  from  " + output_table + "_temp as link INNER JOIN  " + table_name + " as base on link.ID = base.ID;"
+        result = df.ida_query(query, autocommit=True)
+        db.drop_table(output_table + "_temp")
+
+        return result
+
     result = df.ida_query(query)
     return result

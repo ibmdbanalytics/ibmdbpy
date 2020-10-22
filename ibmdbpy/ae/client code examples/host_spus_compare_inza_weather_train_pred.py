@@ -9,11 +9,13 @@ from ibmdbpy.ae import NZFunGroupedApply
 idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
 
-idadf = IdaDataFrame(idadb, 'WEATHER_X10')
-print(idadf.head())
+idadf = IdaDataFrame(idadb, 'WEATHER')
+#print(idadf.describe())
 query = 'select * from weather limit 10000'
+#query= "select * from _V_SYS_COLUMNS where TABLE_NAME='WEATHER';"
 
 df = idadf.ida_query(query)
+#print(df)
 #print(idadf.dtypes)
 
 code_str_host = """def decision_tree_ml_host(self, df):
@@ -147,23 +149,27 @@ output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int
 import time
 start = time.time()
 
-nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name='decision_tree_ml_host', parallel=False, output_table="weather_pred_host", output_signature=output_signature, merge_output_with_df=True)
+nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name='decision_tree_ml_host', parallel=False,  output_signature=output_signature, merge_output_with_df=True)
 result = nz_tapply.get_result()
 print("\n")
 print(result)
 end = time.time()
 print(end - start)
+groups = result.groupby("LOCATION")
+for name, group in groups:
+    print(name + ":" + str(len(group)))
+
 
 code_str_apply="""
 def apply_fun(self, x):
     from math import sqrt
-    max_temp = x[4]
-    id = x[3]
+    max_temp = x[3]
+    id = x[24]
     fahren_max_temp = (max_temp*1.8)+32
     row = [id, max_temp,  fahren_max_temp]
     self.output(row)"""
 output_signature = {'ID':'int', 'MAX_TEMP' :'float', 'FAHREN_MAX_TEMP' : 'float'}
-nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name='apply_fun', output_table="temp_conversion", output_signature=output_signature, merge_output_with_df=True)
+nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name='apply_fun', output_signature=output_signature, merge_output_with_df=True)
 result = nz_apply.get_result()
 print(result)
 
@@ -279,11 +285,15 @@ output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int
 import time
 start = time.time()
 
-nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml", output_table="weather_pred_spus", output_signature=output_signature, merge_output_with_df=True)
+nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml", output_signature=output_signature, merge_output_with_df=True)
 #nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml")
 result = nz_groupapply.get_result()
 print("Host+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
 print(result)
+groups = result.groupby("LOCATION")
+for name, group in groups:
+    print (name +":"+str(len(group)))
+
 end = time.time()
 print(end - start)
 
