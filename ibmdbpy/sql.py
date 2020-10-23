@@ -90,12 +90,32 @@ def _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit):
        CLOB retrieval because it's fixed with a configuration keyword at
        connection creation point. See IdaDataBase.__init__
        """
-    print("query : \n" + query)
+    if (query.strip()[:6].upper() == "SELECT") & first_row_only is True:
+            query = "select * from (" + query + ") as T LIMIT 1"
 
-    # print("commit query: ")
-    # print (autocommit)
+    query = _prepare_query(query, silent)
     try:
         result = read_sql(query, idadb._con)
+        if first_row_only is True:
+            if result.shape[0] > 0:
+                tuple_as_list = list(result.values[0])
+                for index, element in enumerate(tuple_as_list):
+                    if element is None:
+                        tuple_as_list[index] = np.nan
+                    if isinstance(element, decimal.Decimal):
+                        tuple_as_list[index] = int(element)
+                result = tuple(tuple_as_list)
+            else:
+                #first_row_only is True but the query retuned nothing
+                result = tuple()
+        else:
+            if result.shape[1] == 1:
+                #convert to Series if only one column
+                # Note: This may solve problem in case the interface does not
+                # get properly the column names. This is just a suggestion.
+                # Uncomment it if you feel you need it, but so far it worked well without
+                # result.columns = [column[0] for column in cursor.description]
+                result = result[result.columns[0]]
 
         return result
     except Exception as e:
@@ -103,12 +123,12 @@ def _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit):
         str_to_check = "\'NoneType\' object is not iterable"
 
         if str(e) == str_to_check:
-
+            # query is not a select-statement, but its execution succeeded
             if autocommit is True:
                 idadb.commit()
-            return None
+                return None
         else:
-            raise
+            raise e
 
 
 def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
