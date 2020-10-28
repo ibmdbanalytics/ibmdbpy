@@ -5,15 +5,21 @@ from ibmdbpy import IdaDataBase, IdaDataFrame
 from ibmdbpy.ae import NZFunTApply, NZClassTApply
 from ibmdbpy.ae import NZFunApply
 from ibmdbpy.ae import NZFunGroupedApply
+import pandas as pd
 
 idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
-#print(idadf.describe())
+
 query = 'select * from weather limit 10000'
 #query= "select * from _V_SYS_COLUMNS where TABLE_NAME='WEATHER';"
-
+#pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', -1)
+print(idadf.describe())
+print(idadf.describe_old())
 df = idadf.ida_query(query)
 #print(df)
 #print(idadf.dtypes)
@@ -305,7 +311,7 @@ output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int
 nz_groupapply = NZFunTApply(df=idadf, code_str=code_str_host_spus, fun_name ="decision_tree_ml", parallel=True, output_signature=output_signature)
 result = nz_groupapply.get_result()
 print("Host +SPUs execution - slicing on a default column- ML function for the entire slices")
-print(result)
+#print(result)
 print("\n")
 
 end = time.time()
