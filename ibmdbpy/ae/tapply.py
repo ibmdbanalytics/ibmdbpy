@@ -71,9 +71,9 @@ class NZFunTApply(object):
         print("table name is " + self.table_name)
         # print(columns_string)
         if not self.parallel:
-            ae_name = "py_udtf_host"
+            ae_name = "nzpy..py_udtf_host"
         else:
-            ae_name ="py_udtf_any"
+            ae_name ="nzpy..py_udtf_any"
 
         query = "select ae_output.* from " + \
                 " (select * from " + self.table_name + ") as input_t" + \

@@ -71,12 +71,12 @@ class NZFunGroupedApply(object):
         #print(columns_string)
         query = ""
         if self.parallel is False:
-            ae_name = "py_udtf_host"
+            ae_name = "nzpy..py_udtf_host"
             query = "select ae_output.* from " + \
                     " (select * from " + self.db_name + ") as input_t" + \
                     ", table with final (" + ae_name + "(" + columns_string + ")) as ae_output"
         else:
-            ae_name = "py_udtf_any"
+            ae_name = "nzpy..py_udtf_any"
             query = "(select row_number() over (partition by " + self.index + " order by " + self.index + ") as  rn,  count(*)  over (partition" + \
                     " by " + self.index + ") as   ct,    " + self.table_name + ".*   from " + self.table_name + ") as input_t"
             query = "select ae_output.* from " + \

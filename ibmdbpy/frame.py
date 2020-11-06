@@ -1467,7 +1467,7 @@ class IdaDataFrame(object):
     # TODO: to implement for categorical attributes
     @timed
     @idadf_state
-    def describe_old(self, percentiles=[0.25, 0.50, 0.75]):
+    def describe(self, percentiles=[0.25, 0.50, 0.75]):
         """
         A basic statistical summary about current IdaDataFrame. If at least one
         numerical column exists, the summary includes:
@@ -1493,45 +1493,12 @@ class IdaDataFrame(object):
 
         """
         from ibmdbpy.statistics import describe
-        return describe(idadf=self, percentiles=percentiles)
+        #return describe(idadf=self, percentiles=percentiles)
+        return describe(idadf=self)
 
     @timed
     @idadf_state
-    def describe(self):
-        """
-        A basic statistical summary about current IdaDataFrame. If at least one
-        numerical column exists, the summary includes:
 
-            * The count of non-missing values for each numerical column.
-            * The mean for each numerical column.
-            * The standart deviation for each numerical column.
-            * The minimum and maximum for each numerical column.
-            * A list of percentiles set by the user (default : the quartiles).
-
-        Parameters
-        ----------
-        idadf : IdaDataFrame
-        percentiles : Float or list of floats, default: [0.25, 0.50, 0.75].
-            percentiles to be computed on numerical columns.
-            All values in percentiles must be > 0  and < 1.
-
-        Returns
-        -------
-        summary: DataFrame, where
-            * Index is the name of the computed values.
-            * Columns are either numerical or categorical columns of self.
-
-        """
-        table_name= self.internal_state.current_state
-        args_string = "('intable="+table_name+" , outtable="+table_name+"_temp');"
-        create_summary_query = "CALL nza..SUMMARY1000"+args_string
-        corr_df = self.ida_query(create_summary_query)
-        result_query = "SELECT * FROM "+table_name+"_temp ORDER BY columnname; "
-
-        corr_df = self.ida_query(result_query)
-        drop_result_query = "CALL nza..DROP_SUMMARY1000('intable="+table_name+"_temp');"
-        value = self.ida_query(drop_result_query)
-        return corr_df
     @timed
     @idadf_state
     def cov(self):
@@ -1580,7 +1547,8 @@ class IdaDataFrame(object):
         the pearson correlation coefficient method to these ranks.
         """
         from ibmdbpy.statistics import corr
-        return corr(idadf=self, features=features, ignore_indexer=ignore_indexer)
+        #return corr(idadf=self, features=features, ignore_indexer=ignore_indexer)
+        return corr(idadf=self)
 
     # TODO: to implement
     @timed
