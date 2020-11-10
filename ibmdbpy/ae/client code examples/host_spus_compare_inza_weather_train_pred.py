@@ -2,7 +2,7 @@
 
 from ibmdbpy import IdaDataBase, IdaDataFrame
 
-from ibmdbpy.ae import NZFunTApply, NZClassTApply
+from ibmdbpy.ae import NZFunTApply
 from ibmdbpy.ae import NZFunApply
 from ibmdbpy.ae import NZFunGroupedApply
 import pandas as pd

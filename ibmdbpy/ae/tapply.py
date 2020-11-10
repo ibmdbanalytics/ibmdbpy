@@ -103,7 +103,7 @@ class NZFunTApply(object):
 
         run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
 
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
+        final_code = base_code + "\n" + textwrap.indent(fun_code, ' ')
         final_code = final_code+"\n"+ run_string
 
 
