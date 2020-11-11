@@ -34,25 +34,33 @@ class NZInstall(object):
         """
         Constructor for install
         """
+        self.package_name=package_name
+
+
+
+    def  getResultCode(self):
         # we need a way to directly access database rather than through dsn
         idadb = IdaDataBase('nzpy', 'admin', 'password')
         print(idadb)
 
-        #idadf = IdaDataFrame(idadb, 'nzpy')
-        self.package_name =package_name
-        #self.table_name = idadf.internal_state.current_state
 
-        # send the package name as dynamic variable to ae function
-        columns_string = "'PACKAGE_TO_INSTALL= " + self.package_name + "'"
-        #print("table name is " + self.table_name)
-        # print(columns_string)
 
-        ae_name ="nzpy..py_udtf_install"
+        ae_name = "nzpy..py_udtf_install"
 
+        output_signature = {'ResultCode': 'int'}
+        base_code = shaper.get_base_shaper_install(output_signature, self.package_name)
+
+        run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
+
+        final_code = base_code + "\n" + run_string
+
+        columns_string = "'CODE_TO_EXECUTE=" + "\"" + final_code + "\"" + "'"
         query = "select * from table with final (" + ae_name + "(" + columns_string + ")) "
 
+
         result = idadb.ida_query(query)
-        return result
+        if(len(result.values)>0):
+            return result.values[0]
 
 
 

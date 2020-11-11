@@ -121,6 +121,39 @@ def get_base_shaper_apply(columns, fun_name, output_signature):
     return inspect.cleandoc(code_string)
 
 
+def get_base_shaper_install(output_signature, package_name):
+    output_signature_str = get_base_shaper(output_signature)
+    # output_signature_final = inspect.cleandoc(output_signature_str)
+    code_string = """import nzae
+                            
+                            class BaseShaperUdtf(nzae.Ae):
+                                 def _runUdtf(self):
+
+                                    import subprocess
+                                    cwd = os.getcwd()
+                                    
+                                    for row in self:
+                                                                
+                                        
+                                        res = subprocess.call([\'sh', \'/nz/export/ae/adapters/python3x/11/lib/installPackage.sh',  """+"\'"+package_name+"\'"+"""])
+                                       
+                                        self.output(res)
+                                       
+                                    
+
+
+                                 def _runShaper(self):
+                                   """ + textwrap.indent(output_signature_str, '       ') + """
+
+
+
+
+                                   """
+
+    code_string = code_string.replace("'", "''")
+    return inspect.cleandoc(code_string)
+
+
 
 
 
@@ -164,7 +197,7 @@ def get_base_shaper_old_signature(self, columns, fun_name, output_signature):
                              def _runUdtf(self):
                                for row in self :
                                  row = self.""" + fun_name + """(row)
-                                 #self.output(row)
+                                 self.output(row)
 
 
                              def _runShaper(self):
