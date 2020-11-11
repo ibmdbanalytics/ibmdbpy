@@ -1,6 +1,7 @@
 import pytest
 from ibmdbpy import IdaDataBase, IdaDataFrame
 from ibmdbpy.ae import NZFunTApply, NZFunApply, NZFunGroupedApply
+from ibmdbpy.ae import NZInstall
 
 
 def test_tapply_host_weather_train_pred():
@@ -421,3 +422,6 @@ def test_groupedapply_weather_host_spus():
 
 
 
+def test_install():
+    nzinstall = NZInstall(package_name='scikit-learn')
+    print(nzinstall.getResultCode())

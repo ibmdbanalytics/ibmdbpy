@@ -19,7 +19,8 @@ from .tapply import NZFunTApply
 from .apply import NZFunApply
 from .groupedapply import NZFunGroupedApply
 from .tapply_class import NZClassTApply
+from .install import NZInstall
 
 standard_library.install_aliases()
 
-__all__ = ['NZFunTApply', 'NZClassTApply', 'NZFunApply', 'NZFunGroupedApply']
+__all__ = ['NZFunTApply', 'NZClassTApply', 'NZFunApply', 'NZFunGroupedApply', 'NZInstall']
