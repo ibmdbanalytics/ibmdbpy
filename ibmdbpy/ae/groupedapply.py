@@ -51,6 +51,8 @@ class NZFunGroupedApply(object):
         self.columns = self.df.columns.tolist()
 
     def get_result(self):
+        if self.code_str and self.fun_name is None:
+            raise Exception("fun_name is required")
         # we need a comma separated string of column values
         columns_string = ",".join(self.columns)
         # print(columns_string)

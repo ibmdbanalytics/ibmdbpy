@@ -52,6 +52,9 @@ class NZFunTApply(object):
 
 
     def get_result(self):
+
+        if self.code_str and self.fun_name is None:
+            raise Exception("fun_name is required")
         # we need a comma separated string of column values
         columns_string = ",".join(self.columns)
         # print(columns_string)
@@ -68,7 +71,7 @@ class NZFunTApply(object):
         # send the code as dynamic variable to ae function
         columns_string = columns_string + ",'CODE_TO_EXECUTE=" + "\"" + code_string + "\"" + "'"
 
-        print("table name is " + self.table_name)
+        #print("table name is " + self.table_name)
         # print(columns_string)
         if not self.parallel:
             ae_name = "nzpy..py_udtf_host"

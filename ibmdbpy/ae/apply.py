@@ -33,6 +33,8 @@ class NZFunApply(object):
         """
         Constructor for tapply
         """
+
+
         self.table_name = df.internal_state.current_state
         self.df = df
         self.db = df._idadb
@@ -50,6 +52,9 @@ class NZFunApply(object):
         self.columns = self.df.columns.tolist()
 
     def get_result(self):
+
+        if self.code_str and self.fun_name is None:
+            raise Exception("fun_name is required")
         # we need a comma separated string of column values
         columns_string = ",".join(self.columns)
         # print(columns_string)
@@ -60,13 +65,13 @@ class NZFunApply(object):
          code_string = self.build_udtf_shaper_ae_code_fun_as_str(self.code_str, self.fun_name, self.columns, self.output_signature)
         else :
          code_string = self.build_udtf_shaper_ae_code_fun_as_ref(self.fun, self.columns, self.output_signature)
-        #code_string = self.build_udtf_shaper_ae_code(self.fun, self.columns, self.output_signature)
+
 
 
         # send the code as dynamic variable to ae function
         columns_string = columns_string + ",'CODE_TO_EXECUTE=" + "\"" + code_string + "\"" + "'"
 
-        print("table name is " + self.table_name)
+        #print("table name is " + self.table_name)
         # print(columns_string)
 
         ae_name ="nzpy..py_udtf_any"
@@ -96,10 +101,7 @@ class NZFunApply(object):
         final_code = base_code + "\n" + textwrap.indent(fun_code, '    ')
         final_code = final_code + "\n" + run_string
 
-        print_string = """
-                print(3+4)
 
-                """
 
         return inspect.cleandoc(final_code)
 

@@ -15,9 +15,9 @@ idadf = IdaDataFrame(idadb, 'WEATHER')
 query = 'select * from weather limit 10000'
 #query= "select * from _V_SYS_COLUMNS where TABLE_NAME='WEATHER';"
 #pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-pd.set_option('display.width', None)
-pd.set_option('display.max_colwidth', -1)
+#pd.set_option('display.max_columns', None)
+#pd.set_option('display.width', None)
+#pd.set_option('display.max_colwidth', -1)
 corr_result = idadf.corr()
 print(corr_result)
 #print(idadf.describe())
@@ -177,7 +177,7 @@ def apply_fun(self, x):
     row = [id, max_temp,  fahren_max_temp]
     self.output(row)"""
 output_signature = {'ID':'int', 'MAX_TEMP' :'float', 'FAHREN_MAX_TEMP' : 'float'}
-nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name='apply_fun', output_signature=output_signature, merge_output_with_df=True)
+nz_apply = NZFunApply(df=idadf, code_str= code_str_apply,  output_signature=output_signature, merge_output_with_df=True)
 result = nz_apply.get_result()
 print(result)
 

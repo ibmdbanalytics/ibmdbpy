@@ -94,7 +94,7 @@ def _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit):
             query = "select * from (" + query + ") as T LIMIT 1"
 
     query = _prepare_query(query, silent)
-    print(query)
+
     try:
         result = read_sql(query, idadb._con)
         if first_row_only is True:

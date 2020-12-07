@@ -9,8 +9,8 @@ from ibmdbpy.ae import NZFunGroupedApply
 idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
 
-idadf = IdaDataFrame(idadb, 'WEATHER_x10')
-print(idadf.head())
+idadf = IdaDataFrame(idadb, 'WEATHER')
+print(idadf.head(2).transpose())
 query = 'select * from weather limit 10000'
 
 df = idadf.ida_query(query)

@@ -52,7 +52,7 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         if len(columns_str) > 0:
             columns_str = columns_str[:-1]
 
-        print(columns_str)
+
         query = " select  " + columns_str + " , base.*  from  " + output_table + "_temp as link INNER JOIN  " + table_name + " as base on link.ID = base.ID;"
         result = df.ida_query(query, autocommit=True)
         db.drop_table(output_table + "_temp")
