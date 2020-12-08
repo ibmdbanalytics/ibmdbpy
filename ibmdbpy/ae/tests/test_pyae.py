@@ -130,8 +130,8 @@ def test_tapply_host_weather_train_pred():
     end = time.time()
     print(end - start)
     print(result.shape[0])
-    assert result.shape[0] == 35565
-    assert result.shape[1] == 28
+    assert result.shape[0] == 35565, "number of records are not matching"
+    assert result.shape[1] == 28, "number of columns are not matching"
 
 
 def test_apply_weather_save_table_merge_withdf():
@@ -153,10 +153,12 @@ def test_apply_weather_save_table_merge_withdf():
                           output_signature=output_signature, merge_output_with_df=True)
     result = nz_apply.get_result()
     print(result)
+    assert result.shape[0] == 142193, "number of records are not matching"
+    assert result.shape[1] == 27, "number of columns are not matching"
 
 def test_apply_weather_merge_withdf():
         idadb = IdaDataBase('weather', 'admin', 'password')
-        print(idadb)
+
 
         idadf = IdaDataFrame(idadb, 'WEATHER')
         code_str_apply = """def apply_fun(self, x):
@@ -172,6 +174,8 @@ def test_apply_weather_merge_withdf():
                               output_signature=output_signature, merge_output_with_df=True)
         result = nz_apply.get_result()
         print(result)
+        assert result.shape[0] == 142193, "number of records are not matching"
+        assert result.shape[1] == 27, "number of columns are not matching"
 
 def test_apply_weather():
             idadb = IdaDataBase('weather', 'admin', 'password')
@@ -191,6 +195,8 @@ def test_apply_weather():
                                   output_signature=output_signature)
             result = nz_apply.get_result()
             print(result)
+            assert result.shape[0] == 142193, "number of records are not matching"
+            assert result.shape[1] == 3, "number of columns are not matching"
 
 def test_tapply_weather_host_spus_train_pred():
  idadb = IdaDataBase('weather', 'admin', 'password')
@@ -292,17 +298,17 @@ def test_tapply_weather_host_spus_train_pred():
 
 
  """
- import time
- start = time.time()
+
  output_signature = {'ID': 'int', 'RAINTOMORROW_PRED': 'str', 'DATASET_SIZE': 'int', 'CLASSIFIER_ACCURACY': 'float'}
  nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host_spus, fun_name ="decision_tree_ml", parallel=True, output_signature=output_signature)
  result = nz_tapply.get_result()
  print("Host +SPUs execution - slicing on a default column- ML function for the entire slices")
  print(result)
- print("\n")
+ assert result.shape[0] == 35551, "number of records are not matching"
+ assert result.shape[1] == 4, "number of columns are not matching"
 
- end = time.time()
- print(end - start)
+
+
 
 
 def test_groupedapply_weather_host_spus():
@@ -418,10 +424,13 @@ def test_groupedapply_weather_host_spus():
     print("Host+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
     print(result)
     print(time.time()-start)
-    assert result.shape[0] == 35565
+    assert result.shape[0] == 35565, "number of records are not matching"
+    assert result.shape[1] == 28, "number of columns are not matching"
+
 
 
 
 def test_install():
     nzinstall = NZInstall(package_name='scikit-learn')
-    print(nzinstall.getResultCode())
+    result = nzinstall.getResultCode()
+    assert result==0, "installation failed"
