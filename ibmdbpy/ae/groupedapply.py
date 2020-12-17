@@ -29,14 +29,14 @@ standard_library.install_aliases()
 
 class NZFunGroupedApply(object):
 
-    def __init__(self, df, index, output_signature, output_table=None, fun=None,  code_str=None,  fun_name=None,  merge_output_with_df=False):
+    def __init__(self, df, index, output_signature, output_table=None, fun_ref=None,  code_str=None,  fun_name=None,  merge_output_with_df=False):
         """
         Constructor for tapply
         """
         self.table_name = df.internal_state.current_state
         self.df = df
         self.db = df._idadb
-        self.fun = fun
+        self.fun = fun_name
         self.fun_name = fun_name
 
         self.code_str= code_str

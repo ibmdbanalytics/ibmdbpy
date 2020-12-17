@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 class NZFunApply(object):
 
-    def __init__(self, df,  output_signature, output_table=None, code_str=None, fun_ref=None, fun_name=None, merge_output_with_df=False):
+    def __init__(self, df,  output_signature, output_table=None, fun_ref=None, code_str=None, fun_name=None, merge_output_with_df=False):
         """
         Constructor for tapply
         """
