@@ -133,25 +133,8 @@ code_str_host = """def decision_tree_ml_host(self, df):
 
 
 
-#file_to_persist = open("file_persist.py", "wb")
-#pickle.dump(decision_tree_ml, file_to_persist)
-#file_to_persist.close()
-
-dtypes = idadf.dtypes
-output_columns = df.columns.values.tolist()
-
-# print(output_columns)
-#output_columns = dtypes['COLNAME']
-#print(output_columns)
-
-output_columns_types = []
-for column in df.dtypes:
-    # print(column)
-    output_columns_types.append(column.name)
-    #print(idadf)
 
 
-#output_signature = dict(zip(output_columns, output_columns_types))
 output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
 
 import time
@@ -181,13 +164,7 @@ nz_apply = NZFunApply(df=idadf, code_str= code_str_apply,  output_signature=outp
 result = nz_apply.get_result()
 print(result)
 
-#import time
-#start = time.time()
-#nz_groupapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name ="decision_tree_ml_host", parallel=False, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
-#result = nz_groupapply.get_result()
-#print("Host only execution - user code partitions the data")
-#print(result)
-#print("\n")
+
 
 end = time.time()
 print(end - start)

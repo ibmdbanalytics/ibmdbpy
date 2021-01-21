@@ -67,7 +67,6 @@ class NZFunApply(object):
          code_string = self.build_udtf_shaper_ae_code_fun_as_ref(self.fun, self.columns, self.output_signature)
 
 
-
         # send the code as dynamic variable to ae function
         columns_string = columns_string + ",'CODE_TO_EXECUTE=" + "\"" + code_string + "\"" + "'"
 
@@ -86,11 +85,9 @@ class NZFunApply(object):
 
 
 
-
     def build_udtf_shaper_ae_code_fun_as_ref(self, fun, columns, output_signature):
         # we need extra single quotes for correct escaping
-
-        fun_code = inspect.getsource(fun)
+        fun_code = inspect.getsource(fun).lstrip()
         fun_code = fun_code.replace("'", "''")
         fun_name = fun.__name__
 
@@ -98,13 +95,10 @@ class NZFunApply(object):
 
         run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
 
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '    ')
+        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
         final_code = final_code + "\n" + run_string
 
-
-
         return inspect.cleandoc(final_code)
-
 
 
     def build_udtf_shaper_ae_code_fun_as_str(self, code_str, fun_name, columns, output_signature):

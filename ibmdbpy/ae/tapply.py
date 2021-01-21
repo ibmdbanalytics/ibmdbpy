@@ -82,7 +82,7 @@ class NZFunTApply(object):
                 " (select * from " + self.table_name + ") as input_t" + \
                 ", table with final (" + ae_name + "(" + columns_string + ")) as ae_output"
 
-        # print(query)
+        print(query)
         result = result_builder.build_result(self.output_table, self.merge_output, self.db, self.df,
                                              self.output_signature, self.table_name, query)
         return result
@@ -106,7 +106,9 @@ class NZFunTApply(object):
 
         run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
 
-        final_code = base_code + "\n" + textwrap.indent(fun_code, ' ')
+        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
+
+
         final_code = final_code+"\n"+ run_string
 
 

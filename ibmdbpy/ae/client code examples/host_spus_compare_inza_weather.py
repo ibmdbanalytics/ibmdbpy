@@ -86,16 +86,11 @@ def decision_tree_ml_host(self, df):
 
 
 
-#file_to_persist = open("file_persist.py", "wb")
-#pickle.dump(decision_tree_ml, file_to_persist)
-#file_to_persist.close()
 
 
 
-#nz_tapply = NZFunTApply(df=idadf, fun=decision_tree_ml, parallel=True,output_signature=["data_size=int", "location=str", "classifier_score=double"])
-#result = nz_tapply.get_result()
-#print("\n")
-#print(result)
+
+
 
 code_str_apply="""
 def apply_fun(self, x):

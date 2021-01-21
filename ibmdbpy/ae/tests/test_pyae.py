@@ -124,6 +124,7 @@ def test_tapply_host_weather_train_pred():
 
     nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name='decision_tree_ml_host', parallel=False,
                             output_signature=output_signature, merge_output_with_df=True)
+
     result = nz_tapply.get_result()
     print("\n")
     print(result)
@@ -148,7 +149,7 @@ def test_apply_weather_save_table_merge_withdf():
         self.output(row)
         """
     output_signature = {'ID': 'int', 'MAX_TEMP': 'float', 'FAHREN_MAX_TEMP': 'float'}
-    idadb.drop_table("temp_conversion")
+    #idadb.drop_table("temp_conversion")
     nz_apply = NZFunApply(df=idadf, code_str=code_str_apply, fun_name='apply_fun', output_table="temp_conversion",
                           output_signature=output_signature, merge_output_with_df=True)
     result = nz_apply.get_result()
@@ -177,7 +178,7 @@ def test_apply_weather_merge_withdf():
         assert result.shape[0] == 142193, "number of records are not matching"
         assert result.shape[1] == 27, "number of columns are not matching"
 
-def test_apply_weather():
+def test_apply_weather_funstr():
             idadb = IdaDataBase('weather', 'admin', 'password')
             print(idadb)
 
@@ -197,6 +198,29 @@ def test_apply_weather():
             print(result)
             assert result.shape[0] == 142193, "number of records are not matching"
             assert result.shape[1] == 3, "number of columns are not matching"
+
+
+def test_apply_weather_funref():
+    idadb = IdaDataBase('weather', 'admin', 'password')
+    print(idadb)
+
+    idadf = IdaDataFrame(idadb, 'WEATHER')
+    def apply_fun(self, x):
+                from math import sqrt
+                max_temp = x[3]
+                id = x[24]
+                fahren_max_temp = (max_temp*1.8)+32
+                row = [id, max_temp,  fahren_max_temp]
+                self.output(row)
+
+    output_signature = {'ID': 'int', 'MAX_TEMP': 'float', 'FAHREN_MAX_TEMP': 'float'}
+    nz_apply = NZFunApply(df=idadf, fun_ref=apply_fun,
+                          output_signature=output_signature)
+    result = nz_apply.get_result()
+    print(result)
+    assert result.shape[0] == 142193, "number of records are not matching"
+    assert result.shape[1] == 3, "number of columns are not matching"
+
 
 def test_tapply_weather_host_spus_train_pred():
  idadb = IdaDataBase('weather', 'admin', 'password')
