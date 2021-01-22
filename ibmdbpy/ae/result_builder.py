@@ -39,8 +39,11 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         df = idadf.as_dataframe()
         return df
     if output_table is None and merge_output is True:
-        output_table ="pyida_table"
-        create_string = "create table " + output_table + "_temp as "
+        output_table_prefix = "pyida"
+        output_table = db._get_valid_tablename(prefix="pyida_")
+
+
+        create_string = "create table " + output_table + " as "
         query = create_string + query
         result = df.ida_query(query, autocommit=True)
         # join the two
@@ -52,10 +55,9 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         if len(columns_str) > 0:
             columns_str = columns_str[:-1]
 
-
-        query = " select  " + columns_str + " , base.*  from  " + output_table + "_temp as link INNER JOIN  " + table_name + " as base on link.ID = base.ID;"
+        query = " select  " + columns_str + " , base.*  from  " + output_table + "  as link INNER JOIN  " + table_name + " as base on link.ID = base.ID;"
         result = df.ida_query(query, autocommit=True)
-        db.drop_table(output_table + "_temp")
+        db.drop_table(output_table)
 
         return result
 

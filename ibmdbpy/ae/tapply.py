@@ -92,32 +92,12 @@ class NZFunTApply(object):
 
 
     def build_udtf_shaper_ae_code_fun_as_ref(self, fun, columns, output_signature):
-        # we need extra single quotes for correct escaping
 
-        fun_code = inspect.getsource(fun)
-        fun_code = fun_code.replace("'", "''")
-        fun_name = fun.__name__
+        return self.build_udtf_shaper_ae_code_fun_as_str(inspect.getsource(fun).lstrip(), fun.__name__, columns,
+                                                         output_signature)
 
 
-        if output_signature is None:
-            base_code =self.get_base_default(columns, fun_name)
-        else:
-            base_code = shaper.get_base_shaper_tapply(columns, fun_name, output_signature)
 
-        run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
-
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
-
-
-        final_code = final_code+"\n"+ run_string
-
-
-        print_string = """
-        print(3+4)
-
-        """
-
-        return inspect.cleandoc(final_code)
 
     def build_udtf_shaper_ae_code_fun_as_str(self, code_str, fun_name, columns, output_signature):
         # we need extra single quotes for correct escaping

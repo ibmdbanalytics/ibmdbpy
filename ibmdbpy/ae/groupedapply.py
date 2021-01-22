@@ -107,10 +107,7 @@ class NZFunGroupedApply(object):
         final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
         final_code = final_code+"\n"+run_string
 
-        print_string = """
-                print(3+4)
 
-                """
 
         return inspect.cleandoc(final_code)
 
@@ -118,29 +115,13 @@ class NZFunGroupedApply(object):
 
 
     def build_udtf_shaper_ae_code_fun_as_ref(self, fun, columns, output_signature):
-        # we need extra single quotes for correct escaping
-
-        fun_code = inspect.getsource(fun)
-        fun_code = fun_code.replace("'", "''")
-        fun_name = fun.__name__
-
-        if self.parallel is False:
-            base_code = self.get_base_shaper_host(columns, fun_name, output_signature)
-        else:
-            base_code = shaper.get_base_shaper_groupedapply(columns, fun_name, output_signature)
-
-        run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
 
 
-        final_code = final_code+"\n"+ run_string
+        return self.build_udtf_shaper_ae_code_fun_as_str(inspect.getsource(fun).lstrip(), fun.__name__, columns,
+                                                         output_signature)
 
-        print_string = """
-        print(3+4)
 
-        """
 
-        return inspect.cleandoc(final_code)
 
     def get_base_shaper_host(self, columns, fun_name, output_signature):
 

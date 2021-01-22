@@ -86,19 +86,9 @@ class NZFunApply(object):
 
 
     def build_udtf_shaper_ae_code_fun_as_ref(self, fun, columns, output_signature):
-        # we need extra single quotes for correct escaping
-        fun_code = inspect.getsource(fun).lstrip()
-        fun_code = fun_code.replace("'", "''")
-        fun_name = fun.__name__
 
-        base_code = shaper.get_base_shaper_apply(columns, fun_name, output_signature)
-
-        run_string = textwrap.dedent(""" BaseShaperUdtf.run()""")
-
-        final_code = base_code + "\n" + textwrap.indent(fun_code, '     ')
-        final_code = final_code + "\n" + run_string
-
-        return inspect.cleandoc(final_code)
+        return self.build_udtf_shaper_ae_code_fun_as_str(inspect.getsource(fun).lstrip(), fun.__name__, columns,
+                                                  output_signature)
 
 
     def build_udtf_shaper_ae_code_fun_as_str(self, code_str, fun_name, columns, output_signature):
