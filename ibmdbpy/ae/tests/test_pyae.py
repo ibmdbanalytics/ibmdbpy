@@ -157,6 +157,22 @@ def test_apply_weather_save_table_merge_withdf():
     assert result.shape[0] == 142193, "number of records are not matching"
     assert result.shape[1] == 27, "number of columns are not matching"
 
+
+def test_describe():
+    idadb = IdaDataBase('weather', 'admin', 'password')
+    print(idadb)
+    idadf = IdaDataFrame(idadb, 'WEATHER')
+    table_name = idadf.internal_state.current_state
+    outtable_name = idadf._idadb._get_valid_tablename(prefix="pyida_describe")
+    idadf._idadb._call_stored_procedure("SUMMARY1000 ", intable=table_name, outtable=outtable_name)
+    result_query = "SELECT * FROM " + outtable_name + " ORDER BY columnname; "
+    result_df = idadf.ida_query(result_query)
+    idadf._idadb._call_stored_procedure("DROP_SUMMARY1000", intable=outtable_name)
+    assert result_df.shape[0] == 25, "number of rows are not matching"
+    assert result_df.shape[1] == 13, "number of columns are not matching"
+
+
+
 def test_apply_weather_merge_withdf():
         idadb = IdaDataBase('weather', 'admin', 'password')
 

@@ -20,7 +20,7 @@ query = 'select * from weather limit 10000'
 #pd.set_option('display.max_colwidth', -1)
 corr_result = idadf.corr()
 print(corr_result)
-#print(idadf.describe())
+print(idadf.describe())
 
 df = idadf.ida_query(query)
 #print(df)

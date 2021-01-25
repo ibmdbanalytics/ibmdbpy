@@ -582,15 +582,12 @@ def describe(idadf):
 
         """
         table_name= idadf.internal_state.current_state
-        args_string = "('intable="+table_name+" , outtable="+table_name+"_temp');"
-        create_summary_query = "CALL nza..SUMMARY1000"+args_string
-        corr_df = idadf.ida_query(create_summary_query)
-        result_query = "SELECT * FROM "+table_name+"_temp ORDER BY columnname; "
-
-        corr_df = idadf.ida_query(result_query)
-        drop_result_query = "CALL nza..DROP_SUMMARY1000('intable="+table_name+"_temp');"
-        value = idadf.ida_query(drop_result_query)
-        return corr_df
+        outtable_name = idadf._idadb._get_valid_tablename(prefix="pyida_describe")
+        idadf._idadb._call_stored_procedure("SUMMARY1000 ", intable=table_name, outtable=outtable_name)
+        result_query = "SELECT * FROM "+outtable_name+" ORDER BY columnname; "
+        result_df = idadf.ida_query(result_query)
+        idadf._idadb._call_stored_procedure("DROP_SUMMARY1000", intable=outtable_name)
+        return result_df
 
 def describe_old(idadf, percentiles=[0.25, 0.50, 0.75]):
     """
