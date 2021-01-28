@@ -2,6 +2,7 @@ import pytest
 from ibmdbpy import IdaDataBase, IdaDataFrame
 from ibmdbpy.ae import NZFunTApply, NZFunApply, NZFunGroupedApply
 from ibmdbpy.ae import NZInstall
+import pandas as pd
 
 
 def test_tapply_host_weather_train_pred():
@@ -130,14 +131,16 @@ def test_tapply_host_weather_train_pred():
     print(result)
     end = time.time()
     print(end - start)
+    result = result.as_dataframe()
+    print(result)
     print(result.shape[0])
     assert result.shape[0] == 35565, "number of records are not matching"
     assert result.shape[1] == 28, "number of columns are not matching"
 
 
 def test_apply_weather_save_table_merge_withdf():
-    idadb = IdaDataBase('weather', 'admin', 'password')
-    print(idadb)
+    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -148,11 +151,15 @@ def test_apply_weather_save_table_merge_withdf():
         row = [id, max_temp,  fahren_max_temp]
         self.output(row)
         """
-    output_signature = {'ID': 'int', 'MAX_TEMP': 'float', 'FAHREN_MAX_TEMP': 'float'}
-    #idadb.drop_table("temp_conversion")
-    nz_apply = NZFunApply(df=idadf, code_str=code_str_apply, fun_name='apply_fun', output_table="temp_conversion",
+    output_signature = {'ID': 'int', 'RESULT_MAX_TEMP': 'float', 'RESULT_FAHREN_MAX_TEMP': 'float'}
+    output_table = "temp_conversion"
+    if idadb.exists_table(output_table):
+        idadb.drop_table(output_table)
+
+    nz_apply = NZFunApply(df=idadf, code_str=code_str_apply, fun_name='apply_fun', output_table=output_table,
                           output_signature=output_signature, merge_output_with_df=True)
     result = nz_apply.get_result()
+    result = result.as_dataframe()
     print(result)
     assert result.shape[0] == 142193, "number of records are not matching"
     assert result.shape[1] == 27, "number of columns are not matching"
@@ -162,14 +169,22 @@ def test_describe():
     idadb = IdaDataBase('weather', 'admin', 'password')
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
-    table_name = idadf.internal_state.current_state
-    outtable_name = idadf._idadb._get_valid_tablename(prefix="pyida_describe")
-    idadf._idadb._call_stored_procedure("SUMMARY1000 ", intable=table_name, outtable=outtable_name)
-    result_query = "SELECT * FROM " + outtable_name + " ORDER BY columnname; "
-    result_df = idadf.ida_query(result_query)
-    idadf._idadb._call_stored_procedure("DROP_SUMMARY1000", intable=outtable_name)
-    assert result_df.shape[0] == 25, "number of rows are not matching"
-    assert result_df.shape[1] == 13, "number of columns are not matching"
+    result = idadf.describe()
+
+    assert result.shape[0] == 25, "number of rows are not matching"
+    assert result.shape[1] == 13, "number of columns are not matching"
+
+def test_corr():
+    idadb = IdaDataBase('weather', 'admin', 'password')
+    print(idadb)
+    idadf = IdaDataFrame(idadb, 'WEATHER')
+    result_df = idadf.corr()
+
+    print(result_df)
+
+    assert result_df.shape[0] == 16, "number of rows are not matching"
+    assert result_df.shape[1] == 16, "number of columns are not matching"
+
 
 
 
@@ -195,7 +210,7 @@ def test_apply_weather_merge_withdf():
         assert result.shape[1] == 27, "number of columns are not matching"
 
 def test_apply_weather_funstr():
-            idadb = IdaDataBase('weather', 'admin', 'password')
+            idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
             print(idadb)
 
             idadf = IdaDataFrame(idadb, 'WEATHER')

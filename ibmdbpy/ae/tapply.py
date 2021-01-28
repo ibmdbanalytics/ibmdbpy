@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 class NZFunTApply(object):
 
-    def __init__(self, df,  parallel,  output_signature=None, output_table=None, fun_ref=None, code_str=None,  fun_name=None, merge_output_with_df=False):
+    def __init__(self, df,  parallel,  output_signature=None, output_table=None, fun_ref=None, code_str=None,  fun_name=None, merge_output_with_df=False, id='ID'):
         """
         Constructor for tapply
         """
@@ -43,6 +43,7 @@ class NZFunTApply(object):
         self.output_signature = output_signature
         self.parallel =parallel
         self.merge_output = merge_output_with_df
+        self.id = id
 
         # convert the columns index object to a list
         self.columns = self.df.columns.tolist()
@@ -57,10 +58,10 @@ class NZFunTApply(object):
             raise Exception("fun_name is required")
         # we need a comma separated string of column values
         columns_string = ",".join(self.columns)
-        # print(columns_string)
+
 
         # get the default ae class coupled with client ml code
-        # code_string = self.build_udtf_ae_code(self.fun, self.columns)
+
 
         if self.code_str:
          code_string = self.build_udtf_shaper_ae_code_fun_as_str(self.code_str, self.fun_name, self.columns, self.output_signature)
@@ -71,8 +72,8 @@ class NZFunTApply(object):
         # send the code as dynamic variable to ae function
         columns_string = columns_string + ",'CODE_TO_EXECUTE=" + "\"" + code_string + "\"" + "'"
 
-        #print("table name is " + self.table_name)
-        # print(columns_string)
+
+
         if not self.parallel:
             ae_name = "nzpy..py_udtf_host"
         else:
@@ -82,9 +83,9 @@ class NZFunTApply(object):
                 " (select * from " + self.table_name + ") as input_t" + \
                 ", table with final (" + ae_name + "(" + columns_string + ")) as ae_output"
 
-        print(query)
+
         result = result_builder.build_result(self.output_table, self.merge_output, self.db, self.df,
-                                             self.output_signature, self.table_name, query)
+                                             self.output_signature, self.table_name, query, self.id)
         return result
 
 

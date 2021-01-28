@@ -7,24 +7,24 @@ from ibmdbpy.ae import NZFunApply
 from ibmdbpy.ae import NZFunGroupedApply
 import pandas as pd
 
-idadb = IdaDataBase('weather', 'admin', 'password')
+idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
 
 query = 'select * from weather limit 10000'
-#query= "select * from _V_SYS_COLUMNS where TABLE_NAME='WEATHER';"
+
 #pd.set_option('display.max_rows', None)
 #pd.set_option('display.max_columns', None)
 #pd.set_option('display.width', None)
 #pd.set_option('display.max_colwidth', -1)
-corr_result = idadf.corr()
-print(corr_result)
+#corr_result = idadf.corr()
+#print(corr_result)
 print(idadf.describe())
+print(idadf.corr())
 
 df = idadf.ida_query(query)
-#print(df)
-#print(idadf.dtypes)
+
 
 code_str_host = """def decision_tree_ml_host(self, df):
 
@@ -142,10 +142,12 @@ start = time.time()
 
 nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name='decision_tree_ml_host', parallel=False,  output_signature=output_signature, merge_output_with_df=True)
 result = nz_tapply.get_result()
+result = result.as_dataframe()
 print("\n")
 print(result)
 end = time.time()
 print(end - start)
+#result = result.as_dataframe()
 groups = result.groupby("LOCATION")
 for name, group in groups:
     print(name + ":" + str(len(group)))
@@ -159,8 +161,8 @@ def apply_fun(self, x):
     fahren_max_temp = (max_temp*1.8)+32
     row = [id, max_temp,  fahren_max_temp]
     self.output(row)"""
-output_signature = {'ID':'int', 'MAX_TEMP' :'float', 'FAHREN_MAX_TEMP' : 'float'}
-nz_apply = NZFunApply(df=idadf, code_str= code_str_apply,  output_signature=output_signature, merge_output_with_df=True)
+output_signature = {'ID':'int', 'RESULT_MAX_TEMP' :'float', 'RESULT_FAHREN_MAX_TEMP' : 'float'}
+nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name="apply_fun", output_signature=output_signature, merge_output_with_df=True)
 result = nz_apply.get_result()
 print(result)
 

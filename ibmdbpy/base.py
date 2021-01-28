@@ -2213,7 +2213,7 @@ class IdaDataBase(object):
                 tmp.append("%s=%s" % (key, tmp_view_name))
                 views.append(tmp_view_name)
             elif isinstance(value, six.string_types) and all([x != " " for x in value]):
-                if key in ("intable", 'model', 'outtable', 'nametable', 'colPropertiesTable'):
+                if key in ("intable", 'model', 'outtable', 'incolumn', 'nametable', 'colPropertiesTable'):
                     tmp.append("%s=%s"% (key, value))  # no " in the case it is a table name
                 else:
                     tmp.append("%s=\"%s\"" % (key, value))

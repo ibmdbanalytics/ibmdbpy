@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 class NZFunApply(object):
 
-    def __init__(self, df,  output_signature, output_table=None, fun_ref=None, code_str=None, fun_name=None, merge_output_with_df=False):
+    def __init__(self, df,  output_signature, output_table=None, fun_ref=None, code_str=None, fun_name=None, merge_output_with_df=False, id='ID'):
         """
         Constructor for tapply
         """
@@ -45,6 +45,7 @@ class NZFunApply(object):
         self.output_table = output_table
         self.output_signature =output_signature
         self.merge_output = merge_output_with_df
+        self.id = id
 
 
 
@@ -80,7 +81,7 @@ class NZFunApply(object):
                 ", table with final (" + ae_name + "(" + columns_string + ")) as ae_output"
 
 
-        result = result_builder.build_result(self.output_table,self.merge_output, self.db, self.df, self.output_signature, self.table_name, query)
+        result = result_builder.build_result(self.output_table,self.merge_output, self.db, self.df, self.output_signature, self.table_name, query, self.id)
         return result
 
 

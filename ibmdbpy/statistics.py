@@ -762,9 +762,13 @@ def corr(idadf):
     #print(result_df)
 
     table_name = idadf.internal_state.current_state
-    args_string = "('intable=" + table_name + " , incolumn= "+column_string+" , outtable=" + table_name + "_temp');"
-    create_corr_query = "CALL nza..CORRELATION1000MATRIX" + args_string
-    corr_df = idadf.ida_query(create_corr_query)
+    #args_string = "('intable=" + table_name + " , incolumn= "+column_string+" , outtable=" + table_name + "_temp');"
+    #create_corr_query = "CALL nza..CORRELATION1000MATRIX" + args_string
+    idadf._idadb._call_stored_procedure("CORRELATION1000MATRIX ",
+                                        intable=table_name,
+                                        incolumn=column_string,
+                                        outtable=table_name + "_temp")
+    #corr_df = idadf.ida_query(create_corr_query)
     result_query = "SELECT * FROM " + table_name + "_temp ORDER BY varxname, varyname; "
 
 
@@ -772,7 +776,7 @@ def corr(idadf):
     corr_df = idadf.ida_query(result_query)
 
     for index in corr_df.index.values:
-        #print("index is"+str(index))
+
         col_list = []
         for column in corr_df.columns.values:
 

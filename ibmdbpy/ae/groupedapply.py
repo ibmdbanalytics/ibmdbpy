@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 class NZFunGroupedApply(object):
 
-    def __init__(self, df, index, output_signature, output_table=None, fun_ref=None,  code_str=None,  fun_name=None,  merge_output_with_df=False):
+    def __init__(self, df, index, output_signature, output_table=None, fun_ref=None,  code_str=None,  fun_name=None,  merge_output_with_df=False, id='ID'):
         """
         Constructor for tapply
         """
@@ -38,6 +38,7 @@ class NZFunGroupedApply(object):
         self.db = df._idadb
         self.fun = fun_name
         self.fun_name = fun_name
+        self.id = id
 
         self.code_str= code_str
         self.merge_output= merge_output_with_df
@@ -85,7 +86,7 @@ class NZFunGroupedApply(object):
                     query + \
                     ", table with final (" + ae_name + "(rn,ct," + columns_string + ")) as ae_output"
         result = result_builder.build_result(self.output_table, self.merge_output, self.db, self.df,
-                                             self.output_signature, self.table_name, query)
+                                             self.output_signature, self.table_name, query, self.id)
         return result
 
 
