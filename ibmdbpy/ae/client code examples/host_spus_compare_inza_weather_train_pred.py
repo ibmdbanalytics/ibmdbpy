@@ -7,12 +7,12 @@ from ibmdbpy.ae import NZFunApply
 from ibmdbpy.ae import NZFunGroupedApply
 import pandas as pd
 
-idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
 
-query = 'select * from weather limit 10000'
+#query = 'select * from weather limit 10000'
 
 #pd.set_option('display.max_rows', None)
 #pd.set_option('display.max_columns', None)
@@ -20,10 +20,10 @@ query = 'select * from weather limit 10000'
 #pd.set_option('display.max_colwidth', -1)
 #corr_result = idadf.corr()
 #print(corr_result)
-print(idadf.describe())
-print(idadf.corr())
+#print(idadf.describe())
+#print(idadf.corr())
 
-df = idadf.ida_query(query)
+#df = idadf.ida_query(query)
 
 
 code_str_host = """def decision_tree_ml_host(self, df):

@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def test_tapply_host_weather_train_pred():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
