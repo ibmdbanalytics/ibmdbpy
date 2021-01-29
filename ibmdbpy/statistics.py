@@ -556,31 +556,8 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
 ### Descriptive statistics
 ###############################################################################
 
-def describe(idadf):
-        """
-        A basic statistical summary about current IdaDataFrame. If at least one
-        numerical column exists, the summary includes:
+def summary(idadf):
 
-            * The count of non-missing values for each numerical column.
-            * The mean for each numerical column.
-            * The standart deviation for each numerical column.
-            * The minimum and maximum for each numerical column.
-            * A list of percentiles set by the user (default : the quartiles).
-
-        Parameters
-        ----------
-        idadf : IdaDataFrame
-        percentiles : Float or list of floats, default: [0.25, 0.50, 0.75].
-            percentiles to be computed on numerical columns.
-            All values in percentiles must be > 0  and < 1.
-
-        Returns
-        -------
-        summary: DataFrame, where
-            * Index is the name of the computed values.
-            * Columns are either numerical or categorical columns of self.
-
-        """
         table_name= idadf.internal_state.current_state
         outtable_name = idadf._idadb._get_valid_tablename(prefix="pyida_describe")
         idadf._idadb._call_stored_procedure("SUMMARY1000 ", intable=table_name, outtable=outtable_name)
@@ -589,7 +566,7 @@ def describe(idadf):
         idadf._idadb._call_stored_procedure("DROP_SUMMARY1000", intable=outtable_name)
         return result_df
 
-def describe_old(idadf, percentiles=[0.25, 0.50, 0.75]):
+def describe(idadf, percentiles=[0.25, 0.50, 0.75]):
     """
     See IdaDataFrame.describe
     """
@@ -684,7 +661,49 @@ def quantile(idadf, q=0.5):
 # Note : Not casting to double can lead to SQL overflow
 # TODO: Has to be modified in ibmdbR
 
-def cov(idadf, other = None):
+
+def cov(idadf, other=None):
+    numerical_columns = idadf._get_numerical_columns()
+    if len(numerical_columns) < 2:
+        print(idadf.name + " has less than two numeric columns")
+        return
+    column_string = ""
+    for column in numerical_columns:
+        column_string += column + ";"
+
+    result_df = pd.DataFrame(columns=numerical_columns, index=numerical_columns)
+
+
+
+    table_name = idadf.internal_state.current_state
+    outtable = idadf._idadb._get_valid_tablename(prefix="cov_")
+
+    idadf._idadb._call_stored_procedure("COVARIANCE1000MATRIX",
+                                        intable=table_name,
+                                        incolumn=column_string,
+                                        outtable=outtable)
+
+    result_query = "SELECT * FROM " + outtable + " ORDER BY varxname, varyname; "
+
+    cov_df = idadf.ida_query(result_query)
+
+
+    for index in cov_df.index.values:
+
+        col_list = []
+        for column in cov_df.columns.values:
+            col_list.append(cov_df.at[index, column])
+
+        result_df.at[col_list[0], col_list[1]] = col_list[2]
+
+    for column in result_df.columns:
+        result_df[column] = result_df[column].astype(float)
+    value = idadf._idadb.drop_table(outtable)
+
+    return result_df
+
+
+def cov_old(idadf, other = None):
     """
     See IdaDataFrame.cov
     """
@@ -762,12 +781,12 @@ def corr(idadf):
     #print(result_df)
 
     table_name = idadf.internal_state.current_state
-    #args_string = "('intable=" + table_name + " , incolumn= "+column_string+" , outtable=" + table_name + "_temp');"
-    #create_corr_query = "CALL nza..CORRELATION1000MATRIX" + args_string
+    outtable = idadf._idadb._get_valid_tablename(prefix="corr_")
+
     idadf._idadb._call_stored_procedure("CORRELATION1000MATRIX ",
                                         intable=table_name,
                                         incolumn=column_string,
-                                        outtable=table_name + "_temp")
+                                        outtable=outtable)
     #corr_df = idadf.ida_query(create_corr_query)
     result_query = "SELECT * FROM " + table_name + "_temp ORDER BY varxname, varyname; "
 
@@ -788,7 +807,7 @@ def corr(idadf):
     for column in result_df.columns:
 
         result_df[column] = result_df[column].astype(float)
-    value = idadf._idadb.drop_table(table_name+"_temp")
+    value = idadf._idadb.drop_table(outtable)
     return result_df
 
 

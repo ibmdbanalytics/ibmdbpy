@@ -1493,11 +1493,29 @@ class IdaDataFrame(object):
 
         """
         from ibmdbpy.statistics import describe
-        #return describe(idadf=self, percentiles=percentiles)
-        return describe(idadf=self)
+        return describe(idadf=self, percentiles=percentiles)
+
 
     @timed
     @idadf_state
+    def summary(self):
+        """
+        A basic statistical summary about current IdaDataFrame.
+
+        Parameters
+        ----------
+        idadf : IdaDataFrame
+
+
+        Returns
+        -------
+        summary: DataFrame, where
+            * Index is the name of the computed values.
+            * Columns are either numerical or categorical columns of self.
+
+        """
+        from ibmdbpy.statistics import summary
+        return summary(idadf=self)
 
     @timed
     @idadf_state

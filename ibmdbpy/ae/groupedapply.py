@@ -36,7 +36,7 @@ class NZFunGroupedApply(object):
         self.table_name = df.internal_state.current_state
         self.df = df
         self.db = df._idadb
-        self.fun = fun_name
+        self.fun = fun_ref
         self.fun_name = fun_name
         self.id = id
 
@@ -70,8 +70,7 @@ class NZFunGroupedApply(object):
         # send the code as dynamic variable to ae function
         columns_string = columns_string + ",'CODE_TO_EXECUTE=" + "\"" + code_string + "\"" + "'"
 
-        #print("table name is " + self.table_name)
-        #print(columns_string)
+
         query = ""
         if self.parallel is False:
             ae_name = "nzpy..py_udtf_host"
