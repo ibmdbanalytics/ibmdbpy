@@ -1,10 +1,10 @@
 
 
-from ibmdbpy import IdaDataBase, IdaDataFrame
+from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 
-from ibmdbpy.ae import NZFunTApply, NZClassTApply
-from ibmdbpy.ae import NZFunApply
-from ibmdbpy.ae import NZFunGroupedApply
+from ibmdbpy4nps.ae import NZFunTApply, NZClassTApply
+from ibmdbpy4nps.ae import NZFunApply
+from ibmdbpy4nps.ae import NZFunGroupedApply
 
 idadb = IdaDataBase('weather', 'admin', 'password')
 print(idadb)
@@ -162,18 +162,12 @@ def apply_fun(self, x):
     fahren_max_temp = (max_temp*1.8)+32
     row = [id, max_temp,  fahren_max_temp]
     self.output(row)"""
-output_signature = {'ID':'int', 'MAX_TEMP' :'float', 'FAHREN_MAX_TEMP' : 'float'}
+output_signature = {'ID':'int', 'RESULT_MAX_TEMP' :'float', 'RESULT_FAHREN_MAX_TEMP' : 'float'}
 nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name='apply_fun', output_table="temp_conversion", output_signature=output_signature, merge_output_with_df=True)
 result = nz_apply.get_result()
 print(result)
 
-#import time
-#start = time.time()
-#nz_groupapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name ="decision_tree_ml_host", parallel=False, output_signature=["dataset_size=int", "location=str", "classifier_accuracy=double"])
-#result = nz_groupapply.get_result()
-#print("Host only execution - user code partitions the data")
-#print(result)
-#print("\n")
+
 
 end = time.time()
 print(end - start)
