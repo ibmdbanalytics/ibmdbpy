@@ -788,7 +788,7 @@ def corr(idadf):
                                         incolumn=column_string,
                                         outtable=outtable)
     #corr_df = idadf.ida_query(create_corr_query)
-    result_query = "SELECT * FROM " + table_name + "_temp ORDER BY varxname, varyname; "
+    result_query = "SELECT * FROM " + outtable+ " ORDER BY varxname, varyname; "
 
 
 

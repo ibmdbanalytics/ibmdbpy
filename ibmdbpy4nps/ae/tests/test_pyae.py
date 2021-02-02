@@ -151,7 +151,7 @@ def test_apply_weather_save_table_merge_withdf():
         row = [id, max_temp,  fahren_max_temp]
         self.output(row)
         """
-    output_signature = {'ID': 'int', 'RESULT_MAX_TEMP': 'float', 'RESULT_FAHREN_MAX_TEMP': 'float'}
+    output_signature = {'ID': 'int', 'MAX_TEMP': 'float', 'FAHREN_MAX_TEMP': 'float'}
     output_table = "temp_conversion"
     if idadb.exists_table(output_table):
         idadb.drop_table(output_table)

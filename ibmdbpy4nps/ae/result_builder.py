@@ -16,12 +16,17 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
             raise NameError("table name already exists..choose a different name")
 
         # check for duplicate columns
+
         for column in output_signature:
+
+
 
             if column in df.columns.tolist():
                 if (column == id):
                     continue
-                raise ValueError("column duplication..check the column names in the output table")
+
+                raise ValueError("column " + column + " duplicated in the output table")
+
 
         # create a random table for merging the two tables
         output_table_tmp = db._get_valid_tablename(prefix="pyida_")
@@ -63,7 +68,7 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
             if column in df.columns.tolist():
                 if (column == id):
                     continue
-                raise ValueError("column duplication..check the column names in the output table")
+                raise ValueError("column "+column+" duplicated in the output table")
 
         columns_str = ""
         for column in output_signature:

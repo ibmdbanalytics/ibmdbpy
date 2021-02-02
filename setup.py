@@ -62,7 +62,7 @@ classifiers = [
       ]
 
 setup(name='ibmdbpy4nps',
-      version='0.2.1.0',
+      version='0.2.1.2',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
@@ -73,6 +73,7 @@ setup(name='ibmdbpy4nps',
       },
       description='Supports Custom ML/Analytics Execution Inside Netezza',
       long_description=longdesc,
+      long_description_content_type='text/markdown',
       author='IBM Corp.',
       author_email='vinay.kasireddy@ibm.com,toni.bollinger@de.ibm.com',
       license='BSD',
