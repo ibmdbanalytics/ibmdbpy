@@ -20,6 +20,7 @@ from codecs import open
 with open('README.rst', 'r', encoding='utf-8') as f:
     longdesc = f.read()
 
+
 classifiers = [
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -60,8 +61,8 @@ classifiers = [
         'Topic :: Software Development'
       ]
 
-setup(name='ibmdbpy',
-      version='0.1.6',
+setup(name='ibmdbpy4nps',
+      version='0.2.1.2',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
@@ -70,15 +71,15 @@ setup(name='ibmdbpy',
         'test':['pytest', 'flaky==3.4.0'],
         'doc':['sphinx', 'ipython', 'numpydoc', 'sphinx_rtd_theme']
       },
-      description='A Pandas-like SQL-wrapper for in-database analytics with IBM Db2 Warehouse.',
+      description='Supports Custom ML/Analytics Execution Inside Netezza',
       long_description=longdesc,
-      url='https://github.com/ibmdbanalytics/ibmdbpy',
+      long_description_content_type='text/markdown',
       author='IBM Corp.',
-      author_email='Toni.Bollinger@de.ibm.com',
+      author_email='vinay.kasireddy@ibm.com,toni.bollinger@de.ibm.com',
       license='BSD',
       classifiers=classifiers,
-      keywords='data analytics database development IBM Db2 Warehouse pandas scikitlearn scalability machine-learning knowledge discovery',
+      keywords='data analytics database development IBM Netezza pandas scikitlearn scalability machine-learning knowledge discovery',
       packages=find_packages(exclude=['docs', 'tests*']),
       package_data={
-        'ibmdbpy.sampledata': ['*.txt']}
+        'ibmdbpy4nps.sampledata': ['*.txt']}
      )

@@ -1,5 +1,5 @@
-recursive-include ibmdbpy *.txt
-recursive-include ibmdbpy *.py
+recursive-include ibmdbpy4nps *.txt
+recursive-include ibmdbpy4nps *.py
 recursive-include docs *
 
 include LICENSE.txt
