@@ -62,7 +62,7 @@ classifiers = [
       ]
 
 setup(name='ibmdbpy4nps',
-      version='0.2.1.2',
+      version='0.2.1.4',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
@@ -78,7 +78,7 @@ setup(name='ibmdbpy4nps',
       author_email='vinay.kasireddy@ibm.com,toni.bollinger@de.ibm.com',
       license='BSD',
       classifiers=classifiers,
-      keywords='data analytics database development IBM Netezza pandas scikitlearn scalability machine-learning knowledge discovery',
+      keywords='data analytics database development ibm netezza pandas scikitlearn scalability machine-learning knowledge discovery',
       packages=find_packages(exclude=['docs', 'tests*']),
       package_data={
         'ibmdbpy4nps.sampledata': ['*.txt']}
