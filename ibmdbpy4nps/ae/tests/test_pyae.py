@@ -633,6 +633,7 @@ def test_groupedapply_weather_host_spus_funref():
 
 
 def test_install():
-    nzinstall = NZInstall(package_name='scikit-learn')
+    idadb = IdaDataBase('weather', 'admin', 'password')
+    nzinstall = NZInstall(idadb, package_name='pandas')
     result = nzinstall.getResultCode()
     assert result==0, "installation failed"

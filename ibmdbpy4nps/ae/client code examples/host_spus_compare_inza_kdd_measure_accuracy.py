@@ -8,7 +8,7 @@ from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunTApply, NZClassTApply
 from ibmdbpy4nps.ae import NZFunGroupedApply
 
-idadb = IdaDataBase('weather', 'admin', 'password')
+idadb = IdaDataBase('kddcup99', 'admin', 'password')
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'KDDCUP99')
