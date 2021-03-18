@@ -138,6 +138,31 @@ def test_tapply_host_weather_train_pred():
     assert result.shape[1] == 28, "number of columns are not matching"
 
 
+def test_apply_weather_save_table_merge_withdf_duplicate_columns():
+    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+
+
+    idadf = IdaDataFrame(idadb, 'WEATHER')
+    code_str_apply = """def apply_fun(self, x):
+        from math import sqrt
+        max_temp = x[3]
+        id = x[24]
+        fahren_max_temp = (max_temp*1.8)+32
+        row = [id, max_temp,  fahren_max_temp]
+        self.output(row)
+        """
+    output_signature = {'ID': 'int', 'MAXTEMP': 'float', 'FAHREN_MAX_TEMP': 'float'}
+    output_table = "temp_conversion"
+    if idadb.exists_table(output_table):
+        idadb.drop_table(output_table)
+
+    with pytest.raises(ValueError) as exception_msg :
+      nz_apply = NZFunApply(df=idadf, code_str=code_str_apply, fun_name='apply_fun', output_table=output_table,
+                          output_signature=output_signature, merge_output_with_df=True)
+      result = nz_apply.get_result()
+
+    assert exception_msg.match("column MAXTEMP duplicated in the output table")
+
 def test_apply_weather_save_table_merge_withdf():
     idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
 
@@ -156,6 +181,7 @@ def test_apply_weather_save_table_merge_withdf():
     if idadb.exists_table(output_table):
         idadb.drop_table(output_table)
 
+
     nz_apply = NZFunApply(df=idadf, code_str=code_str_apply, fun_name='apply_fun', output_table=output_table,
                           output_signature=output_signature, merge_output_with_df=True)
     result = nz_apply.get_result()
@@ -163,7 +189,6 @@ def test_apply_weather_save_table_merge_withdf():
     print(result)
     assert result.shape[0] == 142193, "number of records are not matching"
     assert result.shape[1] == 27, "number of columns are not matching"
-
 
 def test_summary():
     idadb = IdaDataBase('weather', 'admin', 'password')
@@ -179,7 +204,6 @@ def test_corr():
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result_df = idadf.corr()
-
     print(result_df)
     assert result_df.shape[0] == 16, "number of rows are not matching"
     assert result_df.shape[1] == 16, "number of columns are not matching"
@@ -609,6 +633,7 @@ def test_groupedapply_weather_host_spus_funref():
 
 
 def test_install():
-    nzinstall = NZInstall(package_name='scikit-learn')
+    idadb = IdaDataBase('weather', 'admin', 'password')
+    nzinstall = NZInstall(idadb, package_name='pandas')
     result = nzinstall.getResultCode()
     assert result==0, "installation failed"

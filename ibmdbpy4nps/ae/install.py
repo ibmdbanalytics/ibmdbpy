@@ -30,18 +30,17 @@ standard_library.install_aliases()
 
 class NZInstall(object):
 
-    def __init__(self, package_name):
+    def __init__(self, idadb, package_name):
         """
         Constructor for install
         """
         self.package_name=package_name
+        self.db =idadb
 
 
 
     def  getResultCode(self):
-        # we need a way to directly access database rather than through dsn
-        idadb = IdaDataBase('nzpy', 'admin', 'password')
-        print(idadb)
+
 
 
 
@@ -57,8 +56,9 @@ class NZInstall(object):
         columns_string = "'CODE_TO_EXECUTE=" + "\"" + final_code + "\"" + "'"
         query = "select * from table with final (" + ae_name + "(" + columns_string + ")) "
 
-        print(query)
-        result = idadb.ida_query(query)
+
+        result = self.db.ida_query(query)
+
         if(len(result.values)>0):
             return result.values[0]
 
