@@ -41,9 +41,7 @@ class NZInstall(object):
 
     def  getResultCode(self):
 
-
-
-
+        
         ae_name = "nzpy..py_udtf_install"
 
         output_signature = {'ResultCode': 'int'}
