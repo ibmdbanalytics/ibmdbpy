@@ -148,6 +148,7 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
         try:
             firstRow = cursor.fetchone()
         except:
+            cursor.close()
             return None #non-SELECT query, didn't return anything
         else:
             #query with SELECT statement, mind that resultset might be empty
@@ -208,6 +209,7 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
         try:
             firstRow = cursor.fetchone()
         except:
+            cursor.close()
             return None #non-SELECT query, didn't return anything
         else:        
             #query with SELECT statement, mind that resultset might be empty
