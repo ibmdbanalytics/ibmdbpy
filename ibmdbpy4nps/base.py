@@ -39,6 +39,7 @@ from copy import deepcopy
 
 from collections import OrderedDict
 
+
 import numpy as np
 import pandas as pd
 
@@ -79,7 +80,7 @@ class IdaDataBase(object):
     IdaDataFrame per connection.
     """
 
-    def __init__(self, dsn, uid='', pwd='', autocommit=True, verbose=False):
+    def __init__(self, dsn, uid='', pwd='',  autocommit=True, verbose=False):
         """
         Open a database connection.
 
@@ -167,6 +168,7 @@ class IdaDataBase(object):
 
         self.data_source_name = dsn
 
+
         # default value for _database_system is db2
         self._database_system = 'db2'
         # first delimiter before the parameters in the jdbc-url
@@ -191,7 +193,8 @@ class IdaDataBase(object):
 
         self._idadfs = []
 
-        if self._con_type == 'odbc':
+        if self._con_type == 'odbc' :
+
             self._connection_string = "DSN=%s; UID=%s; PWD=%s;LONGDATACOMPAT=1;"%(dsn,uid,pwd)
             """
             Workaround for CLOB retrieval: 
@@ -203,10 +206,13 @@ class IdaDataBase(object):
             SQL_DBCLOB to SQL_WLONGVARCHAR
             """
             import pyodbc
-            try :
+            try:
                 self._con = pyodbc.connect(self._connection_string)
             except Exception as e:
-                raise IdaDataBaseError(e.value[1])
+                 raise IdaDataBaseError(e.value[1])
+
+
+
 
             try:
                 self.ida_query("select count(*) from _V_OBJECT")
@@ -328,13 +334,26 @@ class IdaDataBase(object):
                     def _get_jdbc_driver_from_folders(folders):
                         jarpath = ''
                         if platform == 'win32':
-                            jarpaths = [fld.split(':')[1].replace('\\', '/') + "/"  + dl
-                                      for fld in folders for dl in driverlibs if os.path.isfile(fld + "/" + dl)]
+                            jarpaths = [fld.split(':')[1].replace('\\', '/') + "/" + dl
+                                        for fld in folders for dl in driverlibs if os.path.isfile(fld + "/" + dl)]
+                            if jarpaths == []:
+                                # check if classpath contains paths with wildcard "*" at the end
+                                jarpaths = [fld.split(':')[1].replace('\\', '/')[:-1] + dl
+                                            for fld in folders for dl in driverlibs if
+                                            fld[-1:] == '*' and os.path.isfile(fld + "/" + dl)]
                         else:
-                            jarpaths = [fld + "/"  + dl for fld in folders for dl in driverlibs if os.path.isfile(fld + "/" + dl)]
-
+                            jarpaths = [fld + "/" + dl for fld in folders for dl in driverlibs if
+                                        os.path.isfile(fld + "/" + dl)]
+                            if jarpaths == []:
+                                # check if classpath contains paths with wildcard "*" at the end
+                                jarpaths = [fld[:-1] + dl
+                                            for fld in folders for dl in driverlibs if
+                                            fld[-1:] == '*' and os.path.isfile(fld[:-1] + dl)]
                         if jarpaths:
                             return jarpaths[0]
+
+
+
                         
                     if classpath: # There is at least something in the classpath variable
                         # Let us see if the jar in a folder of the classpath
@@ -351,6 +370,7 @@ class IdaDataBase(object):
                     if verbose: print("Found it at %s!\nTrying to connect..."%jarpath)
 
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
+
 
             if self._is_netezza_system():
                 driver_not_found = ("HELP: The Netezza JDBC driver library 'nzjdbc3.jar' could not be found. "+

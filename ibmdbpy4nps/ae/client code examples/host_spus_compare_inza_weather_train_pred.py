@@ -5,12 +5,19 @@ from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunTApply
 from ibmdbpy4nps.ae import NZFunApply
 from ibmdbpy4nps.ae import NZFunGroupedApply
-import pandas as pd
 
-idadb = IdaDataBase('weather', 'admin', 'password')
+
+#dsn = "jdbc:netezza://169.63.46.17:5480/weather"
+dsn='weather'
+idadb = IdaDataBase(dsn, 'admin', 'password')
+
+
+
+
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
+print(idadf.head())
 
 #query = 'select * from weather limit 10000'
 
@@ -277,10 +284,9 @@ nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index=
 result = nz_groupapply.get_result()
 print("Host+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
 print(result)
-groups = result.groupby("LOCATION")
+groups = result.as_dataframe().groupby("LOCATION")
 for name, group in groups:
     print (name +":"+str(len(group)))
-
 end = time.time()
 print(end - start)
 
