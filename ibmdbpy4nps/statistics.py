@@ -172,7 +172,7 @@ def _get_percentiles(idadf, percentiles, columns):
         df = idadf.ida_query("(SELECT \""+column+"\" AS \""+column+"\" FROM (SELECT "+
                         "ROW_NUMBER() OVER(ORDER BY \""+column+"\") as rn, \""+
                         column + "\" FROM (SELECT * FROM " + name +
-                        " WHERE " + column + " IS NOT NULL " +
+                        " WHERE \"" + column + "\" IS NOT NULL " +
                         ") AS T1) AS T2 WHERE rn  in("+ indexes_string +"))")
 
         #indexvalues = list(df[df.columns[0]])
@@ -663,17 +663,18 @@ def quantile(idadf, q=0.5):
 
 
 def cov(idadf, other=None):
+    if not idadf._idadb._is_netezza_system():
+        return  cov_old(idadf, other)
+
     numerical_columns = idadf._get_numerical_columns()
     if len(numerical_columns) < 2:
         print(idadf.name + " has less than two numeric columns")
         return
     column_string = ""
     for column in numerical_columns:
-        column_string += column + ";"
+        column_string+="\""+ column+"\";"
 
     result_df = pd.DataFrame(columns=numerical_columns, index=numerical_columns)
-
-
 
     table_name = idadf.internal_state.current_state
     outtable = idadf._idadb._get_valid_tablename(prefix="cov_")
@@ -683,7 +684,11 @@ def cov(idadf, other=None):
                                         incolumn=column_string,
                                         outtable=outtable)
 
-    result_query = "SELECT * FROM " + outtable + " ORDER BY varxname, varyname; "
+    # the calls of substring remove the surrounding double quotes
+    result_query = ("SELECT substring(VARXNAME,2,length(VARXNAME)-2) as VARXNAME, " +
+                            "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
+                            "COVARIANCE, CNTX " +
+                    "FROM " + outtable + " ORDER BY varxname, varyname;")
 
     cov_df = idadf.ida_query(result_query)
 
@@ -768,13 +773,16 @@ def cov_old(idadf, other = None):
     return result
 
 def corr(idadf):
+    if not idadf._idadb._is_netezza_system():
+        return  corr_old(idadf)
+
     numerical_columns = idadf._get_numerical_columns()
     if len(numerical_columns) < 2 :
         print(idadf.name + " has less than two numeric columns")
         return
     column_string=""
     for column in numerical_columns:
-        column_string+=column+";"
+        column_string+="\""+ column+"\";"
 
     result_df = pd.DataFrame(columns=numerical_columns, index=numerical_columns)
 
@@ -787,10 +795,12 @@ def corr(idadf):
                                         intable=table_name,
                                         incolumn=column_string,
                                         outtable=outtable)
-    #corr_df = idadf.ida_query(create_corr_query)
-    result_query = "SELECT * FROM " + outtable+ " ORDER BY varxname, varyname; "
 
-
+    # the calls of substring remove the surrounding double quotes
+    result_query = ("SELECT substring(VARXNAME,2,length(VARXNAME)-2) as VARXNAME, " +
+                            "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
+                            "CORRELATION " +
+                    "FROM " + outtable + " ORDER BY varxname, varyname;")
 
     corr_df = idadf.ida_query(result_query)
 

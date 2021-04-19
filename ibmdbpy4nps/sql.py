@@ -148,7 +148,6 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
         try:
             firstRow = cursor.fetchone()
         except:
-            cursor.close()
             return None #non-SELECT query, didn't return anything
         else:
             #query with SELECT statement, mind that resultset might be empty
@@ -203,13 +202,11 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
     try:
         query = _prepare_query(query, silent)
         cursor.execute(query)
-
         if autocommit is True:
-            idadb._autocommit()            
+            idadb._autocommit()
         try:
             firstRow = cursor.fetchone()
         except:
-            cursor.close()
             return None #non-SELECT query, didn't return anything
         else:        
             #query with SELECT statement, mind that resultset might be empty
@@ -225,57 +222,52 @@ def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
                if colNumbersWithCLOBs:
                    for colNum in colNumbersWithCLOBs:
                        firstRow[colNum] = firstRow[colNum].getSubString(1, firstRow[colNum].length())
-               
             if first_row_only is True:
                 if firstRow is None:
                     return tuple()
                 else:
-                    #this following processing was proposed by Edouard            
+                    #this following processing was proposed by Edouard
                     for index, element in enumerate(firstRow):
                         if element is None:
                             firstRow[index] = np.nan
                         if isinstance(element, decimal.Decimal):
                             firstRow[index] = int(element)
                     result = tuple(firstRow)
-                    return result
-
-            #first_row_only is False
-            if((not colNumbersWithCLOBs) or (firstRow is None)) :
-                #use Pandas' read_sql
-                #if firstRow is None, resultset was empty, so create an empty 
-                #DataFrame with the column names
-                result = read_sql(query, idadb._con)
-                # Note: This may solve problem in case the interface does not
-                # get properly the column names. This is just a suggestion. 
-                # Uncomment it if you feel you need it, but so far it worked well without
-                # result.columns = [column[0] for column in cursor.description]
             else:
+                #first_row_only is False
                 #get the column names for the DataFrame
                 colNames = [column[0] for column in cursor.description]
-                
-                #use the already retrieved row and retrieve the remaining
-                data = []
-                row = firstRow
-                while row is not None:
-                    data.append(row)
-                    row = cursor.fetchone() #this returns a tuple
-                    if row is not None:
-                        row = list(row)            
-                        for colNum in colNumbersWithCLOBs:                            
-                            try:
-                                # Check needed because some DB2GSE functions 
-                                # return Null, which is then interpreted as
-                                # None, which doesn't have getSubString method
-                                row[colNum] = row[colNum].getSubString(
-                                        1, row[colNum].length())
-                            except:
-                                pass
-                result = pd.DataFrame(data)
-                result.columns = colNames
-                
-            #convert to Series if only one column       
-            if len(result.columns) == 1:
-                result = result[result.columns[0]] 
+                data = [firstRow]
+                if firstRow is None:
+                    # return an empty data frame
+                    result = pd.DataFrame(columns=colNames)
+                elif colNumbersWithCLOBs:
+                    #use the already retrieved row and retrieve the remaining
+                    data = []
+                    row = firstRow
+                    while row is not None:
+                        data.append(row)
+                        row = cursor.fetchone() #this returns a tuple
+                        if row is not None:
+                            row = list(row)
+                            for colNum in colNumbersWithCLOBs:
+                                try:
+                                    # Check needed because some DB2GSE functions
+                                    # return Null, which is then interpreted as
+                                    # None, which doesn't have getSubString method
+                                    row[colNum] = row[colNum].getSubString(
+                                                        1, row[colNum].length())
+                                except:
+                                    pass
+                    result = pd.DataFrame(data, columns = colNames)
+                else:
+                    # fetch the remaining rows
+                    data.extend(cursor.fetchall())
+                    result = pd.DataFrame(data, columns= colNames)
+
+                #convert to Series if only one column
+                if len(result.columns) == 1:
+                    result = result[result.columns[0]]
             return result                       
             
     except:
