@@ -42,6 +42,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas as pd
+from pandas.io.sql import read_sql
 
 from lazy import lazy
 import six
@@ -351,9 +352,6 @@ class IdaDataBase(object):
                                             fld[-1:] == '*' and os.path.isfile(fld[:-1] + dl)]
                         if jarpaths:
                             return jarpaths[0]
-
-
-
                         
                     if classpath: # There is at least something in the classpath variable
                         # Let us see if the jar in a folder of the classpath
@@ -1641,7 +1639,10 @@ class IdaDataBase(object):
             elif self._con_type == 'jdbc':
                 try:
                     import jaydebeapi
-                    self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
+                    if self._is_netezza_system():
+                        self._con = jaydebeapi.connect('org.netezza.Driver', self._connection_string)
+                    else:
+                        self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)
                 except:
                     raise
                 else:
@@ -2286,19 +2287,17 @@ class IdaDataBase(object):
                 raise IdaDataBaseError(e.value[-1])
         elif self._con_type == "jdbc":
             # This avoids infinite recursions on Netezza due to reconnect calls in
-            sql.ida_query, sql.ida_scalar_query and sql._prepare_and_execute
+            # sql.ida_query, sql.ida_scalar_query and sql._prepare_and_execute
             if self._con._closed:
                 raise IdaDataBaseError("The connection is closed")
             try:
                 # Avoid infinite recursion
                 if self._is_netezza_system():
                     # On Netezza no result sets are returned after the first database error
-                    if sql.ida_query(self, "SELECT count(*) FROM _V_TABLE", True, True) == None:
+                    if read_sql("SELECT OBJID FROM _V_TABLE LIMIT 1", self._con) is None:
                         raise IdaDataBaseError("The connection is closed")
                 else:
-                    sql.ida_query(self,"SELECT distinct TABSCHEMA, TABNAME, OWNER,"+
-                                  " TYPE from SYSCAT.TABLES WHERE (OWNERTYPE = 'U')",
-                                  True, True)
+                    read_sql("SELECT TABLEID FROM SYSCAT.TABLES LIMIT 1", self._con)
             except Exception as e:
                 raise IdaDataBaseError("The connection is closed")
 

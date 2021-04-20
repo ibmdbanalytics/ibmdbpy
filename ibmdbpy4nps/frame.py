@@ -2114,6 +2114,7 @@ class IdaDataFrame(object):
             cursor = self._idadb._con.cursor()
             cursor.execute("SELECT * FROM %s"%tablename)
             columnlist = [column[0] for column in cursor.description]
+            cursor.close()
             return Index(columnlist)
 
     def _get_all_columns_in_table(self):
