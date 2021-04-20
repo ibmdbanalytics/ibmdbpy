@@ -62,7 +62,7 @@ def entropy(idadf, target=None, mode="normal", execute=True, ignore_indexer=True
         subquery = "SELECT COUNT(*) AS a FROM %s GROUP BY \"%s\""%(idadf.name,targetstr)
         if mode == "normal":
             length = len(idadf)
-            query = "SELECT(SUM(-a*LOG(a))/%s+LOG(%s))/LOG(2)FROM(%s) AS T "%(length, length, subquery)
+            query = "SELECT (SUM(-a*LOG(a))/%s+LOG(%s))/LOG(2) FROM (%s) AS T"%(length, length, subquery)
         elif mode == "raw":
             query = "SELECT SUM(-a*LOG(a)) FROM(%s) AS T "%(subquery)
         
