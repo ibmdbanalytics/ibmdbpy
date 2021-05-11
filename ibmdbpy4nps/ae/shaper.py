@@ -20,7 +20,9 @@ def get_base_shaper_tapply(columns, fun_name, output_signature):
                                   
 
                                  def _runShaper(self):
-                                   """ + textwrap.indent(output_signature_str, '                      ') + """
+                                    
+                                    """ + textwrap.indent(output_signature_str, '                      ') + """
+                                    
 
 
 
@@ -60,8 +62,8 @@ def get_base_shaper_groupedapply(columns, fun_name, output_signature):
 
 
                              def _runShaper(self):
-                               """ + textwrap.indent(output_signature_str, '                      ') + """
-
+                               
+                                     """ + textwrap.indent(output_signature_str, '                      ') + """
 
 
 
@@ -78,13 +80,22 @@ def get_base_shaper(output_signature):
         # print(column)
         if output_signature[column] == 'int' or output_signature[column] == 'int64':
             column_val = 'self.DATA_TYPE__INT32'
+
+            output_signature_str += """
+                                                       self.addOutputColumn('""" + column + """',""" + column_val + """) """
+
+        if output_signature[column] == 'bool' :
+            column_val = 'self.DATA_TYPE__INT32'
             output_signature_str += """
                                                        self.addOutputColumn('""" + column + """',""" + column_val + """) """
 
         if output_signature[column] == 'float' or output_signature[column] == 'float64':
             column_val = 'self.DATA_TYPE__FLOAT'
             output_signature_str += """
+         
                                                        self.addOutputColumn('""" + column + """',""" + column_val + """) """
+
+
         if output_signature[column] == 'double':
             column_val = 'self.DATA_TYPE__DOUBLE'
             output_signature_str += """
@@ -160,53 +171,3 @@ def get_base_shaper_install(output_signature, package_name):
 
 
 
-def get_base_shaper_old_signature(self, columns, fun_name, output_signature):
-    output_signature_str = ""
-
-    for i in range(len(output_signature)):
-        column_signature = output_signature[i]
-        col_sig_list = column_signature.split('=')
-        if col_sig_list[1] == 'int':
-            col_sig_list[1] = 'self.DATA_TYPE__INT32'
-            output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + col_sig_list[
-                1] + """) """
-        if col_sig_list[1] == 'float':
-            col_sig_list[1] = 'self.DATA_TYPE__FLOAT'
-            output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + col_sig_list[
-                1] + """) """
-        if col_sig_list[1] == 'double':
-            col_sig_list[1] = 'self.DATA_TYPE__DOUBLE'
-            output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + \
-                                    col_sig_list[
-                                        1] + """) """
-        if col_sig_list[1] == 'str':
-            col_sig_list[1] = 'self.DATA_TYPE__VARIABLE'
-            output_signature_str += """
-                            self.addOutputColumnString('""" + col_sig_list[
-                0] + """',""" + \
-                                    col_sig_list[
-                                        1] + """,1000) """
-
-    # output_signature_final = inspect.cleandoc(output_signature_str)
-    code_string = """import nzae
-                        import pandas as pd
-                        class BaseShaperUdtf(nzae.Ae):
-                             def _runUdtf(self):
-                               for row in self :
-                                 row = self.""" + fun_name + """(row)
-                                 self.output(row)
-
-
-                             def _runShaper(self):
-                               """ + textwrap.indent(output_signature_str, '                      ') + """
-
-
-
-
-                               """
-
-    code_string = code_string.replace("'", "''")
-    return inspect.cleandoc(code_string)

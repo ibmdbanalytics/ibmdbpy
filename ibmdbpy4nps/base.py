@@ -206,20 +206,29 @@ class IdaDataBase(object):
             SQL_BLOB to SQL_LONGVARBINARY
             SQL_DBCLOB to SQL_WLONGVARCHAR
             """
+
             import pyodbc
             try:
                 self._con = pyodbc.connect(self._connection_string)
             except Exception as e:
-                 raise IdaDataBaseError(e.value[1])
-
-
-
-
+                raise IdaDataBaseError(str(e))
             try:
                 self.ida_query("select count(*) from _V_OBJECT")
                 self._database_system = 'netezza'
-            except  Exception as e:
-                self._database_system = 'db2'
+            except  Exception as e1:
+                try:
+                    self.ida_query("select CURRENT_SERVER from SYSIBM.SYSDUMMY1")
+                    self._database_system = 'db2'
+                except Exception as e2:
+                    errorMsg = ("The following errors occurred when trying to determine " +
+                                "if the database system is Netezza or Db2:\n" +
+                                "%s\n%s") % (str(e1), str(e2))
+                    raise IdaDataBaseError(errorMsg)
+
+
+
+
+
 
         if self._con_type == 'jdbc':
 

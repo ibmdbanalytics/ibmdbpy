@@ -5,6 +5,7 @@ from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunTApply
 from ibmdbpy4nps.ae import NZFunApply
 from ibmdbpy4nps.ae import NZFunGroupedApply
+import pandas as pd
 
 
 #dsn = "jdbc:netezza://169.63.46.17:5480/weather"
@@ -13,25 +14,20 @@ idadb = IdaDataBase(dsn, 'admin', 'password')
 
 
 
-
+#query = "select * from weather_new limit 1000"
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
-print(idadf.head())
 
-#query = 'select * from weather limit 10000'
+query = 'select * from weather limit 10000'
 
-#pd.set_option('display.max_rows', None)
-#pd.set_option('display.max_columns', None)
-#pd.set_option('display.width', None)
-#pd.set_option('display.max_colwidth', -1)
-#corr_result = idadf.corr()
-#print(corr_result)
-#print(idadf.describe())
-#print(idadf.corr())
 
-#df = idadf.ida_query(query)
 
+
+
+
+df = idadf.ida_query(query)
+print(df.dtypes)
 
 code_str_host = """def decision_tree_ml_host(self, df):
 
@@ -81,7 +77,7 @@ code_str_host = """def decision_tree_ml_host(self, df):
                     # impute missing values for categorical variables
                     imp = SimpleImputer(missing_values=None, strategy='constant', fill_value='missing')
                     imputed_df[column] = imp.fit_transform(imputed_df[column].values.reshape(-1, 1))
-                    imputed_df[column] = imputed_df[column].astype('str')
+                    imputed_df[column] = imputed_df[column].astype(str)
                     le = LabelEncoder()
                     # print(imputed_df[column].unique())
 
@@ -107,10 +103,17 @@ code_str_host = """def decision_tree_ml_host(self, df):
 
 
             y_pred= dt.predict(X_test)
+            
 
             pred_df['RAINTOMORROW'] = y_pred
+            
             pred_df['DATASET_SIZE'] = ds_size
             pred_df['CLASSIFIER_ACCURACY']=round(accuracy,2)
+            
+           
+            
+            
+            
 
 
 
@@ -124,14 +127,16 @@ code_str_host = """def decision_tree_ml_host(self, df):
                #print(pred_df)
 
             def print_output(x):
-                row = [x['ID'], x['RAINTOMORROW'], x['DATASET_SIZE'], x['CLASSIFIER_ACCURACY']]
+                row = [x['ID'], x['RAINTOMORROW'],  x['DATASET_SIZE'], x['CLASSIFIER_ACCURACY']]
+                
                 self.output(row)
 
 
             pred_df.apply(print_output, axis=1)
-
+                      
             return pred_df
-
+            
+ 
 
         ml_result = decision_tree_classifier(df=group)
 
@@ -141,21 +146,26 @@ code_str_host = """def decision_tree_ml_host(self, df):
 
 
 
-
 output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
+
 
 import time
 start = time.time()
 
 nz_tapply = NZFunTApply(df=idadf, code_str=code_str_host, fun_name='decision_tree_ml_host', parallel=False,  output_signature=output_signature, merge_output_with_df=True)
-result = nz_tapply.get_result()
-result = result.as_dataframe()
+result_idadf = nz_tapply.get_result()
+result_df = result_idadf.as_dataframe()
+idadb.drop_table(result_idadf.tablename)
 print("\n")
-print(result)
+#pd.set_option('display.max_columns', None)
+#pd.set_option('display.width', None)
+#pd.set_option('display.max_rows', None)
+#pd.set_option('display.max_colwidth', -1)
+print(result_df)
 end = time.time()
 print(end - start)
 #result = result.as_dataframe()
-groups = result.groupby("LOCATION")
+groups = result_df.groupby("LOCATION")
 for name, group in groups:
     print(name + ":" + str(len(group)))
 
@@ -282,6 +292,7 @@ start = time.time()
 nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml", output_signature=output_signature, merge_output_with_df=True)
 #nz_groupapply = NZFunGroupedApply(df=idadf,  code_str=code_str_host_spus, index='LOCATION', fun_name="decision_tree_ml")
 result = nz_groupapply.get_result()
+
 print("Host+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
 print(result)
 groups = result.as_dataframe().groupby("LOCATION")
@@ -297,8 +308,9 @@ start = time.time()
 output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
 nz_groupapply = NZFunTApply(df=idadf, code_str=code_str_host_spus, fun_name ="decision_tree_ml", parallel=True, output_signature=output_signature)
 result = nz_groupapply.get_result()
+result = result.as_dataframe()
 print("Host +SPUs execution - slicing on a default column- ML function for the entire slices")
-#print(result)
+print(result)
 print("\n")
 
 end = time.time()
