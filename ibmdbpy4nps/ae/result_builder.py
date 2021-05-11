@@ -53,6 +53,7 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         idadf = IdaDataFrame(db, output_table)
         return idadf
     if output_table is None and merge_output is True:
+
         # create a random table and store query results
         output_table_tmp = db._get_valid_tablename(prefix="pyida_")
         create_string = "create table " + output_table_tmp + " as "
@@ -80,13 +81,15 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         df_output_table = db._get_valid_tablename(prefix="df_")
 
         query = "create table "+df_output_table+" as  select  " + columns_str + " , base.*  from  " + output_table_tmp + " as link INNER JOIN " \
-                                                                                                                         " " + table_name+"  as base on link." + id + " = base." +id + ";"
+                                                                                                                        " " + table_name+"  as base on link." + id + " = base." +id + ";"
 
 
         result = df.ida_query(query, autocommit=True)
 
         idadf = IdaDataFrame(db, df_output_table)
+
         db.drop_table(output_table_tmp)
+
         return idadf
 
     df_output_table = db._get_valid_tablename(prefix="df_")

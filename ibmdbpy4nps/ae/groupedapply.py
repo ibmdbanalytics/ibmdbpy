@@ -125,36 +125,11 @@ class NZFunGroupedApply(object):
 
     def get_base_shaper_host(self, columns, fun_name, output_signature):
 
-        output_signature_str = ""
+        output_signature_str = shaper.get_base_shaper(output_signature)
 
-        for i in range(len(output_signature)):
-            column_signature = output_signature[i]
-            col_sig_list = column_signature.split('=')
-            if col_sig_list[1] == 'int':
-                col_sig_list[1] = 'self.DATA_TYPE__INT32'
-                output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + col_sig_list[
-                    1] + """) """
-                print(output_signature_str)
-            if col_sig_list[1] == 'float':
-                col_sig_list[1] = 'self.DATA_TYPE__FLOAT'
-                output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + col_sig_list[
-                    1] + """) """
-            if col_sig_list[1] == 'double':
-                col_sig_list[1] = 'self.DATA_TYPE__DOUBLE'
-                output_signature_str += """
-                            self.addOutputColumn('""" + col_sig_list[0] + """',""" + \
-                                        col_sig_list[
-                                            1] + """) """
-            if col_sig_list[1] == 'str':
-                col_sig_list[1] = 'self.DATA_TYPE__VARIABLE'
-                output_signature_str += """
-                            self.addOutputColumnString('""" + col_sig_list[
-                    0] + """',""" + \
-                                        col_sig_list[
-                                            1] + """,1000) """
-                # output_signature_final = inspect.cleandoc(output_signature_str)
+
+
+
 
         code_string = """               import nzae
                                         import pandas as pd
