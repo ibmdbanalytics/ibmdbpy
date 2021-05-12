@@ -210,6 +210,9 @@ class IdaDataBase(object):
             import pyodbc
             try:
                 self._con = pyodbc.connect(self._connection_string)
+                self._con.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
+                self._con.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
+                self._con.setencoding(encoding='utf-8')
             except Exception as e:
                 raise IdaDataBaseError(str(e))
             try:
