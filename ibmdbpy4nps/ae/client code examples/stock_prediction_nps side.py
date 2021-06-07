@@ -8,8 +8,10 @@ dsn ='bank'
 idadb = IdaDataBase(dsn, 'admin', 'password')
 print(idadb)
 
+
 idadf = IdaDataFrame(idadb, 'stocks')
 print(idadf.head())
+
 
 query = 'select * from stocks'
 
