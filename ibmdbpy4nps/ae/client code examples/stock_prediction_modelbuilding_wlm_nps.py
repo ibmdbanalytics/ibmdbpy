@@ -54,11 +54,11 @@ code_str_host_spus = """def stocks_rf_ml(self, df):
     
     wml_credentials = {
                    'url': 'https://us-south.ml.cloud.ibm.com',
-                   'apikey':'iPlcsL-Cw18TgaAwk_mhFYkwwr5MDa9zLq0hhNXrSQpR'
+                   'apikey':'xxxx'
                   }
 
     client = APIClient(wml_credentials)
-    client.set.default_space('48a32d7c-bc0d-4abf-b396-63bf35ed76c1')
+    client.set.default_space('xxxx')
 
     imputed_df = df.copy()
     name = imputed_df.TICKER[0]
