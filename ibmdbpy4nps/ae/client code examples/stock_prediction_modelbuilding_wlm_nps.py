@@ -1,5 +1,5 @@
 
-import pandas as pd
+
 
 from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunGroupedApply
@@ -12,7 +12,7 @@ idadb = IdaDataBase(dsn, 'admin', 'password')
 idadf = IdaDataFrame(idadb, 'stocks')
 
 print(idadf.head())
-print(idadf.dtypes)
+
 
 def delete_models():
 
@@ -64,11 +64,10 @@ code_str_host_spus = """def stocks_rf_ml(self, df):
     
     imputed_df['DATE'] = pd.to_datetime(imputed_df['DATE'])
     imputed_df = imputed_df.sort_values(by='DATE')
-        
+     
     imputed_df['DATE']=imputed_df['DATE'].dt.date
     name = imputed_df.TICKER[0]
-   
-
+    
     from sklearn.preprocessing import LabelEncoder
 
     temp_dict = dict()
