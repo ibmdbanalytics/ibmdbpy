@@ -173,14 +173,15 @@ for name, group in groups:
 code_str_apply="""
 def apply_fun(self, x):
     from math import sqrt
-    max_temp = x[3]
-    id = x[24]
+    max_temp = x[1]
+    id = x[0]
     fahren_max_temp = (max_temp*1.8)+32
     row = [id, max_temp,  fahren_max_temp]
     self.output(row)"""
 output_signature = {'ID':'int', 'RESULT_MAX_TEMP' :'float', 'RESULT_FAHREN_MAX_TEMP' : 'float'}
-nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name="apply_fun", output_signature=output_signature, merge_output_with_df=True)
+nz_apply = NZFunApply(df=idadf, code_str= code_str_apply, fun_name="apply_fun", columns=['ID', 'MAXTEMP'], output_signature=output_signature, merge_output_with_df=True)
 result = nz_apply.get_result()
+result=result.as_dataframe()
 print(result)
 
 

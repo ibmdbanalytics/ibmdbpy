@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 class NZFunTApply(object):
 
-    def __init__(self, df,  parallel,  output_signature=None, output_table=None, fun_ref=None, code_str=None,  fun_name=None, merge_output_with_df=False, id='ID'):
+    def __init__(self, df,  parallel,  output_signature=None, output_table=None, fun_ref=None, code_str=None,  fun_name=None, columns=None, merge_output_with_df=False, id='ID'):
         """
         Constructor for tapply
         """
@@ -46,7 +46,10 @@ class NZFunTApply(object):
         self.id = id
 
         # convert the columns index object to a list
-        self.columns = self.df.columns.tolist()
+        if columns:
+            self.columns = columns
+        else:
+            self.columns = self.df.columns.tolist()
 
 
 
