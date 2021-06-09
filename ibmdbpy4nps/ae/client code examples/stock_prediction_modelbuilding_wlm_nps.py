@@ -61,6 +61,11 @@ code_str_host_spus = """def stocks_rf_ml(self, df):
     client.set.default_space('xxxx')
 
     imputed_df = df.copy()
+    
+    imputed_df['DATE'] = pd.to_datetime(imputed_df['DATE'])
+    imputed_df = imputed_df.sort_values(by='DATE')
+        
+    imputed_df['DATE']=imputed_df['DATE'].dt.date
     name = imputed_df.TICKER[0]
    
 
