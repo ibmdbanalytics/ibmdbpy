@@ -20,20 +20,22 @@ def delete_models():
 
  wml_credentials = {
                    'url': 'https://us-south.ml.cloud.ibm.com',
-                   'apikey':'iPlcsL-Cw18TgaAwk_mhFYkwwr5MDa9zLq0hhNXrSQpR'
+                   'apikey':'xxx'
                   }
 
  client = APIClient(wml_credentials)
- client.set.default_space('48a32d7c-bc0d-4abf-b396-63bf35ed76c1')
+ client.set.default_space('xxx')
  #delete the previous models
  model_dict = client.repository.get_model_details()
+ client.repository.delete
 
  for key, value in model_dict.items():
 
     if (key == 'resources'):
         for res_element in value:
             metadata_dic = res_element.get('metadata')
-            client.repository.delete(metadata_dic.get('id'))
+            res = client.repository.delete(metadata_dic.get('id'))
+            print(res)
 
 
 

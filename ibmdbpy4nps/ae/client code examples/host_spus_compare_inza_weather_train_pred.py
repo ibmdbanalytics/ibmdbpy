@@ -27,7 +27,7 @@ query = 'select * from weather limit 10000'
 
 
 df = idadf.ida_query(query)
-print(df.dtypes)
+
 
 code_str_host = """def decision_tree_ml_host(self, df):
 
