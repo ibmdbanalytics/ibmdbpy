@@ -14,6 +14,7 @@ idadb = IdaDataBase(dsn, 'admin', 'password')
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'customer_churn')
+print(idadf.dtypes)
 code_str_host_spus = """def log_reg_ml(self, df):
             from sklearn.model_selection import cross_val_score
             from sklearn.impute import SimpleImputer

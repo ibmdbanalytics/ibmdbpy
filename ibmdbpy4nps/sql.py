@@ -90,6 +90,7 @@ def _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit):
        CLOB retrieval because it's fixed with a configuration keyword at
        connection creation point. See IdaDataBase.__init__
        """
+
     if (query.strip()[:6].upper() == "SELECT") & first_row_only is True:
             query = "select * from (" + query + ") as T LIMIT 1"
 

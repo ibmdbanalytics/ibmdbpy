@@ -29,7 +29,7 @@ standard_library.install_aliases()
 
 class NZFunGroupedApply(object):
 
-    def __init__(self, df, index, output_signature, output_table=None, fun_ref=None,  code_str=None,  fun_name=None,  merge_output_with_df=False, id='ID'):
+    def __init__(self, df, index, output_signature, output_table=None, fun_ref=None,  code_str=None,  fun_name=None, columns=None, merge_output_with_df=False, id='ID'):
         """
         Constructor for tapply
         """
@@ -49,7 +49,11 @@ class NZFunGroupedApply(object):
         self.parallel = True
 
         # convert the columns index object to a list
-        self.columns = self.df.columns.tolist()
+        if columns:
+            self.columns=columns
+        else :
+            self.columns = self.df.columns.tolist()
+        print(self.columns)
 
     def get_result(self):
         if self.code_str and self.fun_name is None:

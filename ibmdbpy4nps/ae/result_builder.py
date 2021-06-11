@@ -60,6 +60,7 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
         query = create_string + query
         result = df.ida_query(query, autocommit=True)
 
+
         # join the two
 
         # check if there are duplicate columns in the two tables
@@ -86,6 +87,7 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
 
         result = df.ida_query(query, autocommit=True)
 
+
         idadf = IdaDataFrame(db, df_output_table)
 
         db.drop_table(output_table_tmp)
@@ -95,5 +97,6 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
     df_output_table = db._get_valid_tablename(prefix="df_")
     query = "create table " + df_output_table + " as " + query
     result = df.ida_query(query)
+
     idadf = IdaDataFrame(db, df_output_table)
     return idadf
