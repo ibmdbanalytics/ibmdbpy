@@ -4,14 +4,21 @@ import pandas as pd
 from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunGroupedApply
 
-dsn = 'bank'
+#dsn = 'bank'
+dsn='olaf'
 
-idadb = IdaDataBase(dsn, 'admin', 'password')
+#idadb = IdaDataBase(dsn, 'admin', 'password')
+idadb = IdaDataBase(dsn, 'pyuser','6VF6nvnP3QpBtkK')
 
-idadf = IdaDataFrame(idadb, 'stocks_test')
+idadf = IdaDataFrame(idadb, 'stocks_test_old')
 
 print(idadf.head())
 print(idadf.dtypes)
+
+
+#dsn = "jdbc:netezza://158.177.233.251:5480/nzpy_test"
+#idadb = IdaDataBase(dsn, uid="pyuser", pwd="6VF6nvnP3QpBtkK")
+#idadf = IdaDataFrame(idadb, 'stocks_test')
 
 code_str_host_spus = """def stocks_rf_ml(self, df):
 
@@ -77,12 +84,12 @@ code_str_host_spus = """def stocks_rf_ml(self, df):
             temp_dict[column] = le
 
     wml_credentials = {
-                   'url': 'https://us-south.ml.cloud.ibm.com',
-                   'apikey':'xxxx'
+                   'url': 'https://eu-de.ml.cloud.ibm.com',
+                   'apikey':'xxx'
                   }
 
     client = APIClient(wml_credentials)
-    client.set.default_space('xxxx')
+    client.set.default_space('xxx')
     model_dict= client.repository.get_model_details()
 
     
@@ -157,7 +164,7 @@ code_str_host_spus = """def stocks_rf_ml(self, df):
 
 """
 
-output_signature = {'ID': 'int', 'FUTURE_CLOSE_PRICE_PRED': 'double', 'TEST': 'str',
+output_signature = {'ID': 'int64', 'FUTURE_CLOSE_PRICE_PRED': 'double', 'TEST': 'str',
                     'DATASET_SIZE': 'int', 'ACCURACY': 'float'}
 
 import time
@@ -170,8 +177,9 @@ nz_groupapply = NZFunGroupedApply(df=idadf, code_str=code_str_host_spus, index='
 result = nz_groupapply.get_result()
 result = result.as_dataframe()
 print("Host+ SPUs execution - slicing on user selection -ML function for partitions within slices\n")
-print(result[['ID']])
+print(result[['ID', 'DATE']])
 print(result)
+print(result.dtypes)
 end = time.time()
 print(end - start)
 

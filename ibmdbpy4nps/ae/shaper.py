@@ -78,8 +78,13 @@ def get_base_shaper(output_signature):
 
     for column in output_signature:
         # print(column)
-        if output_signature[column] == 'int' or output_signature[column] == 'int64':
+        if output_signature[column] == 'int' :
             column_val = 'self.DATA_TYPE__INT32'
+
+            output_signature_str += """
+                                                       self.addOutputColumn('""" + column + """',""" + column_val + """) """
+        if output_signature[column] == 'int64':
+            column_val = 'self.DATA_TYPE__INT64'
 
             output_signature_str += """
                                                        self.addOutputColumn('""" + column + """',""" + column_val + """) """
