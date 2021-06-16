@@ -4,21 +4,19 @@ import pandas as pd
 from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunGroupedApply
 
-#dsn = 'bank'
-dsn='olaf'
+dsn = 'bank'
 
-#idadb = IdaDataBase(dsn, 'admin', 'password')
-idadb = IdaDataBase(dsn, 'pyuser','6VF6nvnP3QpBtkK')
 
-idadf = IdaDataFrame(idadb, 'stocks_test_old')
+idadb = IdaDataBase(dsn, 'admin', 'password')
+
+
+idadf = IdaDataFrame(idadb, 'stocks_test')
 
 print(idadf.head())
 print(idadf.dtypes)
 
 
-#dsn = "jdbc:netezza://158.177.233.251:5480/nzpy_test"
-#idadb = IdaDataBase(dsn, uid="pyuser", pwd="6VF6nvnP3QpBtkK")
-#idadf = IdaDataFrame(idadb, 'stocks_test')
+
 
 code_str_host_spus = """def stocks_rf_ml(self, df):
 
@@ -84,7 +82,7 @@ code_str_host_spus = """def stocks_rf_ml(self, df):
             temp_dict[column] = le
 
     wml_credentials = {
-                   'url': 'https://eu-de.ml.cloud.ibm.com',
+                   'url': 'xxx',
                    'apikey':'xxx'
                   }
 
