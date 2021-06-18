@@ -5,7 +5,7 @@ from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunTApply
 from ibmdbpy4nps.ae import NZFunApply
 from ibmdbpy4nps.ae import NZFunGroupedApply
-import pandas as pd
+
 
 
 #dsn = "jdbc:netezza://169.63.46.17:5480/weather"
@@ -21,9 +21,7 @@ idadf = IdaDataFrame(idadb, 'WEATHER')
 
 query = 'select * from weather limit 10000'
 
-
-
-
+idadf.s
 
 
 df = idadf.ida_query(query)

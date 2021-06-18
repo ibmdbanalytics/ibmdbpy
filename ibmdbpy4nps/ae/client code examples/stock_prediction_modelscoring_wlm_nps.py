@@ -4,6 +4,8 @@ import pandas as pd
 from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunGroupedApply
 
+
+
 dsn = 'bank'
 
 
