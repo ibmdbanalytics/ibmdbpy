@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (c) 2015, IBM Corp.
 # All rights reserved.
 #
 # Distributed under the terms of the BSD Simplified License.
 #
 # The full license is in the LICENSE file, distributed with this software.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 # Python 2 Compatibility
 from __future__ import print_function
@@ -19,6 +19,7 @@ from builtins import zip
 from builtins import str
 from builtins import int
 from future import standard_library
+
 standard_library.install_aliases()
 
 from collections import OrderedDict
@@ -37,6 +38,7 @@ from ibmdbpy4nps.utils import chunklist
 """
 Statistics module for IdaDataFrames
 """
+
 
 def _numeric_stats(idadf, stat, columns):
     """
@@ -89,9 +91,9 @@ def _numeric_stats(idadf, stat, columns):
                     # sqrt_term = "SQRT(%s) * POW(SQRT(%s), -1)" %(count_dict[column], count_dict[column]-1)
                     sqrt_term = 1
                 else:
-                    sqrt_term = "SQRT(%s)/SQRT(%s)"  %(count_dict[column], count_dict[column]-1)
+                    sqrt_term = "SQRT(%s)/SQRT(%s)" % (count_dict[column], count_dict[column] - 1)
                 # agg_list.append("STDDEV(\"%s\")*(SQRT(%s)/SQRT(%s))"
-                agg_list.append("STDDEV(\"%s\")*( %s )" %(column, sqrt_term))
+                agg_list.append("STDDEV(\"%s\")*( %s )" % (column, sqrt_term))
             select_string = ', '.join(agg_list)
         elif stat == "var":
             tuple_count = _numeric_stats(idadf, 'count', columns)
@@ -101,13 +103,13 @@ def _numeric_stats(idadf, stat, columns):
             agg_list = []
             for column in columns:
                 if idadf._idadb._is_netezza_system():
-                # workaround for error on Netezza related to "/"
-                # ERROR:  Unable to identify an operator '//' ..
+                    # workaround for error on Netezza related to "/"
+                    # ERROR:  Unable to identify an operator '//' ..
                     # div_term = "%s.0 * POW(%s.0, -1)" %(count_dict[column], count_dict[column]-1)
                     div_term = 1
                 else:
-                    div_term = "%s.0/%s.0" %(count_dict[column], count_dict[column]-1)
-                agg_list.append("VARIANCE(\"%s\")*(%s)" %(column, div_term))
+                    div_term = "%s.0/%s.0" % (count_dict[column], count_dict[column] - 1)
+                agg_list.append("VARIANCE(\"%s\")*(%s)" % (column, div_term))
             select_string = ', '.join(agg_list)
         elif stat == "min":
             select_string = 'MIN(\"' + '\"), MIN(\"'.join(columns) + '\")'
@@ -118,7 +120,7 @@ def _numeric_stats(idadf, stat, columns):
 
         name = idadf.internal_state.current_state
 
-        return idadf.ida_query("SELECT %s FROM %s" %(select_string, name)).values[0]
+        return idadf.ida_query("SELECT %s FROM %s" % (select_string, name)).values[0]
 
 
 def _get_percentiles(idadf, percentiles, columns):
@@ -152,14 +154,14 @@ def _get_percentiles(idadf, percentiles, columns):
     data = pd.DataFrame()
     for index_col, column in enumerate(columns):
         nb_not_missing = nrow - tuple_na[index_col]
-        indexes = [float(x)*float(nb_not_missing-1) + 1 for x in percentiles]
+        indexes = [float(x) * float(nb_not_missing - 1) + 1 for x in percentiles]
         low = [math.floor(x) for x in indexes]
         high = [math.ceil(x) for x in indexes]
         tuplelist = []
         i = 0
-        for flag in [((x+1) == y) for x, y in zip(low, high)]:
+        for flag in [((x + 1) == y) for x, y in zip(low, high)]:
             if flag:
-                tuplelist.append((i, i+1))
+                tuplelist.append((i, i + 1))
                 i += 2
             else:
                 tuplelist.append((i, i))
@@ -169,18 +171,18 @@ def _get_percentiles(idadf, percentiles, columns):
         unique = sorted(unique)
         unique = [str(x) for x in unique]
         indexes_string = ",".join(unique)
-        df = idadf.ida_query("(SELECT \""+column+"\" AS \""+column+"\" FROM (SELECT "+
-                        "ROW_NUMBER() OVER(ORDER BY \""+column+"\") as rn, \""+
-                        column + "\" FROM (SELECT * FROM " + name +
-                        " WHERE \"" + column + "\" IS NOT NULL " +
-                        ") AS T1) AS T2 WHERE rn  in("+ indexes_string +"))")
+        df = idadf.ida_query("(SELECT \"" + column + "\" AS \"" + column + "\" FROM (SELECT " +
+                             "ROW_NUMBER() OVER(ORDER BY \"" + column + "\") as rn, \"" +
+                             column + "\" FROM (SELECT * FROM " + name +
+                             " WHERE \"" + column + "\" IS NOT NULL " +
+                             ") AS T1) AS T2 WHERE rn  in(" + indexes_string + "))")
 
-        #indexvalues = list(df[df.columns[0]])
+        # indexvalues = list(df[df.columns[0]])
         indexvalues = list(df)
-        #import pdb ; pdb.set_trace()
-        #print(tuplelist)
-        #print(indexvalues)
-        indexfinal = [(float(str(indexvalues[x[0]]))+float(str(indexvalues[x[1]])))/2 for x in tuplelist]
+        # import pdb ; pdb.set_trace()
+        # print(tuplelist)
+        # print(indexvalues)
+        indexfinal = [(float(str(indexvalues[x[0]])) + float(str(indexvalues[x[1]]))) / 2 for x in tuplelist]
         new_data = pd.DataFrame(indexfinal)
         data[column] = (new_data.T).values[0]
 
@@ -210,6 +212,7 @@ def _categorical_stats(idadf, stat, columns):
     # Calculates count, unique, top, freq
     raise NotImplementedError("TODO")
 
+
 def _get_number_of_nas(idadf, columns):
     """
     Return the count of missing values for a list of columns in the IdaDataFrame.
@@ -232,13 +235,14 @@ def _get_number_of_nas(idadf, columns):
     query_list = list()
     for column in columns:
         string = ("(SELECT COUNT(*) AS \"" + column + "\" FROM " +
-                name + " WHERE \"" + column + "\" IS NULL) AS T_" + column)
+                  name + " WHERE \"" + column + "\" IS NULL) AS T_" + column)
         query_list.append(string)
 
     query_string = ', '.join(query_list)
 
     # TODO: Improvement idea : Get nrow (shape) and substract by count("COLUMN")
-    return idadf.ida_query("SELECT * FROM " + query_string, first_row_only = True)
+    return idadf.ida_query("SELECT * FROM " + query_string, first_row_only=True)
+
 
 def _count_level(idadf, columnlist=None):
     """
@@ -272,15 +276,16 @@ def _count_level(idadf, columnlist=None):
     query_list = []
     for column in columnlist:
         # Here cast ?
-        query_list.append("(SELECT COUNT(*) AS \"" + column +"\" FROM (" +
+        query_list.append("(SELECT COUNT(*) AS \"" + column + "\" FROM (" +
                           "SELECT \"" + column + "\" FROM " + name +
                           " GROUP BY \"" + column + "\" ) AS T1_" + column + ") AS T2_" + column)
-        #query_list.append("(SELECT CAST(COUNT(*) AS BIGINT) AS \"" + column +"\" FROM (" +
+        # query_list.append("(SELECT CAST(COUNT(*) AS BIGINT) AS \"" + column +"\" FROM (" +
         #                  "SELECT \"" + column + "\" FROM " + name + " ))")
 
     query_string = ', '.join(query_list)
     column_string = '\"' + '\", \"'.join(columnlist) + '\"'
-    return idadf.ida_query("SELECT " + column_string + " FROM " + query_string, first_row_only = True)
+    return idadf.ida_query("SELECT " + column_string + " FROM " + query_string, first_row_only=True)
+
 
 def _count_level_groupby(idadf, columnlist=None):
     """
@@ -311,10 +316,11 @@ def _count_level_groupby(idadf, columnlist=None):
     name = idadf.internal_state.current_state
 
     column_string = '\"' + '\", \"'.join(columnlist) + '\"'
-    query = (("SELECT COUNT(*) FROM (SELECT %s, COUNT(*) as COUNT "+
-            "FROM %s GROUP BY %s ORDER BY %s, COUNT ASC) AS T ")
-            %(column_string, name, column_string, column_string))
-    return idadf.ida_query(query, first_row_only = True)
+    query = (("SELECT COUNT(*) FROM (SELECT %s, COUNT(*) as COUNT " +
+              "FROM %s GROUP BY %s ORDER BY %s, COUNT ASC) AS T ")
+             % (column_string, name, column_string, column_string))
+    return idadf.ida_query(query, first_row_only=True)
+
 
 # TODO: REFACTORING: factors function should maybe return a tuple ?
 def _factors_count(idadf, columnlist, valuelist=None):
@@ -347,20 +353,21 @@ def _factors_count(idadf, columnlist, valuelist=None):
 
     if valuelist is None:
         query = (("SELECT %s, COUNT(*) as COUNT FROM %s GROUP BY %s ORDER BY %s, COUNT ASC")
-                %(column_string, name, column_string, column_string))
+                 % (column_string, name, column_string, column_string))
     else:
         agg_list = []
         for value in valuelist:
-            query = "COUNT(\"%s\") as \"%s\""%(value,value)
+            query = "COUNT(\"%s\") as \"%s\"" % (value, value)
             agg_list.append(query)
 
-        agg_string =  ', '.join(agg_list)
+        agg_string = ', '.join(agg_list)
         value_string = '\"' + '", "'.join(valuelist) + '\"'
 
         query = (("SELECT %s,%s FROM %s GROUP BY %s ORDER BY %s,%s ASC")
-                %(column_string, agg_string, name, column_string, column_string, value_string))
+                 % (column_string, agg_string, name, column_string, column_string, value_string))
 
     return idadf.ida_query(query)
+
 
 def _factors_sum(idadf, columnlist, valuelist):
     """
@@ -392,16 +399,17 @@ def _factors_sum(idadf, columnlist, valuelist):
 
     agg_list = []
     for value in valuelist:
-        query = "SUM(\"%s\") as \"%s\""%(value, value)
+        query = "SUM(\"%s\") as \"%s\"" % (value, value)
         agg_list.append(query)
 
-    agg_string =  ', '.join(agg_list)
+    agg_string = ', '.join(agg_list)
     value_string = '\"' + '", "'.join(valuelist) + '\"'
 
     query = (("SELECT %s,%s FROM %s GROUP BY %s ORDER BY %s,%s ASC")
-            %(column_string, agg_string, name, column_string, column_string, value_string))
+             % (column_string, agg_string, name, column_string, column_string, value_string))
 
     return idadf.ida_query(query)
+
 
 def _factors_avg(idadf, columnlist, valuelist):
     """
@@ -434,17 +442,17 @@ def _factors_avg(idadf, columnlist, valuelist):
     agg_list = []
     for value in valuelist:
         agg = (("CAST(AVG(CAST(\"%s\" AS DECIMAL(10,6))) AS DECIMAL(10,6)) \"%s\"")
-              %(value, value))
+               % (value, value))
         agg_list.append(agg)
 
-
-    agg_string =  ', '.join(agg_list)
+    agg_string = ', '.join(agg_list)
     value_string = '\"' + '", "'.join(valuelist) + '\"'
 
     query = (("SELECT %s,%s FROM %s GROUP BY %s ORDER BY %s,%s ASC")
-            %(column_string, agg_string, name, column_string, column_string, value_string))
+             % (column_string, agg_string, name, column_string, column_string, value_string))
 
     return idadf.ida_query(query)
+
 
 ###############################################################################
 ### Pivot Table
@@ -478,7 +486,7 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
 
     ####### Identify automatically categorical fields #########
     # Load distinct count for each and evaluate categorical or not
-    data = idadf._table_def(factor_threshold) #
+    data = idadf._table_def(factor_threshold)  #
     if columns is None:
         factors = data.loc[data['VALTYPE'] == "CATEGORICAL", ['TYPENAME', 'FACTORS']]
         if len(factors) == 0:
@@ -501,18 +509,18 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
 
     nb_entries = nb_row * nb_col
 
-    if nb_entries > max_entries: # Overflow risk
+    if nb_entries > max_entries:  # Overflow risk
         print("Number of entries :", nb_entries)
         print("Value counts for factors:")
         factor_values = factors[['FACTORS']]
         factor_values.columns = ['']
         print(factor_values.T)
         print("WARNING :Attempt to make a table with more than " +
-              str(max_entries)+ " elements. Either increase max_entries " +
+              str(max_entries) + " elements. Either increase max_entries " +
               "parameter or remove columns with too many levels.")
         return
 
-    print("Output dataframe has dimensions", nb_row, "x", (nb_col+1))
+    print("Output dataframe has dimensions", nb_row, "x", (nb_col + 1))
     if interactive is True:
         display_yes = ibmdbpy4nps.utils.query_yes_no("Do you want to download it in memory ?")
         if not display_yes:
@@ -520,19 +528,20 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
 
     categorical_columns = list(factors.index)
     if aggfunc.lower() == 'count':
-        dataframe = _factors_count(idadf, categorical_columns, values) # Download dataframe
+        dataframe = _factors_count(idadf, categorical_columns, values)  # Download dataframe
     if aggfunc.lower() == 'sum':
-        dataframe = _factors_sum(idadf, categorical_columns, values) # Download dataframe
+        dataframe = _factors_sum(idadf, categorical_columns, values)  # Download dataframe
     if aggfunc.lower() in ['avg', 'average', 'mean']:
-        dataframe = _factors_avg(idadf, categorical_columns, values) # Download dataframe
+        dataframe = _factors_avg(idadf, categorical_columns, values)  # Download dataframe
 
     if values is not None:
         agg_values = values
-    else: agg_values = aggfunc.upper()
+    else:
+        agg_values = aggfunc.upper()
 
     if isinstance(agg_values, six.string_types):
         agg_values = [agg_values]
-    dataframe.columns = categorical_columns + agg_values # Name the aggregate column
+    dataframe.columns = categorical_columns + agg_values  # Name the aggregate column
 
     # Formatting result
     if len(agg_values) == 1:
@@ -541,7 +550,7 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
         catdataframe = dataframe[categorical_columns]
         dataframe = catdataframe.join(dataframe[agg_values].stack().reset_index(1))
         dataframe['level_1'] = pd.Categorical(dataframe['level_1'], agg_values)
-        dataframe = dataframe.rename(columns={'level_1':None})
+        dataframe = dataframe.rename(columns={'level_1': None})
         dataframe = dataframe.sort([None] + categorical_columns)
 
     dataframe.set_index([None] + categorical_columns, inplace=True)
@@ -552,19 +561,20 @@ def pivot_table(idadf, values=None, columns=None, max_entries=1000, sort=None,
 
     return result
 
+
 ###############################################################################
 ### Descriptive statistics
 ###############################################################################
 
 def summary(idadf):
+    table_name = idadf.internal_state.current_state
+    outtable_name = idadf._idadb._get_valid_tablename(prefix="pyida_describe")
+    idadf._idadb._call_stored_procedure("SUMMARY1000 ", intable=table_name, outtable=outtable_name)
+    result_query = "SELECT * FROM " + outtable_name + " ORDER BY columnname; "
+    result_df = idadf.ida_query(result_query)
+    idadf._idadb._call_stored_procedure("DROP_SUMMARY1000", intable=outtable_name)
+    return result_df
 
-        table_name= idadf.internal_state.current_state
-        outtable_name = idadf._idadb._get_valid_tablename(prefix="pyida_describe")
-        idadf._idadb._call_stored_procedure("SUMMARY1000 ", intable=table_name, outtable=outtable_name)
-        result_query = "SELECT * FROM "+outtable_name+" ORDER BY columnname; "
-        result_df = idadf.ida_query(result_query)
-        idadf._idadb._call_stored_procedure("DROP_SUMMARY1000", intable=outtable_name)
-        return result_df
 
 def describe(idadf, percentiles=[0.25, 0.50, 0.75]):
     """
@@ -613,7 +623,7 @@ def describe(idadf, percentiles=[0.25, 0.50, 0.75]):
     data.index = ['count', 'mean', 'std', 'min'] + percentile_names + ['max']
 
     # quick fix -> JDBC problems
-    #for column in data.columns:
+    # for column in data.columns:
     #    data[[column]] = data[[column]].astype(float)
 
     if isinstance(idadf, ibmdbpy4nps.IdaSeries):
@@ -658,13 +668,14 @@ def quantile(idadf, q=0.5):
 
     return result
 
+
 # Note : Not casting to double can lead to SQL overflow
 # TODO: Has to be modified in ibmdbR
 
 
 def cov(idadf, other=None):
     if not idadf._idadb._is_netezza_system():
-        return  cov_old(idadf, other)
+        return cov_old(idadf, other)
 
     numerical_columns = idadf._get_numerical_columns()
     if len(numerical_columns) < 2:
@@ -672,7 +683,7 @@ def cov(idadf, other=None):
         return
     column_string = ""
     for column in numerical_columns:
-        column_string+="\""+ column+"\";"
+        column_string += "\"" + column + "\";"
 
     result_df = pd.DataFrame(columns=numerical_columns, index=numerical_columns)
 
@@ -686,12 +697,11 @@ def cov(idadf, other=None):
 
     # the calls of substring remove the surrounding double quotes
     result_query = ("SELECT substring(VARXNAME,2,length(VARXNAME)-2) as VARXNAME, " +
-                            "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
-                            "COVARIANCE, CNTX " +
+                    "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
+                    "COVARIANCE, CNTX " +
                     "FROM " + outtable + " ORDER BY varxname, varyname;")
 
     cov_df = idadf.ida_query(result_query)
-
 
     for index in cov_df.index.values:
 
@@ -708,7 +718,7 @@ def cov(idadf, other=None):
     return result_df
 
 
-def cov_old(idadf, other = None):
+def cov_old(idadf, other=None):
     """
     See IdaDataFrame.cov
     """
@@ -722,7 +732,7 @@ def cov_old(idadf, other = None):
             raise NotImplementedError("The COVAR_SAMP function is not installed on the Netezza database.")
 
     columns = idadf._get_numerical_columns()
-    if len(columns) < 2 :
+    if len(columns) < 2:
         print(idadf.name + " has less than two numeric columns")
         return
 
@@ -742,15 +752,15 @@ def cov_old(idadf, other = None):
             agg_list.append("COVARIANCE(\"" + column_pair[0] + "\",\"" +
                             column_pair[1] + "\")*(" +
                             str(min([count_dict[column_pair[0]],
-                                 count_dict[column_pair[1]]])) + ".0/" +
+                                     count_dict[column_pair[1]]])) + ".0/" +
                             str(min([count_dict[column_pair[0]],
-                                 count_dict[column_pair[1]]])-1) + ".0)")
+                                     count_dict[column_pair[1]]]) - 1) + ".0)")
 
     agg_string = ', '.join(agg_list)
 
     name = idadf.internal_state.current_state
 
-    data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
+    data = idadf.ida_query("SELECT %s FROM %s" % (agg_string, name), first_row_only=True)
 
     tuple_list = []
 
@@ -772,21 +782,22 @@ def cov_old(idadf, other = None):
 
     return result
 
+
 def corr(idadf):
     if not idadf._idadb._is_netezza_system():
-        return  corr_old(idadf)
+        return corr_old(idadf)
 
     numerical_columns = idadf._get_numerical_columns()
-    if len(numerical_columns) < 2 :
+    if len(numerical_columns) < 2:
         print(idadf.name + " has less than two numeric columns")
         return
-    column_string=""
+    column_string = ""
     for column in numerical_columns:
-        column_string+="\""+ column+"\";"
+        column_string += "\"" + column + "\";"
 
     result_df = pd.DataFrame(columns=numerical_columns, index=numerical_columns)
 
-    #print(result_df)
+    # print(result_df)
 
     table_name = idadf.internal_state.current_state
     outtable = idadf._idadb._get_valid_tablename(prefix="corr_")
@@ -798,8 +809,8 @@ def corr(idadf):
 
     # the calls of substring remove the surrounding double quotes
     result_query = ("SELECT substring(VARXNAME,2,length(VARXNAME)-2) as VARXNAME, " +
-                            "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
-                            "CORRELATION " +
+                    "substring(VARYNAME,2,length(VARYNAME)-2) as VARYNAME, " +
+                    "CORRELATION " +
                     "FROM " + outtable + " ORDER BY varxname, varyname;")
 
     corr_df = idadf.ida_query(result_query)
@@ -808,20 +819,29 @@ def corr(idadf):
 
         col_list = []
         for column in corr_df.columns.values:
-
             col_list.append(corr_df.at[index, column])
-
 
         result_df.at[col_list[0], col_list[1]] = col_list[2]
 
     for column in result_df.columns:
-
         result_df[column] = result_df[column].astype(float)
     value = idadf._idadb.drop_table(outtable)
     return result_df
 
 
-def corr_old(idadf, features=None,ignore_indexer=True):
+def train_test_split(idadf, train_table, test_table, id, fraction, seed):
+    table_name = idadf.internal_state.current_state
+
+    query = "CALL nza..SPLIT_DATA('intable = " + table_name + ",id = " + id + ",traintable = " + train_table + ",testtable= " + test_table + ",fraction= " + str(
+        fraction) + ",seed=" + str(seed) + ",outtabletype=table" + "');"
+
+    df = idadf.ida_query(query)
+    idadf.commit()
+
+    return df
+
+
+def corr_old(idadf, features=None, ignore_indexer=True):
     """
     See IdaDataFrame.corr
     """
@@ -835,7 +855,7 @@ def corr_old(idadf, features=None,ignore_indexer=True):
             raise NotImplementedError("The CORR function is not installed on the Netezza database.")
 
     numerical_columns = idadf._get_numerical_columns()
-    if len(numerical_columns) < 2 :
+    if len(numerical_columns) < 2:
         print(idadf.name + " has less than two numeric columns")
         return
 
@@ -844,39 +864,39 @@ def corr_old(idadf, features=None,ignore_indexer=True):
             if idadf.indexer in numerical_columns:
                 numerical_columns.remove(idadf.indexer)
 
-    #print(features)
-    #target, features = ibmdbpy.utils._check_input(target, features)
+    # print(features)
+    # target, features = ibmdbpy.utils._check_input(target, features)
     if features is not None:
         for feature in features:
             if feature not in numerical_columns:
-                raise TypeError("Correlation-based measure not available for non-numerical columns %s"%feature)
+                raise TypeError("Correlation-based measure not available for non-numerical columns %s" % feature)
     else:
         features = numerical_columns
 
-    #if target not in columns:
+    # if target not in columns:
     #    raise ValueError("%s is not a column of numerical type in %s"%(target, idadf.name))
 
     values = OrderedDict()
 
     combinations = [x for x in itertools.combinations(features, 2)]
-    #columns_set = [{x[0], x[1]} for x in combinations]
+    # columns_set = [{x[0], x[1]} for x in combinations]
 
     if idadf._idadb._is_netezza_system():
         corr_function = "CORR"
     else:
         corr_function = "CORRELATION"
 
-    if len(features) < 64: # the limit of variables for an SQL statement is 4096, i.e 64^2
+    if len(features) < 64:  # the limit of variables for an SQL statement is 4096, i.e 64^2
         agg_list = []
         for column_pair in combinations:
-            agg = corr_function + "(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
+            agg = corr_function + "(\"%s\",\"%s\")" % (column_pair[0], column_pair[1])
             agg_list.append(agg)
 
         agg_string = ', '.join(agg_list)
 
         name = idadf.internal_state.current_state
 
-        data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
+        data = idadf.ida_query("SELECT %s FROM %s" % (agg_string, name), first_row_only=True)
 
         for i, element in enumerate(combinations):
             if element[0] not in values:
@@ -893,14 +913,14 @@ def corr_old(idadf, features=None,ignore_indexer=True):
         for chunk in chunkgen:
             agg_list = []
             for column_pair in chunk:
-                agg = corr_function + "(\"%s\",\"%s\")"%(column_pair[0], column_pair[1])
+                agg = corr_function + "(\"%s\",\"%s\")" % (column_pair[0], column_pair[1])
                 agg_list.append(agg)
 
             agg_string = ', '.join(agg_list)
 
             name = idadf.internal_state.current_state
 
-            data = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name), first_row_only = True)
+            data = idadf.ida_query("SELECT %s FROM %s" % (agg_string, name), first_row_only=True)
 
             for i, element in enumerate(chunk):
                 if element[0] not in values:
@@ -918,6 +938,7 @@ def corr_old(idadf, features=None,ignore_indexer=True):
 
     return result
 
+
 ### corrwith
 
 
@@ -926,7 +947,7 @@ def mad(idadf):
     See IdaDataFrame.mad
     """
     columns = idadf._get_numerical_columns()
-    if len(columns) < 2 :
+    if len(columns) < 2:
         print(idadf.name + " has less than two numeric columns")
         return
 
@@ -950,7 +971,7 @@ def mad(idadf):
 
     name = idadf.internal_state.current_state
 
-    mad_tuple = idadf.ida_query("SELECT %s FROM %s"%(agg_string, name))
+    mad_tuple = idadf.ida_query("SELECT %s FROM %s" % (agg_string, name))
     result = pd.Series(mad_tuple.values[0])
     result.index = columns
     result = result.astype('float')
@@ -960,23 +981,25 @@ def mad(idadf):
 
     return result
 
+
 def ida_min(idadf):
     """
     See idadataFrame.min
     """
     na_tuple = _get_number_of_nas(idadf, idadf.columns)
     min_tuple = _numeric_stats(idadf, "min", idadf.columns)
-    if not hasattr(min_tuple,"__iter__") : min_tuple = (min_tuple,) # dirty fix
+    if not hasattr(min_tuple, "__iter__"): min_tuple = (min_tuple,)  # dirty fix
     min_list = [np.nan if ((y > 0) and not isinstance(x, Number))
                 else x for x, y in zip(min_tuple, na_tuple)]
     min_tuple = tuple(min_list)
     result = pd.Series(min_tuple)
     result.index = idadf.columns
 
-    #if isinstance(idadf, ibmdbpy.IdaSeries):
-     #   result = result[0]
+    # if isinstance(idadf, ibmdbpy.IdaSeries):
+    #   result = result[0]
 
     return result
+
 
 def ida_max(idadf):
     """
@@ -984,17 +1007,18 @@ def ida_max(idadf):
     """
     na_tuple = _get_number_of_nas(idadf, idadf.columns)
     max_tuple = _numeric_stats(idadf, "max", idadf.columns)
-    if not hasattr(max_tuple,"__iter__") : max_tuple = (max_tuple,) # dirty fix
+    if not hasattr(max_tuple, "__iter__"): max_tuple = (max_tuple,)  # dirty fix
     max_list = [np.nan if ((y > 0) and not isinstance(x, Number))
                 else x for x, y in zip(max_tuple, na_tuple)]
     max_tuple = tuple(max_list)
     result = pd.Series(max_tuple)
     result.index = idadf.columns
 
-    #if isinstance(idadf, ibmdbpy.IdaSeries):
-      #  result = result[0]
+    # if isinstance(idadf, ibmdbpy.IdaSeries):
+    #  result = result[0]
 
     return result
+
 
 def count(idadf):
     """
@@ -1010,6 +1034,7 @@ def count(idadf):
 
     return result
 
+
 def count_distinct(idadf):
     """
     See IdaDataFrame.count_distinct
@@ -1023,13 +1048,14 @@ def count_distinct(idadf):
 
     return result
 
+
 def std(idadf):
     """
     See IdaDataFrame.std
     """
     columns = idadf._get_numerical_columns()
     if not columns:
-        warnings.warn("%s has no numeric columns"%idadf.name)
+        warnings.warn("%s has no numeric columns" % idadf.name)
         return pd.Series()
 
     std_tuple = _numeric_stats(idadf, "std", columns)
@@ -1042,13 +1068,14 @@ def std(idadf):
 
     return result
 
+
 def var(idadf):
     """
     See IdaDataFrame.var
     """
     columns = idadf._get_numerical_columns()
     if not columns:
-        warnings.warn("%s has no numeric columns"%idadf.name)
+        warnings.warn("%s has no numeric columns" % idadf.name)
         return pd.Series()
 
     var_tuple = _numeric_stats(idadf, "var", columns)
@@ -1061,13 +1088,14 @@ def var(idadf):
 
     return result
 
+
 def mean(idadf):
     """
     See IdaDataFrame.mean
     """
     columns = idadf._get_numerical_columns()
     if not columns:
-        warnings.warn("%s has no numeric columns"%idadf.name)
+        warnings.warn("%s has no numeric columns" % idadf.name)
         return pd.Series()
 
     mean_tuple = _numeric_stats(idadf, "mean", columns)
@@ -1080,14 +1108,15 @@ def mean(idadf):
 
     return result
 
+
 def ida_sum(idadf):
     """
     See IdaDataFrame.sum
     """
-    #Behave like having the option "numeric only" to true
+    # Behave like having the option "numeric only" to true
     columns = idadf._get_numerical_columns()
     if not columns:
-        warnings.warn("%s has no numeric columns"%idadf.name)
+        warnings.warn("%s has no numeric columns" % idadf.name)
         return pd.Series()
 
     sum_tuple = _numeric_stats(idadf, "sum", columns)
@@ -1100,14 +1129,15 @@ def ida_sum(idadf):
 
     return result
 
+
 def median(idadf):
     """
     See IdaDataFrame.median
     """
-    #Behave like having the option "numeric only" to true
+    # Behave like having the option "numeric only" to true
     columns = idadf._get_numerical_columns()
     if not columns:
-        warnings.warn("%s has no numeric columns"%idadf.name)
+        warnings.warn("%s has no numeric columns" % idadf.name)
         return pd.Series()
 
     median_tuple = _numeric_stats(idadf, "median", columns)

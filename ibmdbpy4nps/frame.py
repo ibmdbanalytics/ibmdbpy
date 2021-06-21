@@ -1568,6 +1568,40 @@ class IdaDataFrame(object):
         #return corr(idadf=self, features=features, ignore_indexer=ignore_indexer)
         return corr(idadf=self)
 
+    @timed
+
+    def train_test_split(self, train_table, test_table, id, fraction, seed):
+        """
+        Split the table into train and test sets
+
+        Parameters
+        ----------
+        train_table : str
+            the output table that will contain the given fraction of the input records
+
+        test_table :str
+            the output table that will contain the rest (1-<fraction>) of the input records
+
+        id : str
+            the input table column identifying a unique instance id
+
+        fraction: float
+             the fraction of the data to split
+
+        seed: float
+            the seed of the random function
+
+        Returns
+        -------
+        number of records in train table: float
+
+
+
+        """
+        from ibmdbpy4nps.statistics import train_test_split
+
+        return train_test_split(idadf=self, train_table=train_table, test_table=test_table, id=id, fraction=fraction, seed=seed)
+
     # TODO: to implement
     @timed
     @idadf_state
