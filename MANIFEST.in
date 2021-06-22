@@ -9,5 +9,6 @@ include README.rst
 include setup.cfg
 include *.gitignore
 
+
 prune docs/build
 recursive-excluse *.jar

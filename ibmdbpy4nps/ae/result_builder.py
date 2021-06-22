@@ -41,10 +41,10 @@ def build_result(output_table, merge_output, db, df, output_signature, table_nam
             if column == id:
                 continue
             columns_str = columns_str + "link." + column + ","
-        if len(columns_str) > 0:
-            columns_str = columns_str[:-1]
+        #if len(columns_str) > 0:
+            #columns_str = columns_str[:-1]
 
-        query = "create table " + output_table + " as  select  " + columns_str + " , base.*  from  " + output_table_tmp + " as link INNER JOIN " \
+        query = "create table " + output_table + " as  select  " + columns_str + " base.*  from  " + output_table_tmp + " as link INNER JOIN " \
                                                                                                                              " " + table_name + "  as base on link." + id + " = base." + id + ";"
 
 
