@@ -35,7 +35,7 @@ class Test_DeleteDataBaseObjects(object):
         with pytest.raises(ValueError):
             idadb.drop_table("NOTEXISTINGOBJECT_496070383095079384063739509")
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_drop_table_type_error(self, idadb, idaview):
         with pytest.raises(TypeError):
             idadb.drop_table(idaview.name) # this is a view
@@ -49,12 +49,12 @@ class Test_DeleteDataBaseObjects(object):
         with pytest.raises(ValueError):
             idadb.drop_view("NOTEXISTINGOBJECT_496070383095079384063739509")
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_drop_view_type_error(self, idadb, idadf):
         with pytest.raises(TypeError):
             idadb.drop_view(idadf.name) # this is a table
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     @pytest.mark.xfail(raises=ValueError)
     def test_idadb_drop_model_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive = True)
@@ -65,12 +65,12 @@ class Test_DeleteDataBaseObjects(object):
         idadb.drop_model(kmeans.modelname)
         idadb.commit()
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_drop_model_value_error(self, idadb):
         with pytest.raises(ValueError):
             idadb.is_model("NOTEXISTINGOBJECT_496070383095079384063739509")
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_drop_model_type_error(self, idadb, idadf, idaview):
         with pytest.raises(TypeError):
             idadb.drop_model(idadf.name)

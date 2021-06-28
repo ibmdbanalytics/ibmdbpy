@@ -27,7 +27,7 @@ from ibmdbpy4nps import IdaSeries
 from ibmdbpy4nps import IdaGeoSeries
 from ibmdbpy4nps.exceptions import IdaGeoDataFrameError
 
-@pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+@pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
 class Test_IdaGeoSeries(object):
 
     def test_idageoseries_generalize(self, idageodf_county):

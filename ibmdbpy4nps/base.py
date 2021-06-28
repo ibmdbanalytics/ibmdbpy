@@ -81,7 +81,7 @@ class IdaDataBase(object):
     IdaDataFrame per connection.
     """
 
-    def __init__(self, dsn, uid='', pwd='',  autocommit=True, verbose=False):
+    def __init__(self, dsn, uid='', pwd='', hostname = '', port = 0, autocommit=True, verbose=False):
         """
         Open a database connection.
 
@@ -189,10 +189,25 @@ class IdaDataBase(object):
             else:
                 raise IdaDataBaseError(("The JDBC connection string is invalid for Db2 and Netezza. " +
                                         "It has to start either with 'jdbc:db2:' or 'jdbc:netezza:'."))
+        elif hostname != '':
+            self._con_type = "nzpy"
         else:
             self._con_type = "odbc"
 
         self._idadfs = []
+
+        if self._con_type == 'nzpy':
+            import nzpy;
+            try:
+                if port <= 0:
+                    port = 5480
+                self._con = nzpy.connect(user=uid, password=pwd,host=hostname, port=port,
+                                        database=dsn, securityLevel=1,logLevel=0)
+            except Exception as e:
+                raise IdaDataBaseError(str(e))
+            self._connection_string ={'user':uid,'password':pwd,'host':hostname,
+                'port':port, 'database':dsn, 'securityLevel':1,'logLevel':0}
+            self._database_system = 'netezza'
 
         if self._con_type == 'odbc' :
 
@@ -227,11 +242,6 @@ class IdaDataBase(object):
                                 "if the database system is Netezza or Db2:\n" +
                                 "%s\n%s") % (str(e1), str(e2))
                     raise IdaDataBaseError(errorMsg)
-
-
-
-
-
 
         if self._con_type == 'jdbc':
 
@@ -1648,6 +1658,14 @@ class IdaDataBase(object):
                     raise
                 else:
                     print("The connection was successfully restored")
+            elif self._con_type == 'nzpy':
+                import nzpy
+                try:
+                    self._con = nzpy.connect(**(self._connection_string))
+                except:
+                    raise
+                else:
+                    print("The connection was successfully restored")
             elif self._con_type == 'jdbc':
                 try:
                     import jaydebeapi
@@ -2297,6 +2315,11 @@ class IdaDataBase(object):
                 self._con.cursor()
             except Exception as e:
                 raise IdaDataBaseError(e.value[-1])
+        elif self._con_type == "nzpy":
+            try:
+                self._con.cursor().execute("select 1")
+            except Exception as e:
+                raise IdaDataBaseError(e)
         elif self._con_type == "jdbc":
             # This avoids infinite recursions on Netezza due to reconnect calls in
             # sql.ida_query, sql.ida_scalar_query and sql._prepare_and_execute

@@ -2144,6 +2144,12 @@ class IdaDataFrame(object):
             columns = self._idadb._con.cursor().columns(table=tablename, schema=schema)
             columnlist = [column[3] for column in columns]
             return Index(columnlist)
+        elif self._idadb._con_type == 'nzpy':
+            cursor = self._idadb._con.cursor()
+            cursor.execute("SELECT * FROM %s LIMIT 1"%tablename)
+            columnlist = [str(column[0],"utf-8") for column in cursor.description]
+            cursor.close()
+            return Index(columnlist)
         elif self._idadb._con_type == 'jdbc':
             cursor = self._idadb._con.cursor()
             cursor.execute("SELECT * FROM %s"%tablename)
