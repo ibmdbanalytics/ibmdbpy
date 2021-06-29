@@ -54,14 +54,14 @@ from ibmdbpy4nps.exceptions import IdaDataBaseError, PrimaryKeyError
 
 class IdaDataBase(object):
     """
-    An IdaDataBase instance represents a reference to a remote Db2 Warehouse
+    An IdaDataBase instance represents a reference to a remote Netezza Warehouse
     database. This is an abstraction layer for the remote connection. The
     IdaDataBase interface provides several functions that enable basic database 
     administration in pythonic syntax.
 
-    You can use either ODBC or JDBC to connect to the database. The default 
+    You can use either ODBC or JDBC or nzpy driver to connect to the database. The default
     connection type is ODBC, which is the standard connection type for Windows 
-    users. To establish an ODBC connection, download an IBM DB2 driver and set 
+    users. To establish an ODBC connection, download an IBM Netezza driver and set
     up your ODBC connection by specifying your connection protocol, port, and 
     hostname. An ODBC connection on Linux or Mac might require more settings. 
     For more information about how to establish an ODBC connection, see the 
@@ -81,7 +81,7 @@ class IdaDataBase(object):
     IdaDataFrame per connection.
     """
 
-    def __init__(self, dsn, uid='', pwd='', hostname = '', port = 0, autocommit=True, verbose=False):
+    def __init__(self, database, uid='', pwd='', hostname = '', port = 0, conn_type='odbc', autocommit=True, verbose=False):
         """
         Open a database connection.
 
@@ -163,11 +163,11 @@ class IdaDataBase(object):
         >>> IdaDataBase(dsn=jdbc, uid="<UID>", pwd="<PWD>")
         <ibmdbpy.base.IdaDataBase at 0x9bec860>
         """
-        for arg,name in zip([dsn, uid, pwd],['dsn','uid','pwd']):
+        for arg,name in zip([database, uid, pwd],['database','uid','pwd']):
             if not isinstance(arg, six.string_types):
                 raise TypeError("Argument '%s' of type %, expected : string type."%(name,type(arg)))
 
-        self.data_source_name = dsn
+
 
 
         # default value for _database_system is db2
@@ -176,23 +176,22 @@ class IdaDataBase(object):
         url_1stparam_del = ':'
 
         # Detect if user attempt to connection with ODBC or JDBC
-        if dsn.startswith('jdbc:'):
+
+        if conn_type=='jdbc':
             self._con_type = "jdbc"
-            if dsn.startswith('jdbc:netezza:'):
-                self._database_system = 'netezza'
-                # for Netezza the internal connection is always in autocommit mode
-                # to allow explicit commits
-                dsn+= ';autocommit=false'
-                url_1stparam_del = ';'
-            elif dsn.startswith('jdbc:db2:'):
-                self._database_system = 'db2'
-            else:
-                raise IdaDataBaseError(("The JDBC connection string is invalid for Db2 and Netezza. " +
-                                        "It has to start either with 'jdbc:db2:' or 'jdbc:netezza:'."))
-        elif hostname != '':
-            self._con_type = "nzpy"
-        else:
-            self._con_type = "odbc"
+
+            self._database_system = 'netezza'
+            # for Netezza the internal connection is always in autocommit mode
+            # to allow explicit commits
+            #dsn+= ';autocommit=false'
+            url_1stparam_del = ';'
+
+        if conn_type=='nzpy':
+            self._con_type='nzpy'
+
+        if conn_type=='odbc':
+            self._con_type = 'odbc'
+
 
         self._idadfs = []
 
@@ -202,16 +201,17 @@ class IdaDataBase(object):
                 if port <= 0:
                     port = 5480
                 self._con = nzpy.connect(user=uid, password=pwd,host=hostname, port=port,
-                                        database=dsn, securityLevel=1,logLevel=0)
+                                        database=database, securityLevel=0,logLevel=0)
             except Exception as e:
                 raise IdaDataBaseError(str(e))
             self._connection_string ={'user':uid,'password':pwd,'host':hostname,
-                'port':port, 'database':dsn, 'securityLevel':1,'logLevel':0}
+                'port':port, 'database':database, 'securityLevel':1,'logLevel':0}
             self._database_system = 'netezza'
 
         if self._con_type == 'odbc' :
 
-            self._connection_string = "DSN=%s; UID=%s; PWD=%s;LONGDATACOMPAT=1;"%(dsn,uid,pwd)
+            #self._connection_string = "DSN=%s; UID=%s; PWD=%s;LONGDATACOMPAT=1;"%(dsn,uid,pwd)
+            self._connection_string =  "DRIVER={NetezzaSQL};SERVER=%s;DATABASE=%s; LONGDATACOMPAT=1;UID=%s; PWD=%s;"%(hostname, database, uid, pwd)
             """
             Workaround for CLOB retrieval: 
             Set the CLI/ODBC LongDataCompat keyword to 1. 
@@ -245,60 +245,9 @@ class IdaDataBase(object):
 
         if self._con_type == 'jdbc':
 
-            missingCredentialsMsg = ("Missing credentials to connect via JDBC.")
-            ambiguousDefinitionMsg = ("Ambiguous definition of userID or password: " +
-                                      "Cannot be defined in uid and pwd parameters " +
-                                      "and in jdbc_url_string at the same time.")
-
-            # remove trailing ":" or ";" or spaces on dsn, we will replace.
-            dsn = dsn.rstrip(';: ')
-            # find parameters on dsn; if any exist, there will be an equals sign.
-            ix = dsn.find("=")
-
-            # if no parameters exist, then this is the complete dsn
-            if (ix < 0):
-                # nothing needs to be done, if uid and pwd are missing
-                # (uid and pwd are not needed for local database connections)
-                # otherwise both uid and pwd have to be specified
-                if uid and pwd:
-                    dsn = dsn + url_1stparam_del + 'user={};password={};'.format(uid, pwd)
-                elif not uid and not pwd:
-                   # Neither UID nor PWD have to be specified for local connections.
-                   # This assumes that if they're missing, the connection is local.
-                    pass
-                else:
-                    raise IdaDataBaseError(missingCredentialsMsg)
-            else:
-                # if we know there is at least one parameter; we can assume there exists a ":" before the parameter
-                # portion of the string in a correctly formatted dsn.  Therefore, just check for the existence of 
-                # the uid and pwd and add if they are missing.  If they are on the string, IGNORE the string as-is.
-
-                uidSpecified = uid != ''
-                pwdSpecified = pwd != ''
-
-                if not ('user=' in dsn):
-                    if (uidSpecified):
-                       dsn = dsn + ';user=' + uid
-                elif (uidSpecified):
-                    raise IdaDataBaseError(ambiguousDefinitionMsg)
-                uidSpecified = uidSpecified | ('user=' in dsn)
-
-                if not ('password=' in dsn):
-                    if (pwdSpecified):
-                        dsn = dsn + ';password=' + pwd
-                elif (pwdSpecified):
-                    raise IdaDataBaseError(ambiguousDefinitionMsg)
-                pwdSpecified = pwdSpecified | ('password=' in dsn)
-
-                # throw an exception if either uid or pwd are specified,
-                # i.e. not both or none of the two
-                if (uidSpecified^pwdSpecified):
-                    raise IdaDataBaseError(missingCredentialsMsg)
-
-                 # add trailing ";" to dsn.
-                dsn = dsn + ';'
-
-            jdbc_url = dsn
+            #missingCredentialsMsg = ("Missing credentials to connect via JDBC.")
+            #use the input parameters and build jdbc url here
+            jdbc_url = 'jdbc:netezza//'+hostname+":"+str(port)+"/"+database
 
             try:
                 import jaydebeapi
@@ -389,6 +338,8 @@ class IdaDataBase(object):
                 if jarpath:
                     if verbose: print("Found it at %s!\nTrying to connect..."%jarpath)
 
+                self._connection_string = jdbc_url
+                print(self._connection_string)
                 jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=%s' % jarpath)
 
 
@@ -409,10 +360,11 @@ class IdaDataBase(object):
                                     "or in a folder that is in the CLASSPATH variable. Alternatively place "+
                                     "it in the folder '%s'."%here)
 
-            self._connection_string = jdbc_url
+
 
             try:
                 if self._is_netezza_system():
+
                     self._con = jaydebeapi.connect('org.netezza.Driver', self._connection_string)
                 else:
                     self._con = jaydebeapi.connect('com.ibm.db2.jcc.DB2Driver', self._connection_string)

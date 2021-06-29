@@ -5,8 +5,12 @@ from ibmdbpy4nps.ae import NZInstall
 import pandas as pd
 
 
+hostname = '169.63.46.17'
+port = 5480
+idadb = IdaDataBase('weather', 'admin', 'password', hostname =hostname, port=port, conn_type='nzpy', verbose=True)
+#idadb = IdaDataBase('weather', 'admin', 'password', hostname =hostname, port=port, conn_type='odbc', verbose=True)
 def test_tapply_host_weather_train_pred():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -136,7 +140,7 @@ def test_tapply_host_weather_train_pred():
 
 
 def test_apply_weather_save_table_merge_withdf_duplicate_columns():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -161,7 +165,7 @@ def test_apply_weather_save_table_merge_withdf_duplicate_columns():
 
 
 def test_apply_weather_save_table_merge_withdf():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -187,7 +191,7 @@ def test_apply_weather_save_table_merge_withdf():
 
 
 def test_summary():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result = idadf.summary()
@@ -197,7 +201,7 @@ def test_summary():
 
 
 def test_corr():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result_df = idadf.corr()
@@ -207,8 +211,16 @@ def test_corr():
 
 
 def test_train_test_split():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
+
+    output_table = "WEATHER_TRAIN"
+    if idadb.exists_table(output_table):
+        idadb.drop_table(output_table)
+
+    output_table = "WEATHER_TEST"
+    if idadb.exists_table(output_table):
+        idadb.drop_table(output_table)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result = idadf.train_test_split(train_table='WEATHER_TRAIN', test_table='WEATHER_TEST', id='ID', fraction=0.75,
                                     seed=42)
@@ -217,7 +229,7 @@ def test_train_test_split():
 
 
 def test_cov():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result_df = idadf.cov()
@@ -228,7 +240,7 @@ def test_cov():
 
 
 def test_apply_weather_merge_withdf():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -249,7 +261,7 @@ def test_apply_weather_merge_withdf():
 
 
 def test_apply_weather_funstr():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -271,7 +283,7 @@ def test_apply_weather_funstr():
 
 
 def test_apply_weather_funref():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -294,7 +306,7 @@ def test_apply_weather_funref():
 
 
 def test_tapply_weather_host_spus_train_pred():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -405,7 +417,7 @@ def test_tapply_weather_host_spus_train_pred():
 
 
 def test_groupedapply_weather_host_spus():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -523,7 +535,7 @@ def test_groupedapply_weather_host_spus():
 
 
 def test_groupedapply_weather_host_spus_funref():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -622,7 +634,7 @@ def test_groupedapply_weather_host_spus_funref():
 
 
 def test_install():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+
     nzinstall = NZInstall(idadb, package_name='pandas')
     result = nzinstall.getResultCode()
     assert result == 0, "installation failed"

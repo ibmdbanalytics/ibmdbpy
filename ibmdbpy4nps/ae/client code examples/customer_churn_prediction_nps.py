@@ -5,10 +5,12 @@ from ibmdbpy4nps.ae import NZFunGroupedApply
 
 
 
-dsn='bank'
-idadb = IdaDataBase(dsn, 'admin', 'password')
+database ='customer_churn'
+hostname = '169.63.46.17'
+port = 5480
 
 
+idadb = IdaDataBase(database, 'admin', 'password', hostname=hostname, port=port, conn_type='odbc')
 
 
 print(idadb)
