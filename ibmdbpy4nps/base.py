@@ -81,7 +81,7 @@ class IdaDataBase(object):
     IdaDataFrame per connection.
     """
 
-    def __init__(self, dsn, uid='', pwd='', hostname = '', port = 0, autocommit=True, verbose=False):
+    def __init__(self, dsn, uid='', pwd='', autocommit=True, verbose=False):
         """
         Open a database connection.
 
@@ -163,8 +163,10 @@ class IdaDataBase(object):
         >>> IdaDataBase(dsn=jdbc, uid="<UID>", pwd="<PWD>")
         <ibmdbpy.base.IdaDataBase at 0x9bec860>
         """
-        for arg,name in zip([dsn, uid, pwd],['dsn','uid','pwd']):
-            if not isinstance(arg, six.string_types):
+
+        if isinstance(dsn, dict)==False:
+            for arg,name in zip([dsn, uid, pwd],['dsn','uid','pwd']):
+              if not isinstance(arg, six.string_types):
                 raise TypeError("Argument '%s' of type %, expected : string type."%(name,type(arg)))
 
         self.data_source_name = dsn
@@ -175,38 +177,62 @@ class IdaDataBase(object):
         # first delimiter before the parameters in the jdbc-url
         url_1stparam_del = ':'
 
+
         # Detect if user attempt to connection with ODBC or JDBC
-        if dsn.startswith('jdbc:'):
-            self._con_type = "jdbc"
-            if dsn.startswith('jdbc:netezza:'):
-                self._database_system = 'netezza'
-                # for Netezza the internal connection is always in autocommit mode
-                # to allow explicit commits
-                dsn+= ';autocommit=false'
-                url_1stparam_del = ';'
-            elif dsn.startswith('jdbc:db2:'):
-                self._database_system = 'db2'
+        if isinstance(dsn,str):
+            if dsn.startswith('jdbc:'):
+              self._con_type = "jdbc"
+              if dsn.startswith('jdbc:netezza:'):
+                  self._database_system = 'netezza'
+                  # for Netezza the internal connection is always in autocommit mode
+                  # to allow explicit commits
+                  dsn += ';autocommit=false'
+                  url_1stparam_del = ';'
+              elif dsn.startswith('jdbc:db2:'):
+                  self._database_system = 'db2'
+              else:
+                  raise IdaDataBaseError(("The JDBC connection string is invalid for Db2 and Netezza. " +
+                                          "It has to start either with 'jdbc:db2:' or 'jdbc:netezza:'."))
+
             else:
-                raise IdaDataBaseError(("The JDBC connection string is invalid for Db2 and Netezza. " +
-                                        "It has to start either with 'jdbc:db2:' or 'jdbc:netezza:'."))
-        elif hostname != '':
+                self._con_type='odbc'
+
+        elif isinstance(dsn, dict):
             self._con_type = "nzpy"
-        else:
-            self._con_type = "odbc"
+
 
         self._idadfs = []
 
+
+
         if self._con_type == 'nzpy':
+            #parse dict
+            host=''
+            port=0
+            database=''
+            securityLevel=0
+            for key,value in dsn.items():
+                if(key=='host'):
+                    host=value
+                if (key=='port'):
+                    port=value
+                if (key=='database'):
+                    database=value
+                if (key=='securityLevel') :
+                    securityLevel=value
+                if (key=='logLevel') :
+                    logLevel=value
+
             import nzpy;
             try:
                 if port <= 0:
                     port = 5480
-                self._con = nzpy.connect(user=uid, password=pwd,host=hostname, port=port,
-                                        database=dsn, securityLevel=1,logLevel=0)
+                self._con = nzpy.connect(user=uid, password=pwd,host=host, port=port,
+                                        database=database, securityLevel=securityLevel,logLevel=logLevel)
             except Exception as e:
                 raise IdaDataBaseError(str(e))
-            self._connection_string ={'user':uid,'password':pwd,'host':hostname,
-                'port':port, 'database':dsn, 'securityLevel':1,'logLevel':0}
+            self._connection_string ={'user':uid,'password':pwd,'host':host,
+                'port':port, 'database':database, 'securityLevel':securityLevel,'logLevel':logLevel}
             self._database_system = 'netezza'
 
         if self._con_type == 'odbc' :
