@@ -4,11 +4,19 @@ from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunGroupedApply
 
 
+#odbc dsn
+#dsn='bank'
 
+#nzpy dsn
+dsn ={
+    "database":"customer_churn",
+     "port" :5480,
+     "host" : "169.63.46.17",
+     "securityLevel":0,
+     "logLevel":0
+}
 dsn='bank'
 idadb = IdaDataBase(dsn, 'admin', 'password')
-
-
 
 
 print(idadb)
