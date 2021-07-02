@@ -29,6 +29,9 @@ uid
 pwd
     Password credential to connect to the data source
 
+hostname
+    Name of the host to connect to with nzpy
+
 jdbc
     JDBC url string to be used to connect to the data source, should comply
     to this template : jdbc:db2://<HOST>:<PORT>/<DBNAME>:user=<UID>;password=<PWD>
@@ -47,6 +50,10 @@ py.test --dsn=<DSN>
 py.test --dsn=<DSN> --uid=<UID> --pwd=<pwd>
     In case userID and password are not stored in ODBC settings.
 
+py.test --dsn=<DSN> --uid=<UID> --pwd=<pwd> --hostname <hostname>
+    In case to connect to database with the name <DSN> on host <hostname>
+    with uid <UID> and password <password>
+
 py.test --jdbc=<jdbc_url_string>
     Do the test routine using jdbc connection
 
@@ -60,6 +67,7 @@ Several sample datasets are provided for testing : titanic, iris, swiss
 All options can be combined, however:
     * 'uid' and 'pwd' cannot be defined if 'jdbc' is defined.
     * 'uid' and 'password' must both be defined if one of them is already given.
+    * for nzpy connections dsn, uid, pwd and hostname must be defined
 
 """
 
@@ -89,6 +97,8 @@ def pytest_addoption(parser):
         help="Password")
     parser.addoption("--jdbc", default='',
         help="jdbc url string for JDBC connection")
+    parser.addoption("--hostname", default='',
+        help="hostname for nzpy connection")
 
 def get_data(request):
     """
@@ -125,8 +135,19 @@ def idadb(request):
             pass
     request.addfinalizer(fin)
 
+    hostname = request.config.getoption('--hostname')
     jdbc = request.config.getoption('--jdbc')
-    if jdbc != '':
+
+    if hostname != '':
+        try:
+            idadb = ibmdbpy4nps.IdaDataBase(dsn=request.config.getoption('--dsn'),
+                                            uid=request.config.getoption('--uid'),
+                                            pwd=request.config.getoption('--pwd'),
+                                            hostname=hostname,
+                                            autocommit=False)
+        except:
+            raise
+    elif jdbc != '':
         try:
             idadb = ibmdbpy4nps.IdaDataBase(dsn=jdbc, autocommit=False)
         except:
@@ -155,7 +176,17 @@ def idadb_tmp(request):
     request.addfinalizer(fin)
 
     jdbc = request.config.getoption('--jdbc')
-    if jdbc != '':
+    hostname = request.config.getoption('--hostname')
+    if hostname != '':
+        try:
+            idadb_tmp = ibmdbpy4nps.IdaDataBase(dsn=request.config.getoption('--dsn'),
+                                                uid=request.config.getoption('--uid'),
+                                                pwd=request.config.getoption('--pwd'),
+                                                hostname=hostname,
+                                                autocommit=False)
+        except:
+            raise
+    elif jdbc != '':
         try:
             idadb_tmp = ibmdbpy4nps.IdaDataBase(dsn=jdbc, autocommit=False)
         except:

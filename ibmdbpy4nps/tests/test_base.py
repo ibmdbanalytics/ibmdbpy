@@ -54,7 +54,7 @@ class Test_DataBaseExploration(object):
         assert(idadb.exists_table_or_view(idadf.name) == 1)
         assert(idadb.exists_table_or_view(idaview.name) == 1)
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_exists_table_or_view_positive(self, idadb, idadf, idaview, idageodf_county_view):
         assert(idadb.exists_table_or_view(idadf.name) == 1)
         assert(idadb.exists_table_or_view(idaview.name) == 1)
@@ -99,7 +99,7 @@ class Test_DataBaseExploration(object):
             idadb.drop_model(kmeans.modelname)
         except : pass
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_exists_model_with_schema_positive(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
         # Create a simple KMEANS model
@@ -110,7 +110,7 @@ class Test_DataBaseExploration(object):
             idadb.drop_model(kmeans.modelname)
         except : pass
 
-    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc')")
+    @pytest.mark.skipif("'netezza' in config.getvalue('jdbc') or config.getvalue('hostname') != ''")
     def test_idadb_exists_model_with_schema_positive_mixed_case(self, idadb, idadf_tmp):
         idadb.add_column_id(idadf_tmp, destructive=True)
         # Create a simple KMEANS model

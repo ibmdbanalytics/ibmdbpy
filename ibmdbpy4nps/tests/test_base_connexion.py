@@ -35,11 +35,13 @@ class Test_ConnectToDB(object):
         assert isinstance(idadb._con_type, six.string_types)
         assert isinstance(idadb._idadfs, list)
         if idadb._con_type =='odbc':
-          assert isinstance(idadb._connection_string, six.string_types)
+            assert(isinstance(idadb._connection_string, six.string_types))
         elif idadb._con_type == 'jdbc':
-          assert(isinstance(idadb._connection_string, six.string_types) or isinstance(idadb._connection_string, list))
+            assert(isinstance(idadb._connection_string, six.string_types) or isinstance(idadb._connection_string, list))
+        elif idadb._con_type == 'nzpy':
+            assert(isinstance(idadb._connection_string, dict))
         assert(type(idadb._con).__name__ in ['Connection','instance'])
-        assert(idadb._con_type in ["odbc", "jdbc"])
+        assert(idadb._con_type in ["odbc", "jdbc", "nzpy"])
 
     def test_idadb_instance_fail(self, idadb):
 

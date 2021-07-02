@@ -2,11 +2,24 @@ import pytest
 from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunTApply, NZFunApply, NZFunGroupedApply
 from ibmdbpy4nps.ae import NZInstall
-import pandas as pd
 
+
+
+
+#nzpy dsn
+dsn ={
+    "database":"weather",
+     "port" :5480,
+     "host" : "169.63.46.17",
+     "securityLevel":0,
+     "logLevel":0
+}
+
+#odbc dsn
+#dsn='weather'
 
 def test_tapply_host_weather_train_pred():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+    idadb = IdaDataBase(dsn, 'admin', 'password', verbose=True)
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -136,7 +149,7 @@ def test_tapply_host_weather_train_pred():
 
 
 def test_apply_weather_save_table_merge_withdf_duplicate_columns():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+    idadb = IdaDataBase(dsn, 'admin', 'password', verbose=True)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -161,7 +174,7 @@ def test_apply_weather_save_table_merge_withdf_duplicate_columns():
 
 
 def test_apply_weather_save_table_merge_withdf():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+    idadb = IdaDataBase(dsn, 'admin', 'password', verbose=True)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -187,7 +200,7 @@ def test_apply_weather_save_table_merge_withdf():
 
 
 def test_summary():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result = idadf.summary()
@@ -197,7 +210,7 @@ def test_summary():
 
 
 def test_corr():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result_df = idadf.corr()
@@ -207,8 +220,13 @@ def test_corr():
 
 
 def test_train_test_split():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
+    if (idadb.exists_table("WEATHER_TRAIN")):
+        idadb.drop_table("WEATHER_TRAIN")
+
+    if (idadb.exists_table("WEATHER_TEST")):
+        idadb.drop_table("WEATHER_TEST")
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result = idadf.train_test_split(train_table='WEATHER_TRAIN', test_table='WEATHER_TEST', id='ID', fraction=0.75,
                                     seed=42)
@@ -217,7 +235,7 @@ def test_train_test_split():
 
 
 def test_cov():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
     idadf = IdaDataFrame(idadb, 'WEATHER')
     result_df = idadf.cov()
@@ -228,7 +246,7 @@ def test_cov():
 
 
 def test_apply_weather_merge_withdf():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
     code_str_apply = """def apply_fun(self, x):
@@ -249,7 +267,7 @@ def test_apply_weather_merge_withdf():
 
 
 def test_apply_weather_funstr():
-    idadb = IdaDataBase('weather', 'admin', 'password', verbose=True)
+    idadb = IdaDataBase(dsn, 'admin', 'password', verbose=True)
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -271,7 +289,7 @@ def test_apply_weather_funstr():
 
 
 def test_apply_weather_funref():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -294,7 +312,7 @@ def test_apply_weather_funref():
 
 
 def test_tapply_weather_host_spus_train_pred():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -405,7 +423,7 @@ def test_tapply_weather_host_spus_train_pred():
 
 
 def test_groupedapply_weather_host_spus():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -523,7 +541,7 @@ def test_groupedapply_weather_host_spus():
 
 
 def test_groupedapply_weather_host_spus_funref():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     print(idadb)
 
     idadf = IdaDataFrame(idadb, 'WEATHER')
@@ -622,7 +640,7 @@ def test_groupedapply_weather_host_spus_funref():
 
 
 def test_install():
-    idadb = IdaDataBase('weather', 'admin', 'password')
+    idadb = IdaDataBase(dsn, 'admin', 'password')
     nzinstall = NZInstall(idadb, package_name='pandas')
     result = nzinstall.getResultCode()
     assert result == 0, "installation failed"

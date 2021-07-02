@@ -4,16 +4,32 @@ from ibmdbpy4nps import IdaDataBase, IdaDataFrame
 from ibmdbpy4nps.ae import NZFunGroupedApply
 
 
+#
 
-dsn='bank'
-idadb = IdaDataBase(dsn, 'admin', 'password')
+#nzpy dsn
+dsn ={
+    "database":"customer_churn",
+     "port" :5480,
+     "host" : "169.63.46.17",
+     "securityLevel":0,
+     "logLevel":0
 
 
+}
+
+#odbc dsn
+#dsn='bank'
+
+
+
+idadb = IdaDataBase(dsn, 'admin', 'password' )
 
 
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'customer_churn')
+
+
 print(idadf.dtypes)
 code_str_host_spus = """def log_reg_ml(self, df):
             from sklearn.model_selection import cross_val_score

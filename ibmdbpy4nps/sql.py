@@ -81,6 +81,8 @@ def ida_query(idadb, query, silent=False, first_row_only=False, autocommit = Fal
     """
     if idadb._con_type == 'odbc':
         return _ida_query_ODBC_new(idadb, query, silent, first_row_only, autocommit)
+    elif idadb._con_type == 'nzpy':
+        return _ida_query_NZPY(idadb, query, silent, first_row_only, autocommit)
     else:
         return _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit)
 
@@ -181,7 +183,50 @@ def _ida_query_ODBC(idadb, query, silent, first_row_only, autocommit):
         raise
     finally:
         cursor.close()
-        
+
+def _ida_query_NZPY(idadb, query, silent, first_row_only, autocommit):
+    """
+    """
+    cursor = idadb._con.cursor()
+    try:
+        query = _prepare_query(query, silent)
+        cursor.execute(query)
+
+        if autocommit is True:
+            idadb._autocommit()
+        try:
+            firstRow = cursor.fetchone()
+        except:
+            return None #non-SELECT query, didn't return anything
+        else:
+            #query with SELECT statement, mind that resultset might be empty
+            if first_row_only is True:
+                if firstRow is not None:
+                    #this following processing was proposed by Edouard
+                    tuple_as_list = list(tuple(firstRow))
+                    for index, element in enumerate(tuple_as_list):
+                        if element is None:
+                            tuple_as_list[index] = np.nan
+                        if isinstance(element, decimal.Decimal):
+                            tuple_as_list[index] = int(element)
+                    result = tuple(tuple_as_list)
+                else:
+                    #first_row_only is True but the query retuned nothing
+                    return tuple()
+            else:
+                colNames = [str(column[0],"utf-8") for column in cursor.description]
+                data = [firstRow]
+                data.extend(cursor.fetchall())
+                result = pd.DataFrame(data, columns= colNames)
+                #convert to Series if only one column
+                if len(result.columns) == 1:
+                    result = result[result.columns[0]]
+            return result
+    except:
+        raise
+    finally:
+        cursor.close()
+
 def _ida_query_JDBC(idadb, query, silent, first_row_only, autocommit):
     """
     For JDBC connections, the CLOBs are retrieved as handles from which
