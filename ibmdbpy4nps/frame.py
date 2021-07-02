@@ -1445,7 +1445,8 @@ class IdaDataFrame(object):
     def info(self, buf=None):
         """Some information about current IdaDataFrame. NOTIMPLEMENTED"""
         # There is a lot more
-        from pandas.core.format import _put_lines
+        #from pandas.core.format import _put_lines
+        raise IdaDataFrameError("NOT IMPLEMENTED")
 
         if buf is None:  # pragma: no cover
             buf = sys.stdout

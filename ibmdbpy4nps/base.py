@@ -13,7 +13,7 @@
 ###############################################################################
 
 """
-An IdaDataBase instance represents a reference to a remote Db2 Warehouse database
+An IdaDataBase instance represents a reference to a remote Netezza Warehouse database
 maintaining attributes and methods for administration of the database.
 """
 
@@ -54,25 +54,28 @@ from ibmdbpy4nps.exceptions import IdaDataBaseError, PrimaryKeyError
 
 class IdaDataBase(object):
     """
-    An IdaDataBase instance represents a reference to a remote Db2 Warehouse
+    An IdaDataBase instance represents a reference to a remote Netezza Warehouse
     database. This is an abstraction layer for the remote connection. The
     IdaDataBase interface provides several functions that enable basic database 
     administration in pythonic syntax.
 
-    You can use either ODBC or JDBC to connect to the database. The default 
+    You can use either ODBC or JDBC or NZPY to connect to the database. The default
     connection type is ODBC, which is the standard connection type for Windows 
-    users. To establish an ODBC connection, download an IBM DB2 driver and set 
+    users. To establish an ODBC connection, download an IBM Netezza driver and set
     up your ODBC connection by specifying your connection protocol, port, and 
     hostname. An ODBC connection on Linux or Mac might require more settings. 
     For more information about how to establish an ODBC connection, see the 
     pypyodbc documentation.
 
     To connect with JDBC, install the optional external package jaydebeapi, 
-    download the ibm jdbc driver, and save it in your local ibmdbpy folder. 
+    download the ibm jdbc driver, and save it in your local ibmdbpy4nps folder.
     If you put the jdbc driver in the CLASSPATH variable or the folder that
     contains it, it will work too. A C++ compiler adapted to the current python 
     version, operating system, and architecture may also be required to install
     jaydebeapi.
+
+    To connect with NZPY, specify the required parameters in dict format, there is
+    no need to install any drivers.
 
     The instantiation of an IdaDataBase object is a mandatory step before 
     creating IdaDataFrame objects because IdaDataFrames require an IdaDataBase 
@@ -89,7 +92,7 @@ class IdaDataBase(object):
         ----------
         dsn : str
             Data Source Name (as specified in your ODBC settings) or JDBC URL 
-            string.
+            string or NZPY dict
 
         uid : str, optional
             User ID.
@@ -109,10 +112,10 @@ class IdaDataBase(object):
             Name of the referring DataBase.
 
         _con_type : str
-            Type of the connection, either 'odbc' or 'jdbc'.
+            Type of the connection, either 'odbc' or 'jdbc' or 'nzpy'.
 
         _connection_string : str
-            Connection string use for connecting via ODBC or JDBC.
+            Connection string use for connecting via ODBC or JDBC or NZPY.
 
         _con : connection object
             Connection object to the remote Database.
@@ -162,6 +165,39 @@ class IdaDataBase(object):
         >>> jdbc = 'jdbc:db2://<HOST>:<PORT>/<DBNAME>'
         >>> IdaDataBase(dsn=jdbc, uid="<UID>", pwd="<PWD>")
         <ibmdbpy.base.IdaDataBase at 0x9bec860>
+
+
+         NZPY connection, userID and password are stored in NZPY dict:
+
+         nzpy_dsn ={
+        "database":"<DBNAME>",
+         "port" :<PORT>,
+        "host" : "<HOST>",
+        "securityLevel":<SECURITYLEVEL>,
+        "logLevel":<LOGLEVEL>,
+        "user":"<UID>",
+        "password":"<PWD>"
+        }
+
+        >>> IdaDataBase(dsn=nzpy_dsn)
+        <ibmdbpy.base.IdaDataBase at 0x9bec860>
+
+
+        NZPY connection, NZPY dict and seperate userID and password
+
+         nzpy_dsn ={
+        "database":"<DBNAME>",
+         "port" :<PORT>,
+        "host" : "<HOST>",
+        "securityLevel":<SECURITYLEVEL>,
+        "logLevel":<LOGLEVEL>
+
+        }
+
+        >>> IdaDataBase(dsn=nzpy_dsn, uid="<UID>", pwd="<PWD>")
+
+
+
         """
 
         if isinstance(dsn, dict)==False:
@@ -211,6 +247,9 @@ class IdaDataBase(object):
             port=0
             database=''
             securityLevel=0
+            logLevel=0
+            user =''
+            password=''
             for key,value in dsn.items():
                 if(key=='host'):
                     host=value
@@ -222,16 +261,50 @@ class IdaDataBase(object):
                     securityLevel=value
                 if (key=='logLevel') :
                     logLevel=value
+                if (key == 'user'):
+                    user = value
+                if (key == 'password'):
+                    password = value
 
             import nzpy;
+            missingCredentialsMsg = ("Missing credentials to connect via NZPY.")
+            ambiguousDefinitionMsg = ("Ambiguous definition of userID or password: " +
+                                      "Cannot be defined in uid and pwd parameters " +
+                                      "and in nzpy dict at the same time.")
+
+
+            uidSpecified = uid != ''
+            pwdSpecified = pwd != ''
+
+            if not ('user' in dsn):
+                if (uidSpecified):
+                    user= uid
+            elif (uidSpecified):
+                raise IdaDataBaseError(ambiguousDefinitionMsg)
+            uidSpecified = uidSpecified | ('user' in dsn)
+
+            if not ('password' in dsn):
+                if (pwdSpecified):
+                   password= pwd
+            elif (pwdSpecified):
+                raise IdaDataBaseError(ambiguousDefinitionMsg)
+            pwdSpecified = pwdSpecified | ('password' in dsn)
+
+            # throw an exception if either uid or pwd are specified,
+            # i.e. not both or none of the two
+            if (uidSpecified ^ pwdSpecified):
+                raise IdaDataBaseError(missingCredentialsMsg)
+
+
+
             try:
                 if port <= 0:
                     port = 5480
-                self._con = nzpy.connect(user=uid, password=pwd,host=host, port=port,
+                self._con = nzpy.connect(user=user, password=password,host=host, port=port,
                                         database=database, securityLevel=securityLevel,logLevel=logLevel)
             except Exception as e:
                 raise IdaDataBaseError(str(e))
-            self._connection_string ={'user':uid,'password':pwd,'host':host,
+            self._connection_string ={'user':user,'password':password,'host':host,
                 'port':port, 'database':database, 'securityLevel':securityLevel,'logLevel':logLevel}
             self._database_system = 'netezza'
 
