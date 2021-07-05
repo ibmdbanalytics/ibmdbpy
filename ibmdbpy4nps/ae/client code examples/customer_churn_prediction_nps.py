@@ -10,7 +10,7 @@ from ibmdbpy4nps.ae import NZFunGroupedApply
 dsn ={
     "database":"customer_churn",
      "port" :5480,
-     "host" : "169.63.46.17",
+     "host" : "xxx",
      "securityLevel":0,
      "logLevel":0
 
@@ -19,7 +19,6 @@ dsn ={
 
 #odbc dsn
 #dsn='bank'
-
 
 
 idadb = IdaDataBase(dsn, 'admin', 'password' )

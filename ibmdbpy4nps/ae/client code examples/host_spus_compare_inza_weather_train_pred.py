@@ -21,7 +21,7 @@ idadf = IdaDataFrame(idadb, 'WEATHER')
 
 query = 'select * from weather limit 10000'
 
-idadf.s
+
 
 
 df = idadf.ida_query(query)
