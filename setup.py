@@ -62,8 +62,8 @@ classifiers = [
       ]
 
 setup(name='ibmdbpy4nps',
-      version='0.2.1.8.2',
-      install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
+      version='0.2.1.9',
+      install_requires=['pandas','numpy','future','six','pypyodbc','lazy', 'nzpy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
       extras_require={

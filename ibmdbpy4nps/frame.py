@@ -2148,12 +2148,16 @@ class IdaDataFrame(object):
         elif self._idadb._con_type == 'nzpy':
             cursor = self._idadb._con.cursor()
             cursor.execute("SELECT * FROM %s LIMIT 1"%tablename)
-            columnlist = [str(column[0],"utf-8") for column in cursor.description]
+            columnlist = []
+            if type(cursor.description[0][0]) == bytes:
+                columnlist = [column[0].decode() for column in cursor.description]
+            else:
+                columnlist = [column[0] for column in cursor.description]
             cursor.close()
             return Index(columnlist)
         elif self._idadb._con_type == 'jdbc':
             cursor = self._idadb._con.cursor()
-            cursor.execute("SELECT * FROM %s"%tablename)
+            cursor.execute("SELECT * FROM %s LIMIT 1"%tablename)
             columnlist = [column[0] for column in cursor.description]
             cursor.close()
             return Index(columnlist)

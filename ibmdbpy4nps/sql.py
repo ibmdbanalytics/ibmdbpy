@@ -214,10 +214,15 @@ def _ida_query_NZPY(idadb, query, silent, first_row_only, autocommit):
                     #first_row_only is True but the query retuned nothing
                     return tuple()
             else:
-                colNames = [str(column[0],"utf-8") for column in cursor.description]
+                colnames=[]
+                if type(cursor.description[0][0]) == bytes:
+                    colnames = [column[0].decode() for column in cursor.description]
+                else:
+                    colnames = [column[0] for column in cursor.description]
+
                 data = [firstRow]
                 data.extend(cursor.fetchall())
-                result = pd.DataFrame(data, columns= colNames)
+                result = pd.DataFrame(data, columns= colnames)
                 #convert to Series if only one column
                 if len(result.columns) == 1:
                     result = result[result.columns[0]]
