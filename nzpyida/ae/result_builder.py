@@ -107,11 +107,10 @@ def compress_columns_string(columns):
 
 
     columns_count = len(columns)
-    print(columns_count)
+
     compressions_count = columns_count // 64
-    print(compressions_count)
+
     residual_columns_count = columns_count % 64
-    print(residual_columns_count)
 
 
     compressions_string = ''
@@ -124,5 +123,5 @@ def compress_columns_string(columns):
         columns[(compressions_count * 64):((compressions_count * 64) + residual_columns_count)])
     compressions_string = compressions_string +columns_string
 
-    print(compressions_string)
+
     return compressions_string

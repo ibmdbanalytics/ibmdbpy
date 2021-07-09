@@ -61,8 +61,8 @@ classifiers = [
         'Topic :: Software Development'
       ]
 
-setup(name='ibmdbpy4nps',
-      version='0.2.1.9',
+setup(name='nzpyida',
+      version='0.2.2',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy', 'nzpy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
@@ -81,5 +81,5 @@ setup(name='ibmdbpy4nps',
       keywords='data analytics database development ibm netezza pandas scikitlearn scalability machine-learning knowledge discovery',
       packages=find_packages(exclude=['docs', 'tests*']),
       package_data={
-        'ibmdbpy4nps.sampledata': ['*.txt']}
+        'nzpyida.sampledata': ['*.txt']}
      )

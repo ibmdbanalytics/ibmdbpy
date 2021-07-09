@@ -1,4 +1,4 @@
-ibmdbpy license
+nzpyida license
 ===============
 
 Copyright (c) 2015  IBM Corp.
