@@ -140,11 +140,11 @@ def idadb(request):
 
     if hostname != '':
         try:
-            idadb = nzpyida.IdaDataBase(dsn=request.config.getoption('--dsn'),
-                                        uid=request.config.getoption('--uid'),
-                                        pwd=request.config.getoption('--pwd'),
-                                        hostname=hostname,
-                                        autocommit=False)
+            idadb = nzpyida.IdaDataBase(
+                dsn={'database': request.config.getoption('--dsn'), 'host': hostname, 'port': 5480},
+                uid=request.config.getoption('--uid'),
+                pwd=request.config.getoption('--pwd'),
+                autocommit=False)
         except:
             raise
     elif jdbc != '':
@@ -179,11 +179,12 @@ def idadb_tmp(request):
     hostname = request.config.getoption('--hostname')
     if hostname != '':
         try:
-            idadb_tmp = nzpyida.IdaDataBase(dsn=request.config.getoption('--dsn'),
-                                            uid=request.config.getoption('--uid'),
-                                            pwd=request.config.getoption('--pwd'),
-                                            hostname=hostname,
-                                            autocommit=False)
+            idadb_tmp = nzpyida.IdaDataBase(
+                dsn={'database': request.config.getoption('--dsn'), 'host': hostname, 'port': 5480},
+                uid=request.config.getoption('--uid'),
+                pwd=request.config.getoption('--pwd'),
+                autocommit=False)
+
         except:
             raise
     elif jdbc != '':
