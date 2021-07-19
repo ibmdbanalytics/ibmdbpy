@@ -31,7 +31,11 @@ from nzpyida.exceptions import IdaDataBaseError
 class Test_ConnectToDB(object):
 
     def test_idadb_attr(self, idadb):
-        assert isinstance(idadb.data_source_name, six.string_types)
+
+        if idadb._con_type == 'nzpy':
+            assert isinstance(idadb.data_source_name, dict)
+        else:
+            assert isinstance(idadb.data_source_name, six.string_types)
         assert isinstance(idadb._con_type, six.string_types)
         assert isinstance(idadb._idadfs, list)
         if idadb._con_type =='odbc':
