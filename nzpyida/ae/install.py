@@ -42,7 +42,7 @@ class NZInstall(object):
     def  getResultCode(self):
 
         
-        ae_name = "nzpy..py_udtf_install"
+        ae_name = "nzpyida..py_udtf_install"
 
         output_signature = {'ResultCode': 'int'}
         base_code = shaper.get_base_shaper_install(output_signature, self.package_name)

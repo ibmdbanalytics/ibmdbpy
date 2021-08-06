@@ -74,7 +74,7 @@ class NZFunApply(object):
 
 
 
-        ae_name ="nzpy..py_udtf_any"
+        ae_name ="nzpyida..py_udtf_any"
 
         query = "select ae_output.* from " + \
                 " (select * from " + self.table_name + ") as input_t" + \

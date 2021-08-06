@@ -7,10 +7,27 @@ from nzpyida.ae import NZFunApply
 from nzpyida.ae import NZFunGroupedApply
 
 
-
+#jdbc dsn
 #dsn = "jdbc:netezza://169.63.46.17:5480/weather"
-dsn='weather'
-idadb = IdaDataBase(dsn, 'admin', 'password')
+
+
+
+#nzpy dsn
+
+#nzpy dsn
+dsn ={
+    "database":"weather",
+     "port" :5480,
+     "host" : "169.63.46.17",
+     "securityLevel":0,
+     "logLevel":0
+
+
+}
+
+#odbc dsn
+dsn='fyre'
+idadb = IdaDataBase(dsn, 'admin', 'password',verbose=True)
 
 
 
@@ -18,13 +35,14 @@ idadb = IdaDataBase(dsn, 'admin', 'password')
 print(idadb)
 
 idadf = IdaDataFrame(idadb, 'WEATHER')
+print(idadf.dtypes)
 
-query = 'select * from weather limit 10000'
+#query = 'select * from weather limit 10000'
 
 
 
 
-df = idadf.ida_query(query)
+#df = idadf.ida_query(query)
 
 
 code_str_host = """def decision_tree_ml_host(self, df):
@@ -33,6 +51,7 @@ code_str_host = """def decision_tree_ml_host(self, df):
     from sklearn.impute import SimpleImputer
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.model_selection import train_test_split
+    import datetime
 
     from sklearn.preprocessing import LabelEncoder
     import numpy as np
@@ -107,6 +126,11 @@ code_str_host = """def decision_tree_ml_host(self, df):
             
             pred_df['DATASET_SIZE'] = ds_size
             pred_df['CLASSIFIER_ACCURACY']=round(accuracy,2)
+            #test_date = pd.to_datetime(pred_df['DATE'])
+            #pred_df['TEST_DATE'] = pd.to_datetime('2020-10-01') 
+            #pred_df['TEST_DATE']= pred_df['TEST_DATE'].dt.date
+            pred_df['TEST_DATE'] =10
+            
             
            
             
@@ -125,7 +149,7 @@ code_str_host = """def decision_tree_ml_host(self, df):
                #print(pred_df)
 
             def print_output(x):
-                row = [x['ID'], x['RAINTOMORROW'],  x['DATASET_SIZE'], x['CLASSIFIER_ACCURACY']]
+                row = [x['ID'], x['TEST_DATE'],  x['RAINTOMORROW'], x['DATASET_SIZE'], x['CLASSIFIER_ACCURACY']]
                 
                 self.output(row)
 
@@ -144,7 +168,7 @@ code_str_host = """def decision_tree_ml_host(self, df):
 
 
 
-output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
+output_signature = {'ID':'int', 'TEST_DATE':'date',  'RAINTOMORROW_PRED' :'bool',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
 
 
 import time
@@ -162,7 +186,7 @@ print("\n")
 print(result_df)
 end = time.time()
 print(end - start)
-#result = result.as_dataframe()
+
 groups = result_df.groupby("LOCATION")
 for name, group in groups:
     print(name + ":" + str(len(group)))
@@ -304,7 +328,7 @@ print(end - start)
 
 import time
 start = time.time()
-output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'str',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
+output_signature = {'ID':'int', 'RAINTOMORROW_PRED' :'bool',  'DATASET_SIZE':'int', 'CLASSIFIER_ACCURACY':'float'}
 nz_groupapply = NZFunTApply(df=idadf, code_str=code_str_host_spus, fun_name ="decision_tree_ml", parallel=True, output_signature=output_signature)
 result = nz_groupapply.get_result()
 result = result.as_dataframe()

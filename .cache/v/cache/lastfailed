@@ -1,0 +1,4 @@
+{
+  "ibmdbpy4nps/ae/tests/test_pyae.py": true,
+  "ibmdbpy4nps/ae/tests/test_pyae.py::test_apply_weather_funref": true
+}

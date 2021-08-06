@@ -62,10 +62,9 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.2.2',
+      version='0.2.2.1',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy', 'nzpy'],
-      # optional are jaydebeapi, pytest, sphinx, bokeh
-      # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
+
       extras_require={
         'jdbc':['JayDeBeApi==1.*', 'Jpype1==0.6.3'],
         'test':['pytest', 'flaky==3.4.0'],

@@ -90,7 +90,14 @@ def get_base_shaper(output_signature):
                                                        self.addOutputColumn('""" + column + """',""" + column_val + """) """
 
         if output_signature[column] == 'bool' :
-            column_val = 'self.DATA_TYPE__INT32'
+            column_val = 'self.DATA_TYPE__BOOL'
+            output_signature_str += """
+                                                       self.addOutputColumn('""" + column + """',""" + column_val + """) """
+
+        if output_signature[column] == 'datetime' or  output_signature[column] == 'date':
+
+            
+            column_val = 'self.DATA_TYPE__DATE'
             output_signature_str += """
                                                        self.addOutputColumn('""" + column + """',""" + column_val + """) """
 
