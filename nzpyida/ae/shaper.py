@@ -74,10 +74,10 @@ def get_base_shaper_groupedapply(columns, fun_name, output_signature):
 
 def get_base_shaper(output_signature):
     output_signature_str = ""
-    # print(output_signature)
+
 
     for column in output_signature:
-        # print(column)
+
         if output_signature[column] == 'int' :
             column_val = 'self.DATA_TYPE__INT32'
 

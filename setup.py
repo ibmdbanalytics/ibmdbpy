@@ -16,7 +16,10 @@ setup.py
 from setuptools import setup, find_packages
 from codecs import open
 
+
 # Get the long description from the relevant file
+
+
 with open('README.rst', 'r', encoding='utf-8') as f:
     longdesc = f.read()
 
@@ -62,8 +65,8 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.2.2.1',
-      install_requires=['pandas','numpy','future','six','pypyodbc','lazy', 'nzpy'],
+      version='0.2.2.3',
+      install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
         'jdbc':['JayDeBeApi==1.*', 'Jpype1==0.6.3'],

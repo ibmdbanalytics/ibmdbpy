@@ -2,7 +2,7 @@ from nzpyida import IdaDataFrame
 
 
 def build_result(output_table, merge_output, db, df, output_signature, table_name, query, id):
-    print(query)
+
     if output_table and merge_output is False:
         if db.exists_table(output_table):
             raise NameError("table name already exists..choose a different name")

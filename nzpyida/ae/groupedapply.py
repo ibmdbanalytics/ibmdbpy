@@ -53,7 +53,7 @@ class NZFunGroupedApply(object):
             self.columns=columns
         else :
             self.columns = self.df.columns.tolist()
-        print(self.columns)
+
 
     def get_result(self):
         if self.code_str and self.fun_name is None:
