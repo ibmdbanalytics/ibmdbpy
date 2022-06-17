@@ -2,7 +2,7 @@ future==0.16.0
 JayDeBeApi==1.1.1
 JPype1==0.6.3
 lazy==1.2
-numpy==1.11.2
+numpy==1.21.0
 pandas==0.19.2
 pytest==3.7.0
 flaky==3.4.0
