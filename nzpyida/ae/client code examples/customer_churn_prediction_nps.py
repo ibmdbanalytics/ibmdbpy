@@ -5,20 +5,17 @@ from nzpyida.ae import NZFunGroupedApply
 
 
 #
-
 #nzpy dsn
 dsn ={
     "database":"customer_churn",
      "port" :5480,
      "host" : "169.63.46.17",
      "securityLevel":0,
-     "logLevel":0
+     "logLevel":3
 
 
 }
 
-#odbc dsn
-#dsn='bank'
 
 
 idadb = IdaDataBase(dsn, 'admin', 'password', verbose=True )
