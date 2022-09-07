@@ -8,17 +8,17 @@ from nzpyida.ae import NZFunGroupedApply
 
 
 #jdbc dsn
-#dsn = "jdbc:netezza://169.63.46.17:5480/weather"
+#dsn = "jdbc:netezza://xxxx:5480/weather"
 
 
 
-#nzpy dsn
+
 
 #nzpy dsn
 dsn ={
     "database":"weather",
      "port" :5480,
-     "host" : "169.63.46.17",
+     "host" : "xxxx",
      "securityLevel":0,
      "logLevel":0
 

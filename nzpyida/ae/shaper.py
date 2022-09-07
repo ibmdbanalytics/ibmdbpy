@@ -4,7 +4,7 @@ import textwrap
 
 def get_base_shaper_tapply(columns, fun_name, output_signature):
     output_signature_str = get_base_shaper(output_signature)
-    # print(output_signature)
+
 
 
 
