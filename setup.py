@@ -65,7 +65,7 @@ classifiers = [
       ]
 
 setup(name='nzpyida',
-      version='0.2.2.3',
+      version='0.2.2.4',
       install_requires=['pandas','numpy','future','six','pypyodbc','pyodbc', 'lazy', 'nzpy'],
 
       extras_require={
