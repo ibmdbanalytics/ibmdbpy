@@ -1,6 +1,8 @@
 ibmdbpy
 *******
 
+**This package is deprecated, because it is no longer being maintained.**
+
 Accelerating Python Analytics by In-Database Processing
 =======================================================
 
@@ -96,20 +98,10 @@ Here is the SQL request that was executed for this example::
    SELECT t.*,db2gse.ST_Area(t.SHAPE) as area
    FROM SAMPLES.GEO_COUNTY t;
 
-
 Feature Selection
 =================
 
 Ibmdbpy provides a range of functions to support efficient in-database feature selection, e.g. to estimate the relevance of attributes with respect to a particular target. Functions and documentation can be found in the submodule ``ibmdbpy.feature_selection``. 
-
-Project Roadmap
-===============
-
-* Full test coverage (a basic coverage is already provided)
-* Add more functions and improve what already exists
-* Add wrappers for several ML-Algorithms (Linear regression, Sequential patterns...)
-
-A more detailed roadmap is available on Github, in the ``ROADMAP.txt`` file 
 
 Contributors
 ============
@@ -126,12 +118,3 @@ Here is the list of the persons who contributed to the project, in the chronolog
 - Nicole Schoen (core)
 - Toni Bollinger (core)
 - Eva Feillet (core, geospatial extension, documentation)
-
-How to contribute
-=================
-
-You want to contribute? That's great! There are many things you can do. 
-
-If you are a member of the ibmdbanalytics group, you can create branchs and merge them to master. Otherwise, you can fork the project and do a pull request. You are very welcome to contribute to the code and to the documentation. 
-
-There are many ways to contribute. If you find bugs and have improvement ideas or need some new specific features, please open a ticket! We do care about it. 

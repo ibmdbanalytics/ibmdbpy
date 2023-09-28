@@ -25,7 +25,7 @@ classifiers = [
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 4 - Beta',
+        'Development Status :: 7 - Inactive',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -61,7 +61,7 @@ classifiers = [
       ]
 
 setup(name='ibmdbpy',
-      version='0.1.6',
+      version='0.1.6.post1',
       install_requires=['pandas','numpy','future','six','pypyodbc','lazy'],
       # optional are jaydebeapi, pytest, sphinx, bokeh
       # execute "pip install -e .[jdbc] ibmdbpy" for installing ibmdbpy with the extra jdbc packages
