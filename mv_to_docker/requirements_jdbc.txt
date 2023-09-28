@@ -1,4 +1,4 @@
-future==0.16.0
+future==0.18.3
 JayDeBeApi==1.1.1
 JPype1==0.6.3
 lazy==1.2
