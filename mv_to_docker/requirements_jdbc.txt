@@ -4,6 +4,6 @@ JPype1==0.6.3
 lazy==1.2
 numpy==1.11.2
 pandas==0.19.2
-pytest==3.7.0
+pytest==9.0.3
 flaky==3.4.0
 six==1.10.0
